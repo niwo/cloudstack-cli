@@ -1,0 +1,3 @@
+:cloudstack_url:         "https://my-cloudstack-server/client/api/"
+:cloudstack_api_key:     "cloudstack-api-key"
+:cloudstack_secret_key:  "cloudstack-api-secret"
