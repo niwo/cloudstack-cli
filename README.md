@@ -18,7 +18,8 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+    bin/cs_bootstrap create_server nikstest --zone BIEL_CU01 --template "CentOS-6.4-x64-v1.0" --o
+ffering demo_1cpu_1gb --network M_BIE_NMC-Demo
 
 ## Contributing
 
