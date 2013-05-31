@@ -1,10 +1,10 @@
 # -*- encoding: utf-8 -*-
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'cloudstack-bootstrap/version'
+require 'cloudstack-cli/version'
 
 Gem::Specification.new do |gem|
-  gem.name          = "cloudstack-bootstrap"
+  gem.name          = "cloudstack-cli"
   gem.version       = Cloudstack::Bootstrap::VERSION
   gem.authors       = ["niwo"]
   gem.email         = ["nik.wolfgramm@gmail.com"]

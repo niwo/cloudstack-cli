@@ -1,6 +1,6 @@
-# Cloudstack::Bootstrap
+# Cloudstack CLI
 
-TODO: Write a gem description
+Cloudstack CLI gives command line access to the CloudStack API commands.
 
 ## Installation
 
@@ -18,9 +18,18 @@ Or install it yourself as:
 
 ## Usage
 
-Bootsrap a server
+See the help screen
+
+    bin/cs
+
+Example: Bootsrap a server
 
     bin/cs server create delete-me-10 --zone ZUERICH_IX --port-forwarding 146.159.95.194:22 146.159.95.194:80 --template CentOS-6.4-x64-v1.0 --offering demo_1cpu_1gb --networks M_ZRH_NMC-Demo
+
+## Status
+
+Only a fraction of the CS commands is implemented yet...
+
 
 ## Contributing
 
