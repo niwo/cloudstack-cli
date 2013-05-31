@@ -17,7 +17,8 @@ Gem::Specification.new do |gem|
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
   gem.require_paths = ["lib"]
   gem.add_development_dependency('rdoc')
-  gem.add_development_dependency('aruba')
-  gem.add_development_dependency('rake', '~> 0.9.2')
-  gem.add_dependency('methadone', '~> 1.2.4')
+  gem.add_development_dependency('rake', '~> 10.0.4')
+  gem.add_dependency('thor', '~> 0.18.1')
+  gem.add_dependency('net-ssh', '2.6.7')
+  gem.add_dependency('rainbow', '1.1.4')
 end

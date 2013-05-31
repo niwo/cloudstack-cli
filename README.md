@@ -18,8 +18,9 @@ Or install it yourself as:
 
 ## Usage
 
-    bin/cs_bootstrap create_server nikstest --zone BIEL_CU01 --template "CentOS-6.4-x64-v1.0" --o
-ffering demo_1cpu_1gb --network M_BIE_NMC-Demo
+Bootsrap a server
+
+    bin/cs server create delete-me-10 --zone ZUERICH_IX --port-forwarding 146.159.95.194:22 146.159.95.194:80 --template CentOS-6.4-x64-v1.0 --offering demo_1cpu_1gb --networks M_ZRH_NMC-Demo
 
 ## Contributing
 

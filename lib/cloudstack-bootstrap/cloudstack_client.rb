@@ -22,18 +22,21 @@ require 'openssl'
 require 'uri'
 require 'cgi'
 require 'net/http'
+require 'net/https'
 require 'json'
+require 'yaml'
 
 module CloudstackClient
   class Connection
 
-    ASYNC_POLL_INTERVAL = 2.0
-    ASYNC_TIMEOUT = 300
+    @@async_poll_interval = 2.0
+    @@async_timeout = 300
 
     def initialize(api_url, api_key, secret_key)
       @api_url = api_url
       @api_key = api_key
       @secret_key = secret_key
+      @ssl = api_url.start_with? "https"
     end
 
     ##
@@ -73,7 +76,7 @@ module CloudstackClient
     def wait_for_server_state(id, state)
       while get_server_state(id) != state
         print '..'
-	sleep 5	
+        sleep 5 
       end
       state
     end
@@ -121,14 +124,15 @@ module CloudstackClient
     ##
     # Lists all the servers in your account.
 
-    def list_servers(list_all=false)
+    def list_servers(options = {})
       params = {
           'command' => 'listVirtualMachines',
       }
-      if list_all
+      if options[:listall]
         params['listAll'] = true
-        params['projectId']= -1
+        params['projectId'] = -1
       end
+      params['projectId'] = options[:project_id] if options[:project_id]
 
       json = send_request(params)
       json['virtualmachine'] || []
@@ -138,7 +142,6 @@ module CloudstackClient
     # Deploys a new server using the specified parameters.
 
     def create_server(host_name, service_name, template_name, zone_name=nil, network_names=[], project_name=nil)
-
       if host_name then
         if get_server(host_name) then
           puts "Error: Server '#{host_name}' already exists."
@@ -201,27 +204,6 @@ module CloudstackClient
       }
       params['name'] = host_name if host_name
       params['projectid'] = project['id'] if project_name
-
-      json = send_async_request(params)
-      json['virtualmachine']
-    end
-
-    ##
-    # Deletes the server with the specified name.
-    #
-
-    def delete_server(name, project_id=nil)
-      server = get_server(name, project_id)
-      if !server || !server['id'] then
-        puts "Error: Virtual machine '#{name}' does not exist"
-        exit 1
-      end
-
-      params = {
-          'command' => 'destroyVirtualMachine',
-          'id' => server['id']
-      }
-      params['projectid'] = project_id if project_id
 
       json = send_async_request(params)
       json['virtualmachine']
@@ -365,12 +347,14 @@ module CloudstackClient
     # * executable - all templates that can be used to deploy a new VM
     # * community - templates that are public
 
-    def list_templates(filter)
+    def list_templates(filter, project_id = nil)
       filter ||= 'featured'
       params = {
           'command' => 'listTemplates',
           'templateFilter' => filter
       }
+      params['projectid'] = project_id if project_id
+      
       json = send_request(params)
       json['template'] || []
     end
@@ -393,7 +377,7 @@ module CloudstackClient
           return n
         end
       }
-      puts "debug"
+
       nil
     end
 
@@ -494,7 +478,10 @@ module CloudstackClient
           'ipaddress' => ip_address
       }
       json = send_request(params)
-      json['publicipaddress'].first
+      ip_address = json['publicipaddress']
+
+      return nil unless ip_address
+      ip_address.first
     end
 
 
@@ -504,7 +491,7 @@ module CloudstackClient
     def associate_ip_address(network_id)
       params = {
           'command' => 'associateIpAddress',
-	  'networkid' => network_id
+          'networkid' => network_id
       }
 
       json = send_async_request(params)
@@ -566,7 +553,7 @@ module CloudstackClient
     end
 
     ##
-    # Get projectn by name.
+    # Get project by name.
 
     def get_project(name)
       params = {
@@ -583,26 +570,25 @@ module CloudstackClient
     def list_projects
       params = {
           'command' => 'listProjects',
-          'listall' => 'true',
       }
       json = send_request(params)
       json['project'] || []
     end
 
     ##
-    # Lists all available virtual routers.
-
-    def list_routers(project_id = nil)
+    # List loadbalancer rules
+    def list_loadbalancer_rules(project_name = nil)    
       params = {
-          'command' => 'listRouters',
-          'listall' => 'true',
-          'isrecursive' => 'true'
+        'command' => 'listLoadBalancerRules',
       }
-      params['projectid'] = project_id if project_id
-
+      if project_name
+        project = get_project(project_name)
+        params['projectid'] = project['id']
+      end
       json = send_request(params)
-      json['router'] || []
+      json['loadbalancerrule']
     end
+
 
     ##
     # Sends a synchronous request to the CloudStack API and returns the response as a Hash.
@@ -619,7 +605,6 @@ module CloudstackClient
         params_arr << elem[0].to_s + '=' + elem[1].to_s
       }
       data = params_arr.join('&')
-
       encoded_data = URI.encode(data.downcase).gsub('+', '%20').gsub(',', '%2c')
       signature = OpenSSL::HMAC.digest('sha1', @secret_key, encoded_data)
       signature = Base64.encode64(signature).chomp
@@ -627,7 +612,14 @@ module CloudstackClient
 
       url = "#{@api_url}?#{data}&signature=#{signature}"
 
-      response = Net::HTTP.get_response(URI.parse(url))
+      uri = URI.parse(url)
+      http = Net::HTTP.new(uri.host, uri.port)
+      if @ssl
+        http.use_ssl = true
+        http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+      end 
+
+      response = http.request(Net::HTTP::Get.new(uri.request_uri))
 
       if !response.is_a?(Net::HTTPOK) then
         puts "Error #{response.code}: #{response.message}"
@@ -654,7 +646,7 @@ module CloudstackClient
           'jobId' => json['jobid']
       }
 
-      max_tries = (ASYNC_TIMEOUT / ASYNC_POLL_INTERVAL).round
+      max_tries = (@@async_timeout / @@async_poll_interval).round
       max_tries.times do
         json = send_request(params)
         status = json['jobstatus']
@@ -670,7 +662,7 @@ module CloudstackClient
         end
 
         STDOUT.flush
-        sleep ASYNC_POLL_INTERVAL
+        sleep @@async_poll_interval
       end
 
       print "\n"
