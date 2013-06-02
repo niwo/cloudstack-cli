@@ -1,5 +1,3 @@
-module Cloudstack
-  module Bootstrap
-    VERSION = "0.0.1"
-  end
+module CloudstackCli
+  VERSION = "0.0.1"
 end

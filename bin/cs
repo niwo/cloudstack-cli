@@ -3,7 +3,7 @@
 $LOAD_PATH.unshift File.dirname(__FILE__)
 
 require "thor"
-require './lib/cloudstack-cli'
+require_relative '../lib/cloudstack-cli'
 
 
 class Server < Thor
