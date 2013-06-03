@@ -15,7 +15,6 @@ module CloudstackCli
       @server_offerings ||= @cs.list_service_offerings
     end
     
-
     def templates(type = 'featured', project_id)
       @templates ||= @cs.list_templates(type, project_id)
     end
@@ -62,54 +61,75 @@ module CloudstackCli
     end
 
     def bootstrap_server(name, zone, template, offering, networks, pf_rules = [], project = nil)
-		puts "Bootstrap a new server...".color(:yellow)
-		server = @cs.create_server(
-			name,
-			offering,
-			template,
-			zone,
-			networks,
-			project
-		)
+  		puts "Create server #{name}...".color(:yellow)
+  		server = @cs.create_server(
+  			name,
+  			offering,
+  			template,
+  			zone,
+  			networks,
+  			project
+  		)
 
-		puts
-		puts "server #{server["name"]} has been created.".color(:green)
-		puts
-		puts "Make sure the server is running...".color(:yellow)
-		@cs.wait_for_server_state(server["id"], "Running")
-		puts "OK!".color(:green)
-		puts
-		puts "Get the fqdn of the server...".color(:yellow)
-		server_fqdn = @cs.get_server_fqdn(server)
-		puts "fqdn is #{server_fqdn}".color(:green)
+  		puts
+  		puts "Server #{server["name"]} has been created.".color(:green)
+  		puts
+  		puts "Make sure the server is running...".color(:yellow)
+  		@cs.wait_for_server_state(server["id"], "Running")
+  		puts "OK!".color(:green)
+  		puts
+  		puts "Get the fqdn of the server...".color(:yellow)
+  		server_fqdn = @cs.get_server_fqdn(server)
+  		puts "FQDN is #{server_fqdn}".color(:green)
 
-		if pf_rules.size > 0
-			puts
-			pf_rules.each do |pf_rule|
-				ip_addr = @cs.get_public_ip_address(pf_rule.split(":")[0])
-				port = pf_rule.split(":")[1]
-			  	print "Create port forwarding rule for port #{port} ".color(:yellow)
-			  	@cs.create_port_forwarding_rule(ip_addr["id"], port, 'TCP', port, server["id"])
-			  	puts
-			end
-		end
+  		if pf_rules.size > 0
+  			puts
+  			pf_rules.each do |pf_rule|
+          ip = pf_rule.split(":")[0]
+  				ip_addr = @cs.get_public_ip_address(ip)
+  				port = pf_rule.split(":")[1]
+  			  	print "Create port forwarding rule #{ip}#{port} ".color(:yellow)
+  			  	@cs.create_port_forwarding_rule(ip_addr["id"], port, 'TCP', port, server["id"])
+  			  	puts
+  			end
+  		end
 
-		puts
-		puts "Finish!".color(:green)
+  		puts
+  		puts "Complete!".color(:green)
+    end
+
+    def list_load_balancer_rules(project = nil)
+      @cs.list_load_balancer_rules(project)
+    end
+
+    def create_load_balancer_rule(name, ip, private_port, public_port, options = {})
+      puts "Create rule #{name}...".color(:yellow)
+      @cs.create_load_balancer_rule(name, ip, private_port, public_port, options = {})
+      puts "OK!".color(:green)
+    end
+
+    def assign_to_load_balancer_rule(id, names)
+      puts "Assign #{names.join(', ')} to rule #{id}...".color(:yellow)
+      rule = @cs.assign_to_load_balancer_rule(id, names)
+      if rule['success']
+        puts "OK!".color(:green)
+      else
+        puts "Failed!".color(:red)
+      end
     end
 
     def options
-  	  @options ||= CloudstackClient::ConnectionHelper.load_configuration()
+    	 @options ||= CloudstackClient::ConnectionHelper.load_configuration()
     end
 
     def print_options(options, attr = 'name')
-  	  options.to_enum.with_index(1).each do |option, i|
-  	    puts "#{i}: #{option[attr]}"
-  	  end 	
+    	options.to_enum.with_index(1).each do |option, i|
+    	   puts "#{i}: #{option[attr]}"
+    	end 	
     end
 
     def interactive
-    	ARGV.clear 
+      ARGV.clear 
     	puts
     	puts %{We are going to deploy a new server and...
     	 - assign a public IP address
