@@ -109,7 +109,7 @@ module CloudstackCli
     end
 
     def assign_to_load_balancer_rule(id, names)
-      puts "Assign #{names.join(', ')} to rule #{id}...".color(:yellow)
+      puts "Add #{names.join(', ')} to rule #{id}...".color(:yellow)
       rule = @cs.assign_to_load_balancer_rule(id, names)
       if rule['success']
         puts "OK!".color(:green)

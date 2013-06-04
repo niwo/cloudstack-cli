@@ -132,10 +132,10 @@ class LoadBalancing < Thor
     )
   end
 
-  desc "assign NAME", "assign servers to balancer rule"
+  desc "add NAME", "assign servers to balancer rule"
   option :project
   option :servers, :required => true, :type => :array, :description => 'server names'
-  def assign(name)
+  def add(name)
     cs_cli = CloudstackCli::Cli.new
     if options[:project]
       project = cs_cli.projects.select { |p| p['name'] == options[:project] }.first
