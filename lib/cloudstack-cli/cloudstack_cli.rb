@@ -88,7 +88,7 @@ module CloudstackCli
           ip = pf_rule.split(":")[0]
   				ip_addr = @cs.get_public_ip_address(ip)
   				port = pf_rule.split(":")[1]
-  			  	print "Create port forwarding rule #{ip}#{port} ".color(:yellow)
+  			  	print "Create port forwarding rule #{ip}:#{port} ".color(:yellow)
   			  	@cs.create_port_forwarding_rule(ip_addr["id"], port, 'TCP', port, server["id"])
   			  	puts
   			end
