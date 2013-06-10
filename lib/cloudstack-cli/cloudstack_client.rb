@@ -168,11 +168,13 @@ module CloudstackClient
         exit 1
       end
 
-      project = get_project(project_name) if project_name
-      if !project && project_name then
-        msg = "Project '#{project_name}' is invalid"
-        puts "Error: #{msg}"
-        exit 1
+      if project_name
+        project = get_project(project_name)
+        if !project then
+          msg = "Project '#{project_name}' is invalid"
+          puts "Error: #{msg}"
+          exit 1
+        end
       end
 
       networks = []
@@ -364,7 +366,8 @@ module CloudstackClient
 
     def get_network(name, project_id = nil)
       params = {
-          'command' => 'listNetworks'
+          'command' => 'listNetworks',
+          'listall' => true
       }
       params['projectid'] = project_id if project_id
       json = send_request(params)
@@ -373,6 +376,7 @@ module CloudstackClient
       return nil unless networks
 
       networks.each { |n|
+        puts n['name'] 
         if n['name'] == name then
           return n
         end
@@ -412,7 +416,8 @@ module CloudstackClient
 
     def list_networks(project_id = nil)
       params = {
-          'command' => 'listNetworks'
+          'command' => 'listNetworks',
+          'listall' => true,
       }
       params['projectid'] = project_id if project_id
       json = send_request(params)
@@ -558,10 +563,11 @@ module CloudstackClient
     def get_project(name)
       params = {
           'command' => 'listProjects',
-          'name' => name
+          'name' => name,
+          'listall' => true,
       }
       json = send_request(params)
-      json['project'].first
+      json['project'] ? json['project'].first : nil
     end
 
     ##
@@ -570,6 +576,7 @@ module CloudstackClient
     def list_projects
       params = {
           'command' => 'listProjects',
+          'listall' => true,
       }
       json = send_request(params)
       json['project'] || []
@@ -577,6 +584,7 @@ module CloudstackClient
 
     ##
     # List loadbalancer rules
+    
     def list_load_balancer_rules(name = nil, project_name = nil)    
       params = {
         'command' => 'listLoadBalancerRules',
@@ -594,6 +602,7 @@ module CloudstackClient
 
     ##
     # Creates a load balancing rule.
+
     def create_load_balancer_rule(name, publicip, private_port, public_port, options = {})
       params = {
           'command' => 'createLoadBalancerRule',
@@ -611,6 +620,7 @@ module CloudstackClient
 
     ##
     # Assigns virtual machine or a list of virtual machines to a load balancer rule.
+
     def assign_to_load_balancer_rule(name, vm_names)
       id = list_load_balancer_rules(name).first['id']
 
@@ -625,6 +635,23 @@ module CloudstackClient
       }
       json = send_async_request(params)
     end
+
+    ##
+    # Lists all virtual routers.
+
+    def list_routers( args = { :account => nil, :zone => nil, :projectid => nil} )
+      params = {
+          'command' => 'listRouters',
+          'listall' => 'true'
+      }
+      params['account'] = args[:account] if args[:account]
+      params['zone'] = args[:zone] if args[:zone]
+      params['projectid'] = args[:projectid] if args[:projectid]
+
+      json = send_request(params)
+      json['router'] || []
+    end
+
 
     ##
     # Sends a synchronous request to the CloudStack API and returns the response as a Hash.

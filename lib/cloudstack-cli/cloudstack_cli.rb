@@ -118,6 +118,10 @@ module CloudstackCli
       end
     end
 
+    def list_routers(args)
+      @cs.list_routers(args)
+    end
+
     def options
     	 @options ||= CloudstackClient::ConnectionHelper.load_configuration()
     end
