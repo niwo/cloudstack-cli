@@ -6,7 +6,7 @@ Cloudstack CLI gives command line access to the CloudStack API commands.
 
 Add this line to your application's Gemfile:
 
-    gem 'cloudstack-bootstrap'
+    gem 'cloudstack-cli'
 
 And then execute:
 
@@ -14,7 +14,7 @@ And then execute:
 
 Or install it yourself as:
 
-    $ gem install cloudstack-bootstrap
+    $ gem install cloudstack-cli
 
 ## Usage
 
@@ -28,8 +28,7 @@ Example: Bootsrap a server
 
 ## Status
 
-Only a fraction of the CS commands is implemented yet...
-
+Not all Cloudstack commands implemented yet.
 
 ## Contributing
 
