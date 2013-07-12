@@ -30,6 +30,10 @@ module CloudstackCli
     def networks(project_id = nil)
       @cs.list_networks(project_id)
     end
+
+    def volumes(project_id = nil)
+      @cs.list_volumes(project_id)
+    end
     
     def virtual_machines(options = {})
       @cs.list_servers(options)
@@ -96,6 +100,18 @@ module CloudstackCli
 
   		puts
   		puts "Complete!".color(:green)
+    end
+
+    def stop_server(name)
+      @cs.stop_server(name)
+    end
+
+    def start_server(name)
+      @cs.start_server(name)
+    end
+
+    def reboot_server(name)
+      @cs.reboot_server(name)
     end
 
     def list_load_balancer_rules(project = nil)
@@ -180,4 +196,41 @@ module CloudstackCli
     	)
     end
   end
+end
+
+class CsBootstrap < Thor
+  class_option :verbose, :type => :boolean
+  
+  desc "zone SUBCOMMAND ...ARGS", "manage zones"
+  subcommand "zone", Zone
+
+  desc "project SUBCOMMAND ...ARGS", "manage servers"
+  subcommand "project", Project
+
+  desc "server SUBCOMMAND ...ARGS", "manage servers"
+  subcommand "server", Server
+
+  desc "offering SUBCOMMAND ...ARGS", "manage offerings"
+  subcommand "offering", Offering
+
+  desc "network SUBCOMMAND ...ARGS", "manage networks"
+  subcommand "network", Network
+
+  desc "lb SUBCOMMAND ...ARGS", "manage load balancing rules"
+  subcommand "lb", Lb
+
+  desc "template SUBCOMMAND ...ARGS", "manage template"
+  subcommand "template", Template
+
+  desc "router SUBCOMMAND ...ARGS", "manage virtual routers"
+  subcommand "router", Router
+
+  desc "router SUBCOMMAND ...ARGS", "manage virtual routers"
+  subcommand "router", Router
+
+  desc "volume SUBCOMMAND ...ARGS", "manage volumes"
+  subcommand "volume", Volume
+
+  desc "stack SUBCOMMAND ...ARGS", "manage stacks"
+  subcommand "stack", Stack
 end

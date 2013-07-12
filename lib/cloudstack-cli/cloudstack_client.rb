@@ -55,7 +55,7 @@ module CloudstackClient
         return nil
       end
 
-      machines.first
+      machines.select {|m| m['name'] == name }.first
     end
 
     def get_server_state(id)
@@ -376,7 +376,6 @@ module CloudstackClient
       return nil unless networks
 
       networks.each { |n|
-        puts n['name'] 
         if n['name'] == name then
           return n
         end
@@ -417,6 +416,19 @@ module CloudstackClient
     def list_networks(project_id = nil)
       params = {
           'command' => 'listNetworks',
+          'listall' => true,
+      }
+      params['projectid'] = project_id if project_id
+      json = send_request(params)
+      json['network'] || []
+    end
+
+    ##
+    # Lists all volumes.
+
+    def list_volumes(project_id = nil)
+      params = {
+          'command' => 'listVolumes',
           'listall' => true,
       }
       params['projectid'] = project_id if project_id
@@ -584,7 +596,7 @@ module CloudstackClient
 
     ##
     # List loadbalancer rules
-    
+
     def list_load_balancer_rules(name = nil, project_name = nil)    
       params = {
         'command' => 'listLoadBalancerRules',
@@ -682,7 +694,13 @@ module CloudstackClient
         http.verify_mode = OpenSSL::SSL::VERIFY_NONE
       end 
 
-      response = http.request(Net::HTTP::Get.new(uri.request_uri))
+      begin
+        response = http.request(Net::HTTP::Get.new(uri.request_uri))
+      rescue
+        puts "Error connecting to API:"
+        puts "#{@api_url} is not reachable"
+        exit 1
+      end
 
       if !response.is_a?(Net::HTTPOK) then
         puts "Error #{response.code}: #{response.message}"
