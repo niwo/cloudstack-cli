@@ -114,6 +114,10 @@ module CloudstackCli
       @cs.reboot_server(name)
     end
 
+    def list_accounts(name = nil)
+      @cs.list_accounts({ name: name })
+    end 
+
     def list_load_balancer_rules(project = nil)
       @cs.list_load_balancer_rules(project)
     end
@@ -134,8 +138,12 @@ module CloudstackCli
       end
     end
 
-    def list_routers(args)
-      @cs.list_routers(args)
+    def list_routers(args, redundant_state = nil)
+      routers = @cs.list_routers(args)
+      if redundant_state
+       return  routers.select {|r| r['redundantstate'] == redundant_state }
+      end
+      routers
     end
 
     def options
@@ -233,4 +241,7 @@ class CsBootstrap < Thor
 
   desc "stack SUBCOMMAND ...ARGS", "manage stacks"
   subcommand "stack", Stack
+
+  desc "account SUBCOMMAND ...ARGS", "manage accounts"
+  subcommand "account", Account
 end

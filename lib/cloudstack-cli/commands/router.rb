@@ -5,7 +5,11 @@ class Router < Thor
 
 	desc "list", "list virtual routers"
   option :project
-  option :listall
+  option :account
+  option :status, desc: "Running or Stopped"
+  option :redundant_state, desc: "MASTER, BACKUP or UNKNOWN"
+  option :listall, type: :boolean
+  option :text, type: :boolean, desc: "text output (only the instance name)"
   def list
 		cs_cli = CloudstackCli::Cli.new
    	if options[:project]
@@ -14,36 +18,57 @@ class Router < Thor
      	projectid = project['id']
    	end
 
-		routers = cs_cli.list_routers({projectid: projectid})
-			if options[:listall]
+		routers = cs_cli.list_routers(
+			{
+				account: options[:account], 
+				projectid: projectid,
+				status: options[:status],
+			}, 
+			options[:redundant_state]
+		)
+
+
+		if options[:listall]
 			projects = cs_cli.projects
 			projects.each do |project|
-		  	routers = routers + cs_cli.list_routers({projectid: project['id']})
+		  	routers = routers + cs_cli.list_routers(
+		  		{
+		  			account: options[:account],
+		  			projectid: project['id'],
+		  			status: options[:status]
+		  		},
+		  		options[:redundant_state]
+		  	)
 		  end
 		end
 
-	  puts "Total number of routers: #{routers.size}"
-
-		table(border: true) do
-    	row do
-        column 'Name'
-        column 'Zone'
-        column 'Account', width: 14 unless options[:project]
-        column 'Project', width: 14 if options[:listall] || options[:project]
-        column 'Redundant State'
-        column 'Public IP', width: 15
-      end
-      routers.each do |router|
-        row do
-          column router["name"]
-          column router["zonename"]
-          column router["account"] unless options[:project]
-          column router["project"] if options[:listall] || options[:project]
-          column router["redundantstate"]
-          column router["publicip"]
-        end
-      end
-    end
+		if options[:text]
+			puts routers.map {|r| r['name']}.join(" ")
+		else
+		  puts "Total number of routers: #{routers.size}"
+			table(border: true) do
+	    	row do
+	        column 'Name'
+	        column 'Zone'
+	        column 'Account', width: 14 unless options[:project]
+	        column 'Project', width: 14 if options[:listall] || options[:project]
+	        column 'Redundant State'
+	        column 'Public IP', width: 15
+	        column 'Status'
+	      end
+	      routers.each do |router|
+	        row do
+	          column router["name"]
+	          column router["zonename"]
+	          column router["account"] unless options[:project]
+	          column router["project"] if options[:listall] || options[:project]
+	          column router["redundantstate"]
+	          column router["publicip"]
+	          column router["state"]
+	        end
+	      end
+	    end
+	  end
 
   end
 

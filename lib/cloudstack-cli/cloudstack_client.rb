@@ -651,19 +651,38 @@ module CloudstackClient
     ##
     # Lists all virtual routers.
 
-    def list_routers( args = { :account => nil, :zone => nil, :projectid => nil} )
+    def list_routers(args = { :account => nil, :zone => nil, :projectid => nil, :status => nil})
       params = {
           'command' => 'listRouters',
-          'listall' => 'true'
+          'listall' => 'true',
+          'isrecursive' => 'true'
       }
-      params['account'] = args[:account] if args[:account]
       params['zone'] = args[:zone] if args[:zone]
       params['projectid'] = args[:projectid] if args[:projectid]
+      params['state'] = args[:status] if args[:status]
+      if args[:account]
+        params['domainid'] = list_accounts({name: args[:account]}).first["domainid"]
+        params['account'] = args[:account]
+      end
 
       json = send_request(params)
       json['router'] || []
     end
 
+    ##
+    # Lists accounts.
+
+    def list_accounts(args = { :name => nil })
+      params = {
+          'command' => 'listAccounts',
+          'listall' => 'true',
+          'isrecursive' => 'true'
+      }
+      params['name'] = args[:name] if args[:name]
+
+      json = send_request(params)
+      json['account'] || []
+    end
 
     ##
     # Sends a synchronous request to the CloudStack API and returns the response as a Hash.
