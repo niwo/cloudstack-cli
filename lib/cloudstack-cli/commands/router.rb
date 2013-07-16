@@ -1,5 +1,3 @@
-require 'command_line_reporter'
-
 class Router < Thor
 	include CommandLineReporter
 
@@ -11,7 +9,7 @@ class Router < Thor
   option :listall, type: :boolean
   option :text, type: :boolean, desc: "text output (only the instance name)"
   def list
-		cs_cli = CloudstackCli::Cli.new
+		cs_cli = CloudstackCli::Helper.new
    	if options[:project]
     	project = cs_cli.projects.select { |p| p['name'] == options[:project] }.first
      	raise "Project '#{options[:project]}' not found" unless project

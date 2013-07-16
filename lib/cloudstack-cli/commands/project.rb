@@ -2,7 +2,7 @@ class Project < Thor
 
   desc "list", "list projects"
   def list
-    cs_cli = CloudstackCli::Cli.new
+    cs_cli = CloudstackCli::Helper.new
     projects = cs_cli.projects
     if projects.size < 1
       puts "No projects found"

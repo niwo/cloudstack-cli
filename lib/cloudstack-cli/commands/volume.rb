@@ -2,7 +2,7 @@ class Volume < Thor
   desc "list", "list networks"
   option :project
   def list
-    cs_cli = CloudstackCli::Cli.new
+    cs_cli = CloudstackCli::Helper.new
     if options[:project]
       project = cs_cli.projects.select { |p| p['name'] == options[:project] }.first
       raise "Project '#{options[:project]}' not found" unless project
