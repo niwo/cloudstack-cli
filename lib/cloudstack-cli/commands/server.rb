@@ -4,12 +4,14 @@ class Server < Thor
   option :listall, :type => :boolean
   option :text, :type => :boolean
   option :project
+  option :account
   def list
     cs_cli = CloudstackCli::Helper.new
     if options[:project]
       project = cs_cli.projects.select { |p| p['name'] == options[:project] }.first
       exit_now! "Project '#{options[:project]}' not found" unless project
       options[:project_id] = project['id']
+      options[:account] = nil
     end
     servers = cs_cli.virtual_machines(options)
     if servers.size < 1

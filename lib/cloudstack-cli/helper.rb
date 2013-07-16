@@ -1,16 +1,25 @@
 module CloudstackCli
   class Helper
     include CommandLineReporter
+
     def initialize 
 	    @cs = CloudstackClient::Connection.new(
 	      options[:cloudstack_url],
 	      options[:cloudstack_api_key],
 	      options[:cloudstack_secret_key]
 	    )
-    end 
+    end
 
-    def server_offerings
-      @server_offerings ||= @cs.list_service_offerings
+    def domains(name = nil)
+      @cs.list_domains(name)
+    end
+
+    def server_offerings(domain = nil)
+      @server_offerings ||= @cs.list_service_offerings(domain)
+    end
+
+    def create_offering(params)
+      @cs.create_offering(name)
     end
     
     def templates(type = 'featured', project_id)
@@ -139,7 +148,7 @@ module CloudstackCli
     def list_routers(args, redundant_state = nil)
       routers = @cs.list_routers(args)
       if redundant_state
-       return  routers.select {|r| r['redundantstate'] == redundant_state }
+       return  routers.select {|r| r['redundantstate'].downcase == redundant_state.downcase }
       end
       routers
     end

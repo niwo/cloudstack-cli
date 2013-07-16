@@ -37,5 +37,8 @@ module CloudstackCli
 
     desc "account SUBCOMMAND ...ARGS", "manage accounts"
     subcommand "account", Account
+
+    desc "domain SUBCOMMAND ...ARGS", "manage domains"
+    subcommand "domain", Domain
   end
 end

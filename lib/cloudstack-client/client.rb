@@ -126,13 +126,18 @@ module CloudstackClient
 
     def list_servers(options = {})
       params = {
-          'command' => 'listVirtualMachines',
+        'command' => 'listVirtualMachines',
       }
       if options[:listall]
         params['listAll'] = true
         params['projectId'] = -1
+        options[:account] = nil
       end
-      params['projectId'] = options[:project_id] if options[:project_id]
+      params['projectid'] = options[:project_id] if options[:project_id]
+      if options[:account]
+        params['domainid'] = list_accounts({name: options[:account]}).first["domainid"]
+        params['account'] = options[:account]
+      end
 
       json = send_request(params)
       json['virtualmachine'] || []
@@ -301,12 +306,40 @@ module CloudstackClient
     ##
     # Lists all available service offerings.
 
-    def list_service_offerings
+    def list_service_offerings(domain = nil)
       params = {
           'command' => 'listServiceOfferings'
       }
+
+      if domain
+        params['domainid'] = list_domains(domain).first["id"]
+      end
+
       json = send_request(params)
       json['serviceoffering'] || []
+    end
+
+    ##
+    # Create a service offering.
+
+    def create_offering(params)
+      params = {
+          'command' => 'createServiceOffering',
+          'name' => params[:name],
+          'cpunumber' => params[:cpunumber],
+          'cpuspeed' => params[:cpuspeed],
+          'displaytext' => params[:displaytext],
+          'memory' => params[:memory]
+      }
+
+      if params['domain']
+        params['domainid'] = list_domains(params['domain']).first["id"]
+      end
+      params['tags'] = params[:tags] if params[:tags]
+      params['offerha'] = params[:ha] if params[:ha]
+
+      json = send_request(params)
+      json['serviceoffering'].first
     end
 
     ##
@@ -682,6 +715,21 @@ module CloudstackClient
 
       json = send_request(params)
       json['account'] || []
+    end
+
+    ##
+    # List domains.
+
+    def list_domains(name = nil)
+      params = {
+          'command' => 'listDomains',
+          'listall' => 'true',
+          'isrecursive' => 'true'
+      }
+      params['name'] = name if name
+
+      json = send_request(params)
+      json['domain'] || []
     end
 
     ##
