@@ -40,5 +40,8 @@ module CloudstackCli
 
     desc "domain SUBCOMMAND ...ARGS", "manage domains"
     subcommand "domain", Domain
+
+    desc "publicip SUBCOMMAND ...ARGS", "manage public ip addresses"
+    subcommand "publicip", Publicip
   end
 end

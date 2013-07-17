@@ -46,6 +46,7 @@ class Router < Thor
 		  puts "Total number of routers: #{routers.size}"
 			table(border: true) do
 	    	row do
+	    		column 'ID', width: 40
 	        column 'Name'
 	        column 'Zone'
 	        column 'Account', width: 14 unless options[:project]
@@ -56,6 +57,7 @@ class Router < Thor
 	      end
 	      routers.each do |router|
 	        row do
+	        	column router["id"]
 	          column router["name"]
 	          column router["zonename"]
 	          column router["account"] unless options[:project]
@@ -81,6 +83,12 @@ class Router < Thor
   option :project
   def start
 
+  end
+
+  desc "destroy ID", "destroy virtual router"
+  def destroy(id)
+  	cs_cli = CloudstackCli::Helper.new
+  	puts "OK" if cs_cli.destroy_router(name)
   end
 
 end

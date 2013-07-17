@@ -10,6 +10,10 @@ module CloudstackCli
 	    )
     end
 
+    def remove_publicip(id)
+      @cs.disassociate_ip_address(id)
+    end
+
     def domains(name = nil)
       @cs.list_domains(name)
     end
@@ -19,7 +23,15 @@ module CloudstackCli
     end
 
     def create_offering(params)
-      @cs.create_offering(name)
+      @cs.create_offering(params)
+    end
+
+    def delete_offering(id)
+      @cs.delete_offering(id)
+    end
+
+    def update_offering(args)
+      @cs.update_offering(args)
     end
     
     def templates(type = 'featured', project_id)
@@ -36,6 +48,10 @@ module CloudstackCli
 
     def networks(project_id = nil)
       @cs.list_networks(project_id)
+    end
+
+    def physical_networks
+      @cs.list_physical_networks
     end
 
     def volumes(project_id = nil)
@@ -151,6 +167,10 @@ module CloudstackCli
        return  routers.select {|r| r['redundantstate'].downcase == redundant_state.downcase }
       end
       routers
+    end
+
+    def destroy_router(id)
+      @cs.destroy_router(id)
     end
 
     def options

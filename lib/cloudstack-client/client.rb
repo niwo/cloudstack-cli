@@ -36,7 +36,7 @@ module CloudstackClient
       @api_url = api_url
       @api_key = api_key
       @secret_key = secret_key
-      @ssl = api_url.start_with? "https"
+      @use_ssl = api_url.start_with? "https"
     end
 
     ##
@@ -322,24 +322,51 @@ module CloudstackClient
     ##
     # Create a service offering.
 
-    def create_offering(params)
+    def create_offering(args)
       params = {
           'command' => 'createServiceOffering',
-          'name' => params[:name],
-          'cpunumber' => params[:cpunumber],
-          'cpuspeed' => params[:cpuspeed],
-          'displaytext' => params[:displaytext],
-          'memory' => params[:memory]
+          'name' => args[:name],
+          'cpunumber' => args[:cpunumber],
+          'cpuspeed' => args[:cpuspeed],
+          'displaytext' => args[:displaytext],
+          'memory' => args[:memory]
       }
 
-      if params['domain']
-        params['domainid'] = list_domains(params['domain']).first["id"]
+      if args['domain']
+        params['domainid'] = list_domains(args['domain']).first["id"]
       end
-      params['tags'] = params[:tags] if params[:tags]
-      params['offerha'] = params[:ha] if params[:ha]
+
+      params['tags'] = args[:tags] if args[:tags]
+      params['offerha'] = 'true' if args[:ha]
 
       json = send_request(params)
       json['serviceoffering'].first
+    end
+
+    ##
+    # Delete a service offering.
+
+    def delete_offering(id)
+      params = {
+          'command' => 'deleteServiceOffering',
+          'id' => id
+      }
+
+      json = send_request(params)
+      json['success']
+    end
+
+    def update_offering(args)
+      params = {
+          'command' => 'updateServiceOffering',
+          'id' => args['id']
+      }
+      params['name'] = args['name'] if args['name']
+      params['displaytext'] = args['displaytext'] if args['displaytext']
+      params['sortkey'] = args['sortkey'] if args['sortkey']
+
+      json = send_request(params)
+      json['serviceoffering']
     end
 
     ##
@@ -454,6 +481,17 @@ module CloudstackClient
       params['projectid'] = project_id if project_id
       json = send_request(params)
       json['network'] || []
+    end
+
+    ##
+    # Lists all physical networks.
+
+    def list_physical_networks
+      params = {
+          'command' => 'listPhysicalNetworks',
+      }
+      json = send_request(params)
+      json['physicalnetwork'] || []
     end
 
     ##
@@ -684,7 +722,7 @@ module CloudstackClient
     ##
     # Lists all virtual routers.
 
-    def list_routers(args = { :account => nil, :zone => nil, :projectid => nil, :status => nil})
+    def list_routers(args = {:account => nil, :zone => nil, :projectid => nil, :status => nil, :name => nil})
       params = {
           'command' => 'listRouters',
           'listall' => 'true',
@@ -693,6 +731,7 @@ module CloudstackClient
       params['zone'] = args[:zone] if args[:zone]
       params['projectid'] = args[:projectid] if args[:projectid]
       params['state'] = args[:status] if args[:status]
+      params['name'] = args[:name] if args[:name]
       if args[:account]
         params['domainid'] = list_accounts({name: args[:account]}).first["domainid"]
         params['account'] = args[:account]
@@ -703,13 +742,26 @@ module CloudstackClient
     end
 
     ##
+    # Destroy virtual router.
+
+    def destroy_router(id)
+      params = {
+        'command' => 'destroyRouter',
+        'id' => id
+      }
+
+      json = send_request(params)
+      json['router'].first
+    end
+
+    ##
     # Lists accounts.
 
     def list_accounts(args = { :name => nil })
       params = {
-          'command' => 'listAccounts',
-          'listall' => 'true',
-          'isrecursive' => 'true'
+        'command' => 'listAccounts',
+        'listall' => 'true',
+        'isrecursive' => 'true'
       }
       params['name'] = args[:name] if args[:name]
 
@@ -722,9 +774,9 @@ module CloudstackClient
 
     def list_domains(name = nil)
       params = {
-          'command' => 'listDomains',
-          'listall' => 'true',
-          'isrecursive' => 'true'
+        'command' => 'listDomains',
+        'listall' => 'true',
+        'isrecursive' => 'true'
       }
       params['name'] = name if name
 
@@ -744,11 +796,10 @@ module CloudstackClient
 
       params_arr = []
       params.sort.each { |elem|
-        params_arr << elem[0].to_s + '=' + elem[1].to_s
+        params_arr << elem[0].to_s + '=' + CGI.escape(elem[1].to_s).gsub('+', '%20').gsub(' ','%20')
       }
       data = params_arr.join('&')
-      encoded_data = URI.encode(data.downcase).gsub('+', '%20').gsub(',', '%2c')
-      signature = OpenSSL::HMAC.digest('sha1', @secret_key, encoded_data)
+      signature = OpenSSL::HMAC.digest('sha1', @secret_key, data.downcase)
       signature = Base64.encode64(signature).chomp
       signature = CGI.escape(signature)
 
@@ -756,10 +807,8 @@ module CloudstackClient
 
       uri = URI.parse(url)
       http = Net::HTTP.new(uri.host, uri.port)
-      if @ssl
-        http.use_ssl = true
-        http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-      end 
+      http.use_ssl = @use_ssl
+      http.verify_mode = OpenSSL::SSL::VERIFY_NONE
 
       begin
         response = http.request(Net::HTTP::Get.new(uri.request_uri))
