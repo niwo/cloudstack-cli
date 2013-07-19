@@ -52,7 +52,7 @@ class Router < Thor
 	        column 'Account', width: 14 unless options[:project]
 	        column 'Project', width: 14 if options[:listall] || options[:project]
 	        column 'Redundant State'
-	        column 'Public IP', width: 15
+	        column 'Linklocal IP', width: 15
 	        column 'Status'
 	      end
 	      routers.each do |router|
@@ -63,7 +63,7 @@ class Router < Thor
 	          column router["account"] unless options[:project]
 	          column router["project"] if options[:listall] || options[:project]
 	          column router["redundantstate"]
-	          column router["publicip"]
+	          column router["linklocalip"]
 	          column router["state"]
 	        end
 	      end

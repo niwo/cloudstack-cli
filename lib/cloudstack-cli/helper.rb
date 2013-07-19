@@ -2,6 +2,8 @@ module CloudstackCli
   class Helper
     include CommandLineReporter
 
+    attr_reader :cs
+
     def initialize 
 	    @cs = CloudstackClient::Connection.new(
 	      options[:cloudstack_url],

@@ -1,6 +1,18 @@
 module CloudstackCli
   class Cli < Thor
-    class_option :verbose, :type => :boolean
+    class_option :config
+    class_option :verbose, type: :boolean
+
+    desc "api COMMAND ...ARGS", "run a custom api command"
+    def command(command, *cmds)
+      client = CloudstackCli::Helper.new
+      params = {'command' => command}
+      cmds.each do |cmd|
+        cmd = cmd.split('=')
+        params[cmd[0]] = cmd[1] 
+      end
+      puts JSON.pretty_generate(client.cs.send_request params)
+    end
     
     desc "zone SUBCOMMAND ...ARGS", "manage zones"
     subcommand "zone", Zone

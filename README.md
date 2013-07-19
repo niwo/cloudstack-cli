@@ -6,7 +6,7 @@ Cloudstack CLI gives command line access to the CloudStack API commands.
 
 Add this line to your application's Gemfile:
 
-    gem 'cloudstack-cli'
+    gem "cloudstack-cli"
 
 And then execute:
 
@@ -20,15 +20,16 @@ Or install it yourself as:
 
 See the help screen
 
-    bin/cs
+    $ bin/cs
 
 Example: Bootsrap a server
 
-    bin/cs server create delete-me-10 --zone ZUERICH_IX --port-forwarding 146.159.95.194:22 146.159.95.194:80 --template CentOS-6.4-x64-v1.0 --offering demo_1cpu_1gb --networks M_ZRH_NMC-Demo
+    $ bin/cs server create delete-me-10 --zone ZUERICH_IX --port-forwarding 146.159.95.194:22 146.159.95.194:80 --template CentOS-6.4-x64-v1.2 --offering demo_1cpu_1gb --networks M_ZRH_NMC-Demo
 
-## Status
+Example: Run a custom API command
 
-Not all Cloudstack commands implemented yet.
+    bin/cs command listAlerts type=8
+
 
 ## Contributing
 
