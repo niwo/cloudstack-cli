@@ -42,7 +42,7 @@ class Lb < Thor
 
   desc "add NAME", "assign servers to balancer rule"
   option :project
-  option :servers, :required => true, :type => :array, :description => 'server names'
+  option :servers, required: true, type: :array, description: 'server names'
   def add(name)
     cs_cli = CloudstackCli::Helper.new
     if options[:project]

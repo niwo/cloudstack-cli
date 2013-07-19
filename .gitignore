@@ -3,3 +3,4 @@ results.html
 config/cloudstack.yml
 pkg
 html
+*.gem
