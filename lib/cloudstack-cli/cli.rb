@@ -3,7 +3,7 @@ module CloudstackCli
     class_option :config
     class_option :verbose, type: :boolean
 
-    desc "api COMMAND ...ARGS", "run a custom api command"
+    desc "command COMMAND [arg1=val1] [arg2=val2]...", "run a custom api command"
     def command(command, *cmds)
       client = CloudstackCli::Helper.new
       params = {'command' => command}
