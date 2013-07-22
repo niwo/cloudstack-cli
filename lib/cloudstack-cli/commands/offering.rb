@@ -4,7 +4,7 @@ class Offering < Thor
   desc 'list', 'list offerings by type [compute|network|storage]'
   option :domain
   def list(type='compute')
-    cs_cli = CloudstackCli::Helper.new
+    cs_cli = CloudstackCli::Helper.new(options[:config])
     offerings = cs_cli.server_offerings(options[:domain])
 
     offerings.group_by{|o| o["domain"]}.each_value do |offers|
@@ -47,20 +47,20 @@ class Offering < Thor
   option :tags
   def create(name)
     options[:name] = name
-    cs_cli = CloudstackCli::Helper.new
+    cs_cli = CloudstackCli::Helper.new(options[:config])
     puts "OK" if cs_cli.create_offering(options)
   end
 
   desc 'delete ID', 'delete offering'
   def delete(id)
-    cs_cli = CloudstackCli::Helper.new
+    cs_cli = CloudstackCli::Helper.new(options[:config])
     puts "OK" if cs_cli.delete_offering(id)
   end
 
 
   desc 'sort', 'sort by cpu and memory grouped by domain'
   def sort
-    cs_cli = CloudstackCli::Helper.new
+    cs_cli = CloudstackCli::Helper.new(options[:config])
     offerings = cs_cli.server_offerings(options[:domain])
     sortkey = -1
     offerings.group_by{|o| o["domain"]}.each_value do |offers|

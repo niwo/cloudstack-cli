@@ -4,11 +4,12 @@ module CloudstackCli
 
     attr_reader :cs
 
-    def initialize 
+    def initialize(config_file)
+      @config_file = config_file
 	    @cs = CloudstackClient::Connection.new(
-	      options[:cloudstack_url],
-	      options[:cloudstack_api_key],
-	      options[:cloudstack_secret_key]
+	      options[:url],
+	      options[:api_key],
+	      options[:secret_key]
 	    )
     end
 
@@ -175,8 +176,16 @@ module CloudstackCli
       @cs.destroy_router(id)
     end
 
+    def start_router(id)
+      @cs.start_router(id)
+    end
+
+    def stop_router(id)
+      @cs.stop_router(id)
+    end
+
     def options
-    	 @options ||= CloudstackClient::ConnectionHelper.load_configuration()
+    	 @options ||= CloudstackClient::ConnectionHelper.load_configuration(@config_file)
     end
 
     def print_options(options, attr = 'name')

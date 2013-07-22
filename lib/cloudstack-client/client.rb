@@ -728,7 +728,14 @@ module CloudstackClient
           'listall' => 'true',
           'isrecursive' => 'true'
       }
-      params['zone'] = args[:zone] if args[:zone]
+      if args[:zone]
+        zone = get_zone(args[:zone])
+        unless zone 
+          puts "Error: Zone #{args[:zone]} not found"
+          exit 1
+        end
+        params['zoneid'] = zone['id']  
+      end
       params['projectid'] = args[:projectid] if args[:projectid]
       params['state'] = args[:status] if args[:status]
       params['name'] = args[:name] if args[:name]
@@ -752,6 +759,30 @@ module CloudstackClient
 
       json = send_request(params)
       json['router'].first
+    end
+
+    ##
+    # Start virtual router.
+
+    def start_router(id)
+      params = {
+        'command' => 'startRouter',
+        'id' => id
+      }
+
+      json = send_async_request(params)
+    end
+
+    ##
+    # Stop virtual router.
+
+    def stop_router(id)
+      params = {
+        'command' => 'stopRouter',
+        'id' => id
+      }
+
+      json = send_async_request(params)
     end
 
     ##

@@ -2,7 +2,7 @@ class Lb < Thor
   desc "list", "list load balancer rules"
   option :project
   def list
-    cs_cli = CloudstackCli::Helper.new
+    cs_cli = CloudstackCli::Helper.new(options[:config])
     if options[:project]
       project = cs_cli.projects.select { |p| p['name'] == options[:project] }.first
       exit_now! "Project '#{options[:project]}' not found" unless project
@@ -24,7 +24,7 @@ class Lb < Thor
   option :public_port, :required => true
   option :private_port
   def create(name)
-    cs_cli = CloudstackCli::Helper.new
+    cs_cli = CloudstackCli::Helper.new(options[:config])
     if options[:project]
       project = cs_cli.projects.select { |p| p['name'] == options[:project] }.first
       exit_now! "Project '#{options[:project]}' not found" unless project
@@ -44,7 +44,7 @@ class Lb < Thor
   option :project
   option :servers, required: true, type: :array, description: 'server names'
   def add(name)
-    cs_cli = CloudstackCli::Helper.new
+    cs_cli = CloudstackCli::Helper.new(options[:config])
     if options[:project]
       project = cs_cli.projects.select { |p| p['name'] == options[:project] }.first
       exit_now! "Project '#{options[:project]}' not found" unless project

@@ -11,7 +11,7 @@ class Network < Thor
   option :project
   option :physical, type: :boolean
   def list
-    cs_cli = CloudstackCli::Helper.new
+    cs_cli = CloudstackCli::Helper.new(options[:config])
     if options[:project]
       project = cs_cli.projects.select { |p| p['name'] == options[:project] }.first
       raise "Project '#{options[:project]}' not found" unless project
@@ -19,7 +19,6 @@ class Network < Thor
     
     if options[:physical]
       networks = cs_cli.physical_networks
-
       if networks.size < 1
         puts "No networks found"
       else
@@ -42,7 +41,6 @@ class Network < Thor
       end
     else
       networks = cs_cli.networks(project ? project['id'] : -1)
-
       if networks.size < 1
         puts "No networks found"
       else

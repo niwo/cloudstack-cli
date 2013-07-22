@@ -1,11 +1,40 @@
 module CloudstackCli
   class Cli < Thor
-    class_option :config
+    include Thor::Actions
+
+    class_option :config, default: File.join(Dir.home, '.cloudstack-cli.yml'), aliases: '-c'
     class_option :verbose, type: :boolean
+
+    desc "setup", "initial setup of the Cloudstack connection"
+    option :url
+    option :api_key
+    option :secret_key
+    def setup(file = options[:config])
+      config = {}
+      unless options[:url]
+        say "What's the URL of your Cloudstack API?", :blue
+        say "Example: https://my-cloudstack-server/client/api/", :blue
+        config[:url] = ask("URL:", :magenta)
+      end
+
+      unless options[:api_key]
+        config[:api_key] = ask("API Key:", :magenta)
+      end
+
+      unless options[:secret_key]
+        config[:secret_key] = ask("Secret Key:", :magenta)
+      end
+
+      if File.exists? file
+        say "Warning: #{file} already exists.", :red
+        exit unless yes?("Overwrite [y/N]", :red)
+      end
+      File.open(file, 'w+') {|f| f.write(config.to_yaml) }
+    end    
 
     desc "command COMMAND [arg1=val1 arg2=val2...]", "run a custom api command"
     def command(command, *args)
-      client = CloudstackCli::Helper.new
+      client = CloudstackCli::Helper.new(options[:config])
       params = {'command' => command}
       args.each do |arg|
         arg = arg.split('=')

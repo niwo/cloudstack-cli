@@ -16,6 +16,20 @@ Or install it yourself as:
 
     $ gem install cloudstack-cli
 
+## Setup
+
+Create the initial configuration:
+
+	cs setup
+
+cloudstack-cli expects to find a configuartion file with the API URL and your CloudStack credentials in your home directory named .cloudstack-cli.yml. If the file is located elsewhere you can specify the loaction using the --config option.
+
+Example content of the configuration file:
+
+    :url:         "https://my-cloudstack-server/client/api/"
+	:api_key:     "cloudstack-api-key"
+	:secret_key:  "cloudstack-api-secret"
+
 ## Usage
 
 See the help screen

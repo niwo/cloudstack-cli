@@ -2,7 +2,7 @@ class Account < Thor
 
   desc 'list [NAME]', 'list accounts'
   def list(name = nil)
-    cs_cli = CloudstackCli::Helper.new
+    cs_cli = CloudstackCli::Helper.new(options[:config])
     accounts = cs_cli.list_accounts(name)
     if accounts.size < 1
       puts "No accounts found"
