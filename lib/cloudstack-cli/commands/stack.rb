@@ -1,6 +1,6 @@
 class Stack < Thor
 
-	desc "create STACKFILE", "create a stack of servers"
+	desc "stack create STACKFILE", "create a stack of servers"
   def create(stackfile)
     CloudstackCli::Cli.new.bootstrap_server(
         name,

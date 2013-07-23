@@ -4,15 +4,7 @@ Cloudstack CLI gives command line access to the CloudStack API commands.
 
 ## Installation
 
-Add this line to your application's Gemfile:
-
-    gem "cloudstack-cli"
-
-And then execute:
-
-    $ bundle
-
-Or install it yourself as:
+Install the cloudstack-cli gem:
 
     $ gem install cloudstack-cli
 
@@ -32,17 +24,43 @@ Example content of the configuration file:
 
 ## Usage
 
-See the help screen
+See the help screen:
 
-    $ bin/cs
+    $ cs
 
-Example: Bootsrap a server
+### Example 1
 
-    $ bin/cs server create delete-me-10 --zone ZUERICH_IX --port-forwarding 146.159.95.194:22 146.159.95.194:80 --template CentOS-6.4-x64-v1.2 --offering demo_1cpu_1gb --networks M_ZRH_NMC-Demo
+Bootsrap a server:
 
-Example: Run a custom API command
+    $ cs server create server01 --zone ZUERICH_IX --port-forwarding 193.218.104.10:22 193.218.104.10:80 --template CentOS-6.4-x64-v1.4 --offering 1cpu_1gb --networks M_Demo
 
-    bin/cs command listAlerts type=8
+### Example 2
+
+Run a custom API command:
+
+    cs command listAlerts type=8
+
+### Example 3
+
+Sort all computing offerings by CPU and Memory grouped my Domain:
+
+    cs offering sort
+
+### Example 4
+
+Stop all virtual routers of project Demo (you could filter by Zone too):
+(This command is helpful if you have to deploy new versions of Cloudstack when using redumdant routers)
+
+    cs router list --project Demo --status running --redundant-state BACKUP --command stop
+
+Hint: You can watch the status of the command with watch.
+
+    watch -n cs router list --project Demo
+
+
+## References
+-  [Cloudstack API documentation](http://cloudstack.apache.org/docs/api/apidocs-4.1/TOC_Root_Admin.html)
+-  This tool was inspired by the Knife extension for Cloudstack: [knife-cloudstack](https://github.com/CloudStack-extras/knife-cloudstack)
 
 
 ## Contributing
@@ -52,3 +70,10 @@ Example: Run a custom API command
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create new Pull Request
+
+
+## License
+
+Released under the MIT License.  See the [LICENSE][] file for further details.
+
+[license]: LICENSE.txt

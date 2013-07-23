@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 
-$LOAD_PATH.unshift File.dirname(__FILE__)
-require_relative '../lib/cloudstack_client'
-require_relative '../lib/cloudstack_cli'
+require 'cloudstack_client'
+require 'cloudstack_cli'
 
 CloudstackCli::Cli.start(ARGV)

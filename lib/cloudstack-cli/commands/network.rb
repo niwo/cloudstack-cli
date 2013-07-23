@@ -1,13 +1,13 @@
 class Network < Thor
   include CommandLineReporter
 
-  desc "create NAME", "create network"
+  desc "network create NAME", "create network"
   def create(name)
 
 
   end
 
-  desc "list", "list networks"
+  desc "network list", "list networks"
   option :project
   option :physical, type: :boolean
   def list
@@ -67,6 +67,5 @@ class Network < Thor
       end
     end
 
-    
   end
 end

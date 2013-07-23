@@ -756,37 +756,34 @@ module CloudstackClient
     ##
     # Destroy virtual router.
 
-    def destroy_router(id)
+    def destroy_router(id, async = false)
       params = {
         'command' => 'destroyRouter',
         'id' => id
       }
-      json = send_request(params)
-      json['router'].first
+      async ? send_async_request(params) : send_request(params)
     end
 
     ##
     # Start virtual router.
 
-    def start_router(id)
+    def start_router(id, async = false)
       params = {
         'command' => 'startRouter',
         'id' => id
       }
-
-      json = send_async_request(params)
+      async ? send_async_request(params) : send_request(params)
     end
 
     ##
     # Stop virtual router.
 
-    def stop_router(id)
+    def stop_router(id, async = false)
       params = {
         'command' => 'stopRouter',
         'id' => id
       }
-
-      json = send_async_request(params)
+      async ? send_async_request(params) : send_request(params)
     end
 
     ##

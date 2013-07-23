@@ -1,5 +1,3 @@
-$LOAD_PATH.unshift File.dirname(__FILE__)
-
 require 'yaml'
 require 'rainbow'
 require "thor"

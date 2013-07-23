@@ -37,7 +37,7 @@ module CloudstackCli
       @cs.update_offering(args)
     end
     
-    def templates(type = 'featured', project_id)
+    def templates(type = 'featured', project_id = -1)
       @templates ||= @cs.list_templates(type, project_id)
     end
 
@@ -194,13 +194,13 @@ module CloudstackCli
     	end 	
     end
 
-    def interactive
+    def bootstrap_server_interactive
       ARGV.clear 
     	puts
-    	puts %{We are going to deploy a new server and...
-    	 - assign a public IP address
-    	 - create a firewall rule for SSH and HTTP access
-    	 - connect to the server and install the puppet client}.color(:magenta)
+    	puts "We are going to deploy a new server and..."
+    	puts "- assign a public IP address"
+    	puts "- create a firewall rule for SSH and HTTP access"
+    	puts "- connect to the server and install the puppet client}"
     	puts
 
     	print "Please provide a name for the new server".background(:blue)

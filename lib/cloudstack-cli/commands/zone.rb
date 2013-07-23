@@ -1,6 +1,6 @@
 class Zone < Thor
 
-  desc "list", "list zones"
+  desc "zone list", "list zones"
   def list
     cs_cli = CloudstackCli::Helper.new(options[:config])
     zones = cs_cli.zones

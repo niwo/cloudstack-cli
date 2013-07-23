@@ -2,7 +2,7 @@ class Router < Thor
 	include Thor::Actions
 	include CommandLineReporter
 
-	desc "list", "list virtual routers"
+	desc "router list", "list virtual routers"
   option :project
   option :account
   option :zone
@@ -16,7 +16,10 @@ class Router < Thor
 		cs_cli = CloudstackCli::Helper.new(options[:config])
    	if options[:project]
     	project = cs_cli.projects.select { |p| p['name'] == options[:project] }.first
-     	raise "Project '#{options[:project]}' not found" unless project
+     	unless project
+     		say "Error: Project '#{options[:project]}' not found", :red
+     		exit 1
+     	end
      	projectid = project['id']
    	end
 
@@ -82,16 +85,16 @@ class Router < Thor
 	  	when "start"
 	  		exit unless yes?("Start the routers above? [y/N]:", :magenta)
 	  		routers.each do |router|
-	  			print "Start router #{router['name']}"
-	  			cs_cli.start_router router['id']
-	  			puts
+	  			say "Start router #{router['name']}... "
+	  			say "job started ", :green if job = cs_cli.start_router(router['id'])
+	  			say "(jobid: #{job['jobid']})"
 	  		end
 	  	when "stop"
 	  		exit unless yes?("Stop the routers above? [y/N]:", :magenta)
 	  		routers.each do |router|
-	  			print "Stop router #{router['name']}"
-	  			cs_cli.stop_router router['id']
-	  			puts
+	  			say "Stop router #{router['name']}... "
+	  			say "job started ", :green if job = cs_cli.stop_router(router['id'])
+	  			say "(jobid: #{job['jobid']})"
 	  		end
 	  	else
 	  		say "Command #{options[:command]} not supported", :red
@@ -100,24 +103,25 @@ class Router < Thor
 	  end
   end
 
-  desc "stop ID", "stop virtual router"
+  desc "router stop ID", "stop virtual router"
   def stop(id)
   	exit unless yes?("Stop the router with ID #{id}?", :magenta)
   	cs_cli = CloudstackCli::Helper.new(options[:config])
   	cs_cli.stop_router id
   end
 
-  desc "start ID", "start virtual router"
+  desc "router start ID", "start virtual router"
   def start(id)
   	exit unless yes?("Start the router with ID #{id}?", :magenta)
   	cs_cli = CloudstackCli::Helper.new(options[:config])
   	cs_cli.start_router id
   end
 
-  desc "destroy ID", "destroy virtual router"
+  desc "router destroy ID", "destroy virtual router"
   def destroy(id)
+  	exit unless yes?("Destroy the router with ID #{id}?", :magenta)
   	cs_cli = CloudstackCli::Helper.new(options[:config])
-  	puts "OK" if cs_cli.destroy_router(name)
+  	say "OK", :green if cs_cli.destroy_router(id)
   end
 
 end

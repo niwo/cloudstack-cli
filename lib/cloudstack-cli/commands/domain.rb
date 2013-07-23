@@ -1,6 +1,6 @@
 class Domain < Thor
 
-  desc 'list [NAME]', 'list domains'
+  desc 'domain list [NAME]', 'list domains'
   def list(name = nil)
     cs_cli = CloudstackCli::Helper.new(options[:config])
     domains = cs_cli.domains(name)

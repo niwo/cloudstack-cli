@@ -1,5 +1,6 @@
 class Lb < Thor
-  desc "list", "list load balancer rules"
+  
+  desc "lb list", "list load balancer rules"
   option :project
   def list
     cs_cli = CloudstackCli::Helper.new(options[:config])
@@ -18,7 +19,7 @@ class Lb < Thor
     end
   end
 
-  desc "create NAME", "create load balancer rule"
+  desc "lb create NAME", "create load balancer rule"
   option :project
   option :ip, :required => true
   option :public_port, :required => true
@@ -40,7 +41,7 @@ class Lb < Thor
     )
   end
 
-  desc "add NAME", "assign servers to balancer rule"
+  desc "lb add NAME", "assign servers to balancer rule"
   option :project
   option :servers, required: true, type: :array, description: 'server names'
   def add(name)

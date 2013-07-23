@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    cloudstack-cli (0.0.1)
+    cloudstack-cli (0.0.3)
       command_line_reporter (~> 3.2.1)
       net-ssh (~> 2.6.7)
       rainbow (~> 1.1.4)
@@ -14,7 +14,7 @@ GEM
     command_line_reporter (3.2.1)
       colored (>= 1.2)
     json (1.8.0)
-    net-ssh (2.6.7)
+    net-ssh (2.6.8)
     rainbow (1.1.4)
     rake (10.0.4)
     rdoc (4.0.1)

@@ -1,9 +1,21 @@
 module CloudstackCli
+  trap("TERM") { puts "SIGTERM received"; exit }
+
   class Cli < Thor
     include Thor::Actions
 
-    class_option :config, default: File.join(Dir.home, '.cloudstack-cli.yml'), aliases: '-c'
-    class_option :verbose, type: :boolean
+    package_name "cloudstack-cli" 
+    map %w(-v --version) => :version 
+
+    class_option :config,
+      default: File.join(Dir.home, '.cloudstack-cli.yml'),
+      aliases: '-c',
+      desc: 'localition of your cloudstack-cli configuration file'
+
+    desc "version", "outputs the cloudstack-cli version"
+    def version
+      say "cloudstack-cli v#{CloudstackCli::VERSION}"
+    end
 
     desc "setup", "initial setup of the Cloudstack connection"
     option :url
