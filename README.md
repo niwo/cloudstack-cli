@@ -24,6 +24,8 @@ Example content of the configuration file:
 
 ## Usage
 
+Please see http://rubydoc.info/gems/cloudstack-cli/0.0.3/frames
+
 See the help screen:
 
     $ cs
@@ -74,6 +76,4 @@ Hint: You can watch the status of the command with watch.
 
 ## License
 
-Released under the MIT License.  See the [LICENSE][] file for further details.
-
-[license]: LICENSE.txt
+Released under the MIT License. See the [LICENSE](https://bitbucket.org/swisstxt/cloudstack-cli/raw/master/LICENSE.txt) file for further details.
