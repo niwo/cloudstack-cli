@@ -2,7 +2,7 @@ class Router < Thor
 	include Thor::Actions
 	include CommandLineReporter
 
-	desc "router list", "list virtual routers"
+	desc "list", "list virtual routers"
   option :project
   option :account
   option :zone
@@ -103,21 +103,21 @@ class Router < Thor
 	  end
   end
 
-  desc "router stop ID", "stop virtual router"
+  desc "stop ID", "stop virtual router"
   def stop(id)
   	exit unless yes?("Stop the router with ID #{id}?", :magenta)
   	cs_cli = CloudstackCli::Helper.new(options[:config])
   	cs_cli.stop_router id
   end
 
-  desc "router start ID", "start virtual router"
+  desc "start ID", "start virtual router"
   def start(id)
   	exit unless yes?("Start the router with ID #{id}?", :magenta)
   	cs_cli = CloudstackCli::Helper.new(options[:config])
   	cs_cli.start_router id
   end
 
-  desc "router destroy ID", "destroy virtual router"
+  desc "destroy ID", "destroy virtual router"
   def destroy(id)
   	exit unless yes?("Destroy the router with ID #{id}?", :magenta)
   	cs_cli = CloudstackCli::Helper.new(options[:config])

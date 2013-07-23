@@ -1,7 +1,6 @@
 module CloudstackCli
-  trap("TERM") { puts "SIGTERM received"; exit }
-
-  class Cli < Thor
+  
+  class Cli < CloudstackCli::Base
     include Thor::Actions
 
     package_name "cloudstack-cli" 
@@ -55,46 +54,49 @@ module CloudstackCli
       puts JSON.pretty_generate(client.cs.send_request params)
     end
     
-    desc "zone SUBCOMMAND ...ARGS", "manage zones"
+    desc "zone SUBCOMMAND ...ARGS", "Manage zones"
     subcommand "zone", Zone
 
-    desc "project SUBCOMMAND ...ARGS", "manage servers"
+    desc "project SUBCOMMAND ...ARGS", "Manage servers"
     subcommand "project", Project
 
-    desc "server SUBCOMMAND ...ARGS", "manage servers"
+    desc "server SUBCOMMAND ...ARGS", "Manage servers"
     subcommand "server", Server
 
-    desc "offering SUBCOMMAND ...ARGS", "manage offerings"
+    desc "offering SUBCOMMAND ...ARGS", "Manage offerings"
     subcommand "offering", Offering
 
-    desc "network SUBCOMMAND ...ARGS", "manage networks"
+    desc "network SUBCOMMAND ...ARGS", "Manage networks"
     subcommand "network", Network
 
-    desc "lb SUBCOMMAND ...ARGS", "manage load balancing rules"
+    desc "lb SUBCOMMAND ...ARGS", "Manage load balancing rules"
     subcommand "lb", Lb
 
-    desc "template SUBCOMMAND ...ARGS", "manage template"
+    desc "template SUBCOMMAND ...ARGS", "Manage template"
     subcommand "template", Template
 
-    desc "router SUBCOMMAND ...ARGS", "manage virtual routers"
+    desc "router SUBCOMMAND ...ARGS", "Manage virtual routers"
     subcommand "router", Router
 
-    desc "router SUBCOMMAND ...ARGS", "manage virtual routers"
+    desc "router SUBCOMMAND ...ARGS", "Manage virtual routers"
     subcommand "router", Router
 
-    desc "volume SUBCOMMAND ...ARGS", "manage volumes"
+    desc "volume SUBCOMMAND ...ARGS", "Manage volumes"
     subcommand "volume", Volume
 
-    desc "stack SUBCOMMAND ...ARGS", "manage stacks"
+    desc "stack SUBCOMMAND ...ARGS", "Manage stacks"
     subcommand "stack", Stack
 
-    desc "account SUBCOMMAND ...ARGS", "manage accounts"
+    desc "account SUBCOMMAND ...ARGS", "Manage accounts"
     subcommand "account", Account
 
-    desc "domain SUBCOMMAND ...ARGS", "manage domains"
+    desc "domain SUBCOMMAND ...ARGS", "Manage domains"
     subcommand "domain", Domain
 
-    desc "publicip SUBCOMMAND ...ARGS", "manage public ip addresses"
+    desc "publicip SUBCOMMAND ...ARGS", "Manage public ip addresses"
     subcommand "publicip", Publicip
+
+    desc "capacity SUBCOMMAND ...ARGS", "Lists all the system wide capacities"
+    subcommand "capacity", Capacity
   end
 end

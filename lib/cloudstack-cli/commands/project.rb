@@ -1,6 +1,6 @@
 class Project < Thor
 
-  desc "project list", "list projects"
+  desc "list", "list projects"
   def list
     cs_cli = CloudstackCli::Helper.new(options[:config])
     projects = cs_cli.projects

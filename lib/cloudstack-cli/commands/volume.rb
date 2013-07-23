@@ -1,5 +1,5 @@
 class Volume < Thor
-  desc "volume list", "list networks"
+  desc "list", "list networks"
   option :project
   def list
     cs_cli = CloudstackCli::Helper.new(options[:config])

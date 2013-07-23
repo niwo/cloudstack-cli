@@ -1,4 +1,20 @@
 module CloudstackCli
+
+
+  class Base < Thor
+
+    no_commands do 
+      def cloudstack_client(config_file = options[:config])
+        @config ||= CloudstackClient::ConnectionHelper.load_configuration(config_file)
+        @client ||= CloudstackClient::Connection.new(
+          @config[:url],
+          @config[:api_key],
+          @config[:secret_key]
+        )
+      end
+    end
+  end
+
   class Helper
     include CommandLineReporter
 

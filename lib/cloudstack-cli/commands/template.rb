@@ -1,6 +1,6 @@
 class Template < Thor
 
-  desc 'template list', 'list templates by type [featured|self|self-executable|executable|community]' 
+  desc 'list', 'list templates by type [featured|self|self-executable|executable|community]' 
   option :project
   def list(type='featured')
     cs_cli = CloudstackCli::Helper.new(options[:config])

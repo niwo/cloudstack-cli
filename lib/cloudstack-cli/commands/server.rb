@@ -1,6 +1,6 @@
 class Server < Thor
 
-  desc "server list", "list servers"
+  desc "list", "list servers"
   option :listall, :type => :boolean
   option :text, :type => :boolean
   option :project
@@ -27,7 +27,7 @@ class Server < Thor
     end
   end
 
-  desc "server create NAME", "create a server"
+  desc "create NAME", "create a server"
   option :zone, :required => true
   option :template, :required => true
   option :offering, :required => true
@@ -47,22 +47,22 @@ class Server < Thor
       )
   end
 
-  desc "server bootstrap", "interactive creation of a server with network access"
+  desc "bootstrap", "interactive creation of a server with network access"
   def bootstrap
     CloudstackCli::Helper.new(options[:config]).bootstrap_server_interactive()
   end
 
-  desc "server stop NAME", "stop a server"
+  desc "stop NAME", "stop a server"
   def stop(name)
     CloudstackCli::Helper.new(options[:config]).stop_server(name)
   end
 
-  desc "server start NAME", "start a server"
+  desc "start NAME", "start a server"
   def start(name)
     CloudstackCli::Helper.new(options[:config]).start_server(name)
   end
 
-  desc "server reboot NAME", "reboot a server"
+  desc "reboot NAME", "reboot a server"
   def restart(name)
     CloudstackCli::Helper.new(options[:config]).reboot_server(name)
   end

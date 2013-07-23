@@ -817,6 +817,18 @@ module CloudstackClient
     end
 
     ##
+    # List capacity.
+
+    def list_capacity(args = {})
+      params = {
+        'command' => 'listCapacity',
+      }
+
+      json = send_request(params)
+      json['capacity'] || []
+    end
+
+    ##
     # Sends a synchronous request to the CloudStack API and returns the response as a Hash.
     #
     # The wrapper element of the response (e.g. mycommandresponse) is discarded and the
