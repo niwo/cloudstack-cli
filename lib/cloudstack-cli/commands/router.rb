@@ -11,6 +11,7 @@ class Router < Thor
   option :listall, type: :boolean
   option :text, type: :boolean, desc: "text output (only the instance name)"
   option :command, desc: "command to execute for each router: START or STOP"
+  option :reverse, type: :boolean, default: false, desc: "reverse listing of routers"
   def list
 		cs_cli = CloudstackCli::Helper.new(options[:config])
    	if options[:project]
@@ -45,6 +46,7 @@ class Router < Thor
 		  end
 		end
 
+		routers.reverse! if options[:reverse]
 		if options[:text]
 			puts routers.map {|r| r['name']}.join(" ")
 		else
@@ -80,14 +82,16 @@ class Router < Thor
 	  	when "start"
 	  		exit unless yes?("Start the routers above? [y/N]:", :magenta)
 	  		routers.each do |router|
-	  			say "Start router #{router['name']}"
+	  			print "Start router #{router['name']}"
 	  			cs_cli.start_router router['id']
+	  			puts
 	  		end
 	  	when "stop"
 	  		exit unless yes?("Stop the routers above? [y/N]:", :magenta)
 	  		routers.each do |router|
-	  			say "Stop router #{router['name']}"
+	  			print "Stop router #{router['name']}"
 	  			cs_cli.stop_router router['id']
+	  			puts
 	  		end
 	  	else
 	  		say "Command #{options[:command]} not supported", :red

@@ -740,7 +740,12 @@ module CloudstackClient
       params['state'] = args[:status] if args[:status]
       params['name'] = args[:name] if args[:name]
       if args[:account]
-        params['domainid'] = list_accounts({name: args[:account]}).first["domainid"]
+        account = list_accounts({name: args[:account]}).first
+        unless account
+          puts "Error: Account #{args[:account]} not found."
+          exit 1
+        end
+        params['domainid'] = account["domainid"]
         params['account'] = args[:account]
       end
 
@@ -756,7 +761,6 @@ module CloudstackClient
         'command' => 'destroyRouter',
         'id' => id
       }
-
       json = send_request(params)
       json['router'].first
     end
