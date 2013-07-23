@@ -12,7 +12,7 @@ Install the cloudstack-cli gem:
 
 Create the initial configuration:
 
-	cs setup
+	$ cs setup
 
 cloudstack-cli expects to find a configuartion file with the API URL and your CloudStack credentials in your home directory named .cloudstack-cli.yml. If the file is located elsewhere you can specify the loaction using the --config option.
 
@@ -40,24 +40,24 @@ Bootsrap a server:
 
 Run a custom API command:
 
-    cs command listAlerts type=8
+    $ cs command listAlerts type=8
 
 ### Example 3
 
 Sort all computing offerings by CPU and Memory grouped my Domain:
 
-    cs offering sort
+    $ cs offering sort
 
 ### Example 4
 
 Stop all virtual routers of project Demo (you could filter by Zone too):
 (This command is helpful if you have to deploy new versions of Cloudstack when using redumdant routers)
 
-    cs router list --project Demo --status running --redundant-state BACKUP --command stop
+    $ cs router list --project Demo --status running --redundant-state BACKUP --command stop
 
 Hint: You can watch the status of the command with watch.
 
-    watch -n cs router list --project Demo
+    $ watch -n cs router list --project Demo
 
 
 ## References
