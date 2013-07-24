@@ -127,12 +127,8 @@ module CloudstackClient
     def list_servers(options = {})
       params = {
         'command' => 'listVirtualMachines',
+        'listAll' => true
       }
-      if options[:listall]
-        params['listAll'] = true
-        params['projectId'] = -1
-        options[:account] = nil
-      end
       params['projectid'] = options[:project_id] if options[:project_id]
       if options[:account]
         params['domainid'] = list_accounts({name: options[:account]}).first["domainid"]

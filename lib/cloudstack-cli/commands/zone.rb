@@ -1,16 +1,17 @@
-class Zone < Thor
+class Zone < CloudstackCli::Base
 
   desc "list", "list zones"
   def list
-    cs_cli = CloudstackCli::Helper.new(options[:config])
-    zones = cs_cli.zones
+    zones = client.list_zones
     if zones.size < 1
       puts "No projects found"
     else
+      table = [["Name", "Description"]]
       zones.each do |zone|
-        puts "#{zone['name']} - #{zone['description']}"
+        table << [zone['name'] ,zone['description']]
       end
     end
+    print_table(table)
   end
 
 end

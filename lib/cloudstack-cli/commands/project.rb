@@ -1,15 +1,17 @@
-class Project < Thor
+class Project < CloudstackCli::Base
 
   desc "list", "list projects"
   def list
-    cs_cli = CloudstackCli::Helper.new(options[:config])
-    projects = cs_cli.projects
+    projects = client.list_projects
     if projects.size < 1
       puts "No projects found"
     else
+      table = [["Name", "Displaytext", "Domain"]]
       projects.each do |project|
-        puts "#{project['name']} - #{project['displaytext']} - #{project['domain']}"
+        table << [project['name'], project['displaytext'], project['domain']]
       end
+      print_table(table)
     end
   end
+  
 end

@@ -1,20 +1,23 @@
-class Volume < Thor
+class Volume < CloudstackCli::Base
+
   desc "list", "list networks"
   option :project
   def list
-    cs_cli = CloudstackCli::Helper.new(options[:config])
     if options[:project]
-      project = cs_cli.projects.select { |p| p['name'] == options[:project] }.first
+      project = client.list_projects.select { |p| p['name'] == options[:project] }.first
       raise "Project '#{options[:project]}' not found" unless project
     end
     
-    networks = cs_cli.networks(project ? project['id'] : nil)
+    networks = client.list_networks(project ? project['id'] : nil)
     if networks.size < 1
       puts "No networks found"
     else
+      table = [["Name", "Displaytext", "Default?"]]
       networks.each do |network|
-        puts "#{network['name']} - #{network['displaytext']} #{' - Default' if network['isdefault']}"
+        table << [network['name'], network['displaytext'], network['isdefault']]
       end
+      print_table(table)
     end
   end
+
 end

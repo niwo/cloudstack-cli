@@ -2,10 +2,12 @@ module CloudstackCli
 
 
   class Base < Thor
+    include Thor::Actions
+    attr_reader :config
 
     no_commands do 
-      def cloudstack_client(config_file = options[:config])
-        @config ||= CloudstackClient::ConnectionHelper.load_configuration(config_file)
+      def client
+        @config ||= CloudstackClient::ConnectionHelper.load_configuration(options[:config])
         @client ||= CloudstackClient::Connection.new(
           @config[:url],
           @config[:api_key],
@@ -29,8 +31,14 @@ module CloudstackCli
 	    )
     end
 
-    def remove_publicip(id)
-      @cs.disassociate_ip_address(id)
+    def options
+       @options ||= CloudstackClient::ConnectionHelper.load_configuration(@config_file)
+    end
+
+    def print_options(options, attr = 'name')
+      options.to_enum.with_index(1).each do |option, i|
+         puts "#{i}: #{option[attr]}"
+      end   
     end
 
     def domains(name = nil)
@@ -39,18 +47,6 @@ module CloudstackCli
 
     def server_offerings(domain = nil)
       @server_offerings ||= @cs.list_service_offerings(domain)
-    end
-
-    def create_offering(params)
-      @cs.create_offering(params)
-    end
-
-    def delete_offering(id)
-      @cs.delete_offering(id)
-    end
-
-    def update_offering(args)
-      @cs.update_offering(args)
     end
     
     def templates(type = 'featured', project_id = -1)
@@ -69,9 +65,6 @@ module CloudstackCli
       @cs.list_networks(project_id)
     end
 
-    def physical_networks
-      @cs.list_physical_networks
-    end
 
     def volumes(project_id = nil)
       @cs.list_volumes(project_id)
@@ -79,31 +72,6 @@ module CloudstackCli
     
     def virtual_machines(options = {})
       @cs.list_servers(options)
-    end
-    
-    def virtual_machines_table(vms)
-      table(border: true) do
-        row do
-          column 'Name', width: 20
-          column 'State'
-          column 'Offering', align: 'right'
-          column 'Template', align: 'right', width: 30
-          column 'IP\'s', width: 14
-          column 'Project'
-          column 'Account'
-        end
-        vms.each do |vm|
-          row do
-            column vm['name']
-            column vm['state']
-            column vm['serviceofferingname']
-            column vm['templatename']
-            column vm['nic'].map { |nic| nic['ipaddress']}.join(" ")
-            column vm['project']
-            column vm['account']
-          end
-        end
-      end
     end
 
     def bootstrap_server(name, zone, template, offering, networks, pf_rules = [], project = nil)
@@ -144,18 +112,6 @@ module CloudstackCli
   		puts "Complete!".color(:green)
     end
 
-    def stop_server(name)
-      @cs.stop_server(name)
-    end
-
-    def start_server(name)
-      @cs.start_server(name)
-    end
-
-    def reboot_server(name)
-      @cs.reboot_server(name)
-    end
-
     def list_accounts(name = nil)
       @cs.list_accounts({ name: name })
     end 
@@ -180,34 +136,8 @@ module CloudstackCli
       end
     end
 
-    def list_routers(args, redundant_state = nil)
-      routers = @cs.list_routers(args)
-      if redundant_state
-       return  routers.select {|r| r['redundantstate'].downcase == redundant_state.downcase }
-      end
-      routers
-    end
-
-    def destroy_router(id)
-      @cs.destroy_router(id)
-    end
-
-    def start_router(id)
-      @cs.start_router(id)
-    end
-
-    def stop_router(id)
-      @cs.stop_router(id)
-    end
-
-    def options
-    	 @options ||= CloudstackClient::ConnectionHelper.load_configuration(@config_file)
-    end
-
-    def print_options(options, attr = 'name')
-    	options.to_enum.with_index(1).each do |option, i|
-    	   puts "#{i}: #{option[attr]}"
-    	end 	
+    def filter_by(objects, tag_name, tag)
+      objects.select {|r| r[tag_name].downcase == tag }
     end
 
     def bootstrap_server_interactive

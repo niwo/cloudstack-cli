@@ -1,29 +1,37 @@
-class Server < Thor
+class Server < CloudstackCli::Base
 
   desc "list", "list servers"
-  option :listall, :type => :boolean
-  option :text, :type => :boolean
   option :project
   option :account
   def list
-    cs_cli = CloudstackCli::Helper.new(options[:config])
     if options[:project]
-      project = cs_cli.projects.select { |p| p['name'] == options[:project] }.first
-      exit_now! "Project '#{options[:project]}' not found" unless project
-      options[:project_id] = project['id']
-      options[:account] = nil
+      if options[:project].downcase == "all"
+        options[:project_id] = -1
+      else
+        project = client.list_projects.select { |p| p['name'] == options[:project] }.first
+        unless project
+          say "Project '#{options[:project]}' not found", :red
+          exit 1
+        end
+        options[:project_id] = project['id']
+      end
     end
-    servers = cs_cli.virtual_machines(options)
+    servers = client.list_servers(options)
     if servers.size < 1
       puts "No servers found"
     else
-      if options[:text]
-        servers.each do |server|
-          puts "#{server['name']} - #{server['state']} - #{server['domain']}"
-        end
-      else
-        cs_cli.virtual_machines_table(servers)
+      table = [["Name", "State", "Offering", "Zone", options[:project] ? "Project" : "Account", "IP's"]]
+      servers.each do |server|
+        table << [
+          server['name'],
+          server['state'],
+          server['serviceofferingname'],
+          server['zonename'],
+          options[:project] ? server['project'] : server['account'],
+          server['nic'].map { |nic| nic['ipaddress']}.join(' ')
+        ]
       end
+      print_table table
     end
   end
 
@@ -54,17 +62,20 @@ class Server < Thor
 
   desc "stop NAME", "stop a server"
   def stop(name)
-    CloudstackCli::Helper.new(options[:config]).stop_server(name)
+    client.stop_server(name)
+    puts
   end
 
   desc "start NAME", "start a server"
   def start(name)
-    CloudstackCli::Helper.new(options[:config]).start_server(name)
+    client.start_server(name)
+    puts
   end
 
   desc "reboot NAME", "reboot a server"
   def restart(name)
-    CloudstackCli::Helper.new(options[:config]).reboot_server(name)
+    client.reboot_server(name)
+    puts
   end
 
 end
