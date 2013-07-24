@@ -1,5 +1,4 @@
 module CloudstackCli
-  
   class Cli < CloudstackCli::Base
     include Thor::Actions
 

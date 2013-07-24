@@ -25,5 +25,4 @@ Gem::Specification.new do |gem|
   gem.add_dependency('thor', '~> 0.18.1')
   gem.add_dependency('net-ssh', '~> 2.6.7')
   gem.add_dependency('rainbow', '~> 1.1.4')
-  gem.add_dependency('command_line_reporter', '~> 3.2.1')
 end
