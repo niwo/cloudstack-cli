@@ -1,6 +1,6 @@
 # Cloudstack CLI
 
-Cloudstack CLI gives command line access to the CloudStack API commands.
+Cloudstack CLI is a [CloudStack](http://cloudstack.apache.org/) API client written in Ruby.
 
 ## Installation
 
