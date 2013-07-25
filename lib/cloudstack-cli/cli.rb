@@ -22,8 +22,8 @@ module CloudstackCli
     def setup(file = options[:config])
       config = {}
       unless options[:url]
-        say "What's the URL of your Cloudstack API?", :blue
-        say "Example: https://my-cloudstack-server/client/api/", :blue
+        say "What's the URL of your Cloudstack API?", :yellow
+        say "Example: https://my-cloudstack-server/client/api/", :yellow
         config[:url] = ask("URL:", :magenta)
       end
 

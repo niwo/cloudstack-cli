@@ -1,15 +1,22 @@
-class Account < Thor
+class Account < CloudstackCli::Base
+
+  TYPES = {
+    0 => 'user',
+    1 => 'domain-admin',
+    2 => 'admin'
+  }
 
   desc 'list [NAME]', 'list accounts'
   def list(name = nil)
-    cs_cli = CloudstackCli::Helper.new(options[:config])
-    accounts = cs_cli.list_accounts(name)
+    accounts = client.list_accounts({name: name})
     if accounts.size < 1
       puts "No accounts found"
     else
+      table = [["Name", "Type", "Domain"]]
       accounts.each do |account|
-        puts "#{account['name']} - #{account['domain']}"
+        table << [account['name'], TYPES[account['accounttype']], account['domain']]
       end
+      print_table table
     end
   end
   

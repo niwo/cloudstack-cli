@@ -8,11 +8,7 @@ class Server < CloudstackCli::Base
       if options[:project].downcase == "all"
         options[:project_id] = -1
       else
-        project = client.list_projects.select { |p| p['name'] == options[:project] }.first
-        unless project
-          say "Project '#{options[:project]}' not found", :red
-          exit 1
-        end
+        project = find_project
         options[:project_id] = project['id']
       end
     end
@@ -45,14 +41,14 @@ class Server < CloudstackCli::Base
   option :interactive, :type => :boolean
   def create(name)
     CloudstackCli::Helper.new(options[:config]).bootstrap_server(
-        name,
-        options[:zone],
-        options[:template],
-        options[:offering],
-        options[:networks],
-        options[:port_forwarding],
-        options[:project]
-      )
+      name,
+      options[:zone],
+      options[:template],
+      options[:offering],
+      options[:networks],
+      options[:port_forwarding],
+      options[:project]
+    )
   end
 
   desc "bootstrap", "interactive creation of a server with network access"

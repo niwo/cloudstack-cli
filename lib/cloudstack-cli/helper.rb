@@ -116,10 +116,6 @@ module CloudstackCli
       end
     end
 
-    def filter_by(objects, tag_name, tag)
-      objects.select {|r| r[tag_name].downcase == tag }
-    end
-
     def bootstrap_server_interactive
       ARGV.clear 
     	puts

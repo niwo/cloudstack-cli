@@ -1,4 +1,4 @@
-# CloudstackClient by Nik Wolfgramm (<nik.wolfgramm@swisstxt.ch>) based on 
+# cloudstack-client by Nik Wolfgramm (<nik.wolfgramm@gmail.com.ch>) based on 
 # knife-cloudstack by Ryan Holmes (<rholmes@edmunds.com>), KC Braunschweig (<kcbraunschweig@gmail.com>)
 # 
 # License:: Apache License, Version 2.0
@@ -16,7 +16,6 @@
 # limitations under the License.
 #
 
-require 'rubygems'
 require 'base64'
 require 'openssl'
 require 'uri'
@@ -664,14 +663,14 @@ module CloudstackClient
     ##
     # List loadbalancer rules
 
-    def list_load_balancer_rules(name = nil, project_name = nil)    
+    def list_load_balancer_rules(options = {})    
       params = {
         'command' => 'listLoadBalancerRules',
       }
-      params['name'] = name if name
+      params['name'] = options[:name] if options[:name]
 
-      if project_name
-        project = get_project(project_name)
+      if options[:project_name]
+        project = get_project(options[:project_name])
         params['projectid'] = project['id']
       end
 

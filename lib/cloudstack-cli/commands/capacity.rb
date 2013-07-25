@@ -19,10 +19,16 @@ class Capacity < CloudstackCli::Base
   	table = []
     header = ["Zone", "Type", "Capacity Used", "Capacity Total", "Used"]
     capacities.each do |c|
-    	 table << ["#{c['zonename']}", "#{TYPES[c['type']]}", "#{c['capacityused']}", "#{c['capacitytotal']}", "#{c['percentused']}%"]
+    	table << [
+    		c['zonename'],
+    	 	TYPES[c['type']],
+    	 	c['capacityused'],
+    	 	c['capacitytotal'],
+    	 	"#{c['percentused']}%"
+    	]
     end
     table = table.sort {|a, b|  [a[0], a[1]] <=> [b[0], b[1]]}.insert(0, header)
-    print_table(table)
+    print_table table
   end
 
 end

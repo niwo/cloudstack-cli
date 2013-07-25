@@ -9,14 +9,7 @@ class Network < CloudstackCli::Base
   option :project
   option :physical, type: :boolean
   def list
-    if options[:project]
-      project = client.list_projects.select { |p| p['name'] == options[:project] }.first
-      unless project
-        say "Project '#{options[:project]}' not found", :red
-        exit 1
-      end
-    end
-    
+    project = find_project if options[:project]
     if options[:physical]
       networks = client.list_physical_networks
       if networks.size < 1

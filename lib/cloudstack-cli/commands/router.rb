@@ -11,16 +11,7 @@ class Router < CloudstackCli::Base
   option :command, desc: "command to execute for each router: START or STOP"
   option :reverse, type: :boolean, default: false, desc: "reverse listing of routers"
   def list
-		cs_cli = CloudstackCli::Helper.new(options[:config])
-   	if options[:project]
-    	project = client.list_projects.select { |p| p['name'] == options[:project] }.first
-     	unless project
-     		say "Error: Project '#{options[:project]}' not found", :red
-     		exit 1
-     	end
-     	projectid = project['id']
-   	end
-
+   	projectid = find_project['id'] if options[:project]
 		routers = client.list_routers(
 			{
 				account: options[:account], 
@@ -29,6 +20,7 @@ class Router < CloudstackCli::Base
 				zone: options[:zone]
 			}
 		)
+
 		if options[:listall]
 			projects = client.list_projects
 			projects.each do |project|
@@ -44,7 +36,7 @@ class Router < CloudstackCli::Base
 		end
 
 		if options[:redundant_state]
-			routers = cs_cli.filter_by(routers, 'redundantstate', options[:redundant_state].downcase)
+			routers = filter_by(routers, 'redundantstate', options[:redundant_state].downcase)
 		end
 
 		routers.reverse! if options[:reverse]
