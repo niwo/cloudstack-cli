@@ -1,0 +1,29 @@
+{
+  "name": "hadoop_cluster_a",
+  "description": "A small hadoop cluster with hbase",
+  "version": "1.0",
+  "servers": [
+    {
+      "name": "zookeeper-a, zookeeper-b, zookeeper-c",
+      "description": "Zookeeper nodes",
+      "template": "rhel-5.6-base",
+      "service": "small",
+      "port_rules": "2181",
+    },
+    {
+      "name": "hadoop-master",
+      "description": "Hadoop master node",
+      "template": "rhel-5.6-base",
+      "service": "large",
+      "networks": "app-net, storage-net",
+      "port_rules": "50070, 50030, 60010",
+    },
+    {
+      "name": "hadoop-worker-a hadoop-worker-b hadoop-worker-c",
+      "description": "Hadoop worker nodes",
+      "template": "rhel-5.6-base",
+      "service": "medium",
+      "port_rules": "50075, 50060, 60030",
+    }
+  ]
+}

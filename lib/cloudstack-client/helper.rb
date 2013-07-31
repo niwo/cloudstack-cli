@@ -4,8 +4,8 @@ module CloudstackClient
       begin
         return YAML::load(IO.read(config_file))
       rescue Exception => e
-        $stderr.puts "Can't find the config file '#{config_file}'"
-        $stderr.puts "Please see https://bitbucket.org/swisstxt/cloudstack-cli under 'Setup'"
+        $stderr.puts "Can't find the config file #{config_file}."
+        $stderr.puts "To create a new configuration file run \"cs setup\"."
         exit
       end
     end

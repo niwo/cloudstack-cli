@@ -5,8 +5,7 @@ module CloudstackCli
 
     # catch control-c and exit
     trap("SIGINT") {
-      puts
-      puts "bye"
+      puts " bye"
       exit!
     }
 

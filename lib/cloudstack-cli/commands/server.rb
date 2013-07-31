@@ -32,13 +32,13 @@ class Server < CloudstackCli::Base
   end
 
   desc "create NAME", "create a server"
-  option :zone, :required => true
-  option :template, :required => true
-  option :offering, :required => true
-  option :networks, :type => :array, :required => true
+  option :zone, required: true
+  option :template, required: true
+  option :offering, required: true
+  option :networks, type: :array, required: true
   option :project
-  option :port_forwarding, :type => :array, :aliases => :pf, :default => [], :description => "public_ip:port"
-  option :interactive, :type => :boolean
+  option :port_forwarding, type: :array, aliases: :pf, default: [], description: "public_ip:port"
+  option :interactive, type: :boolean
   def create(name)
     CloudstackCli::Helper.new(options[:config]).bootstrap_server(
       name,
@@ -49,6 +49,25 @@ class Server < CloudstackCli::Base
       options[:port_forwarding],
       options[:project]
     )
+  end
+
+  desc "destroy NAME", "destroy a server"
+  option :force, description: "destroy without asking", type: :boolean, aliases: '-f'
+  def destroy(name)
+    server = client.get_server(name)
+    unless server
+      error "Server not found."
+      exit
+    end
+    ask = "Are you sure you want to destroy the following server?\n"
+    ask += "#{server['name']} (#{server['state']})?"
+
+    unless options[:force] == true || yes?(ask)
+      exit  
+    end
+
+    client.destroy_server(server["id"])
+    puts
   end
 
   desc "bootstrap", "interactive creation of a server with network access"

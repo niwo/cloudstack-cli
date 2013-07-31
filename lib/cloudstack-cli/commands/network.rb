@@ -7,43 +7,33 @@ class Network < CloudstackCli::Base
 
   desc "list", "list networks"
   option :project
-  option :physical, type: :boolean
+  option :account, default: ""
   def list
     project = find_project if options[:project]
-    if options[:physical]
-      networks = client.list_physical_networks
-      if networks.size < 1
-        puts "No networks found"
-      else
-        table = [['Name', 'State', 'ID', 'Zone ID']]
-        networks.each do |network|
-          table << [
-            network["name"],
-            network["state"],
-            network["id"],
-            network["zoneid"] 
-          ]
-        end
-        print_table table
-      end
+
+    networks = []
+    if project
+      networks = client.list_networks(project['id'])
     else
-      networks = client.list_networks(project ? project['id'] : -1)
-      if networks.size < 1
-        puts "No networks found"
-      else
-        table = [["Name", "Displaytext", "Account", "Project", "State", "ID"]]
-        networks.each do |network|
-          table << [
-            network["name"],
-            network["displaytext"],
-            network["account"],
-            network["project"],
-            network["state"],
-            network["id"]
-          ]
-        end
-        print_table table
+      networks = client.list_networks(-1, options[:account] != '' ? options[:account] : nil )
+      networks + client.list_networks(nil, options[:account] != '' ? options[:account] : nil )
+    end
+
+    if networks.size < 1
+      puts "No networks found"
+    else
+      table = [["Name", "Displaytext", "Account", "Project", "State", "ID"]]
+      networks.each do |network|
+        table << [
+          network["name"],
+          network["displaytext"],
+          network["account"],
+          network["project"],
+          network["state"],
+          network["id"]
+        ]
       end
+      print_table table
     end
   end
 

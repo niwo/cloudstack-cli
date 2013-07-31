@@ -68,6 +68,9 @@ module CloudstackCli
     desc "network SUBCOMMAND ...ARGS", "Manage networks"
     subcommand "network", Network
 
+    desc "physicalnetwork SUBCOMMAND ...ARGS", "Manage physical networks"
+    subcommand "physicalnetwork", PhysicalNetwork
+
     desc "lb SUBCOMMAND ...ARGS", "Manage load balancing rules"
     subcommand "lb", Lb
 

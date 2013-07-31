@@ -273,6 +273,20 @@ module CloudstackClient
     end
 
     ##
+    # Destroy the server with the specified name.
+    #
+
+    def destroy_server(id)
+      params = {
+          'command' => 'destroyVirtualMachine',
+          'id' => id
+      }
+
+      json = send_async_request(params)
+      json['virtualmachine']
+    end
+
+    ##
     # Finds the service offering with the specified name.
 
     def get_service_offering(name)
@@ -468,12 +482,21 @@ module CloudstackClient
     ##
     # Lists all available networks.
 
-    def list_networks(project_id = nil)
+    def list_networks(project_id = nil, account = nil)
       params = {
-          'command' => 'listNetworks',
-          'listall' => true,
+        'command' => 'listNetworks',
+        'listall' => true,
       }
       params['projectid'] = project_id if project_id
+      if account
+        domain = list_accounts({name: account})
+        if domain.size > 0
+          params['account'] = account
+          params['domainid'] = domain.first["domainid"]
+        else
+          puts "Account #{account} not found."
+        end
+      end
       json = send_request(params)
       json['network'] || []
     end
