@@ -92,8 +92,8 @@ module CloudstackCli
     desc "domain SUBCOMMAND ...ARGS", "Manage domains"
     subcommand "domain", Domain
 
-    desc "publicip SUBCOMMAND ...ARGS", "Manage public ip addresses"
-    subcommand "publicip", Publicip
+    desc "public_ip SUBCOMMAND ...ARGS", "Manage public ip addresses"
+    subcommand "public_ip", PublicIp
 
     desc "capacity SUBCOMMAND ...ARGS", "Lists all the system wide capacities"
     subcommand "capacity", Capacity
