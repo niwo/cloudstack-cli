@@ -68,17 +68,14 @@ module CloudstackCli
     desc "network SUBCOMMAND ...ARGS", "Manage networks"
     subcommand "network", Network
 
-    desc "physicalnetwork SUBCOMMAND ...ARGS", "Manage physical networks"
-    subcommand "physicalnetwork", PhysicalNetwork
+    desc "physical_network SUBCOMMAND ...ARGS", "Manage physical networks"
+    subcommand "physical_network", PhysicalNetwork
 
-    desc "lb SUBCOMMAND ...ARGS", "Manage load balancing rules"
-    subcommand "lb", Lb
+    desc "load_balancer SUBCOMMAND ...ARGS", "Manage load balancing rules"
+    subcommand "load_balancer", LoadBalancer
 
     desc "template SUBCOMMAND ...ARGS", "Manage template"
     subcommand "template", Template
-
-    desc "router SUBCOMMAND ...ARGS", "Manage virtual routers"
-    subcommand "router", Router
 
     desc "router SUBCOMMAND ...ARGS", "Manage virtual routers"
     subcommand "router", Router
@@ -100,5 +97,8 @@ module CloudstackCli
 
     desc "capacity SUBCOMMAND ...ARGS", "Lists all the system wide capacities"
     subcommand "capacity", Capacity
+
+    desc "port_rules SUBCOMMAND ...ARGS", "Manage portforwarding rules"
+    subcommand "port_rule", PortRule
   end
 end

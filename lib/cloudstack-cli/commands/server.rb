@@ -14,7 +14,7 @@ class Server < CloudstackCli::Base
     end
     servers = client.list_servers(options)
     if servers.size < 1
-      puts "No servers found"
+      puts "No servers found."
     else
       table = [["Name", "State", "Offering", "Zone", options[:project] ? "Project" : "Account", "IP's"]]
       servers.each do |server|
@@ -37,9 +37,9 @@ class Server < CloudstackCli::Base
   option :offering, required: true
   option :networks, type: :array, required: true
   option :project
-  option :port_rules, type: :array, aliases: :pf,
+  option :port_rules, type: :array,
     default: [],
-    description: "Port Forwarding Rules [public_ip]:port ..."
+    desc: "Port Forwarding Rules [public_ip]:port ..."
   option :interactive, type: :boolean
   def create(name)
     CloudstackCli::Helper.new(options[:config]).bootstrap_server(

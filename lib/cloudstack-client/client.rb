@@ -621,13 +621,16 @@ module CloudstackClient
     ##
     # Lists all port forwarding rules.
 
-    def list_port_forwarding_rules(ip_address_id=nil)
+    def list_port_forwarding_rules(ip_address_id=nil, project_id)
       params = {
-          'command' => 'listPortForwardingRules'
+          'command' => 'listPortForwardingRules',
+          'listall' => true,
+          'isrecursive' => true
       }
       params['ipAddressId'] = ip_address_id if ip_address_id
+      params['projectid'] = project_id if project_id
       json = send_request(params)
-      json['portforwardingrule']
+      json['portforwardingrule'] || []
     end
 
     ##

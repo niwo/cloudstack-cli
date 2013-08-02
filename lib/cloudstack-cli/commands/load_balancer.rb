@@ -1,4 +1,4 @@
-class Lb < CloudstackCli::Base
+class LoadBalancer < CloudstackCli::Base
   
   desc "list", "list load balancer rules"
   option :project
