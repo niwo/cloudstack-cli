@@ -44,11 +44,43 @@ Run a custom API command:
 
 ### Example 3
 
+Create a stack of servers:
+
+    $ cs stack create my_stackfile.json
+
+An example stackfile looks like this
+
+    {
+      "name": "web_stack-a",
+      "description": "Web Application Stack",
+      "version": "1.0",
+      "zone": "DC1",
+      "servers": [
+        {
+          "name": "web-d1, web-d2",
+          "description": "Web nodes",
+          "template": "CentOS-6.4-x64-v1.2",
+          "offering": "1cpu_1gb",
+          "networks": "server_network",
+          "port_rules": ":80, :443"
+        },
+        {
+          "name": "mysql-db",
+          "description": "Hadoop master node",
+          "template": "CentOS-6.4-x64-v1.2",
+          "offering": "2cpu_4gb",
+          "networks": "server_network, storage_network"
+        }
+      ]
+    }
+
+### Example 4
+
 Sort all computing offerings by CPU and Memory grouped my Domain:
 
     $ cs offering sort
 
-### Example 4
+### Example 5
 
 Stop all virtual routers of project Demo (you could filter by Zone too):
 (This command is helpful if you have to deploy new versions of Cloudstack when using redumdant routers)

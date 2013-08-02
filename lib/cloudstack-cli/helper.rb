@@ -55,36 +55,48 @@ module CloudstackCli
     end
 
     def bootstrap_server(name, zone, template, offering, networks, pf_rules = [], project = nil)
-  		puts "Create server #{name}...".color(:yellow)
-  		server = @cs.create_server(
-  			name,
-  			offering,
-  			template,
-  			zone,
-  			networks,
-  			project
-  		)
 
-  		puts
-  		puts "Server #{server["name"]} has been created.".color(:green)
-  		puts
-  		puts "Make sure the server is running...".color(:yellow)
-  		@cs.wait_for_server_state(server["id"], "Running")
-  		puts "OK!".color(:green)
-  		puts
-  		puts "Get the fqdn of the server...".color(:yellow)
-  		server_fqdn = @cs.get_server_fqdn(server)
-  		puts "FQDN is #{server_fqdn}".color(:green)
+      server = @cs.get_server(name)
 
-  		if pf_rules.size > 0
+      unless server
+  		  puts "Create server #{name}...".color(:yellow)
+  		  server = @cs.create_server(
+  			 name,
+  			 offering,
+  			 template,
+  			 zone,
+  			 networks,
+  			 project
+  		  )
+
+        puts
+        puts "Server #{server["name"]} has been created.".color(:green)
+        puts
+        puts "Make sure the server is running...".color(:yellow)
+        @cs.wait_for_server_state(server["id"], "Running")
+        puts "OK!".color(:green)
+      else
+        puts "Server #{name} already exists".color(:green)
+      end
+
+  		if pf_rules && pf_rules.size > 0
   			puts
+        frontendip = nil
+        project = @cs.get_project(project)
   			pf_rules.each do |pf_rule|
           ip = pf_rule.split(":")[0]
-  				ip_addr = @cs.get_public_ip_address(ip)
+          if ip != ''
+  				  ip_addr = @cs.get_public_ip_address(ip)
+          else
+            ip_addr = frontendip ||= @cs.associate_ip_address(
+              @cs.get_network(networks[0], project ? project["id"] : nil)["id"]
+            )
+          end
   				port = pf_rule.split(":")[1]
-  			  	print "Create port forwarding rule #{ip}:#{port} ".color(:yellow)
-  			  	@cs.create_port_forwarding_rule(ip_addr["id"], port, 'TCP', port, server["id"])
-  			  	puts
+          puts
+  			  print "Create port forwarding rule #{ip}:#{port} ".color(:yellow)
+  			  @cs.create_port_forwarding_rule(ip_addr["id"], port, 'TCP', port, server["id"])
+  			  puts
   			end
   		end
 

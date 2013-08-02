@@ -37,7 +37,9 @@ class Server < CloudstackCli::Base
   option :offering, required: true
   option :networks, type: :array, required: true
   option :project
-  option :port_forwarding, type: :array, aliases: :pf, default: [], description: "public_ip:port"
+  option :port_rules, type: :array, aliases: :pf,
+    default: [],
+    description: "Port Forwarding Rules [public_ip]:port ..."
   option :interactive, type: :boolean
   def create(name)
     CloudstackCli::Helper.new(options[:config]).bootstrap_server(
@@ -46,28 +48,30 @@ class Server < CloudstackCli::Base
       options[:template],
       options[:offering],
       options[:networks],
-      options[:port_forwarding],
+      options[:port_rules],
       options[:project]
     )
   end
 
-  desc "destroy NAME", "destroy a server"
+  desc "destroy NAME [NAME2 ..]", "destroy a server"
+  option :project
   option :force, description: "destroy without asking", type: :boolean, aliases: '-f'
-  def destroy(name)
-    server = client.get_server(name)
-    unless server
-      error "Server not found."
-      exit
-    end
-    ask = "Are you sure you want to destroy the following server?\n"
-    ask += "#{server['name']} (#{server['state']})?"
+  def destroy(*name)
+    projectid = find_project['id'] if options[:project]
 
-    unless options[:force] == true || yes?(ask)
-      exit  
+    name.each do |server_name|
+      server = client.get_server(server_name, projectid)
+      unless server
+        say "Server #{server_name} not found.", :red
+      else
+        ask = "Destroy #{server_name} (#{server['state']})?"
+        if options[:force] == true || yes?(ask)
+          say "Destroying #{server_name} "
+          client.destroy_server(server["id"])
+          puts  
+        end
+      end
     end
-
-    client.destroy_server(server["id"])
-    puts
   end
 
   desc "bootstrap", "interactive creation of a server with network access"
