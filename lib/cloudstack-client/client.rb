@@ -449,7 +449,6 @@ module CloudstackClient
           return n
         end
       }
-
       nil
     end
 
