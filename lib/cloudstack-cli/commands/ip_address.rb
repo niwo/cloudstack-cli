@@ -18,4 +18,16 @@ class IpAddress < CloudstackCli::Base
   	say ip['ipaddress']
   end
 
+  desc "list", "list public IP address"
+  option :project
+  option :account
+  option :listall
+  def list
+  	table = [["Address", "Account", "Zone"]]
+  	client.list_public_ip_addresses(options).each do |address|
+  		table << [address["ipaddress"], address["account"], address["zonename"]]
+  	end
+  	print_table table
+  end
+
 end

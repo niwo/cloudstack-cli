@@ -575,6 +575,33 @@ module CloudstackClient
     end
 
     ##
+    # Lists the public ip addresses.
+
+    def list_public_ip_addresses(args = {})
+      params = {
+          'command' => 'listPublicIpAddresses',
+          'isrecursive' => true
+      }
+      if args[:project]
+        project = get_project(args[:project])
+        params['projectid'] = project['id']
+      end
+      if args[:account]
+        account = list_accounts({name: args[:account]}).first
+        unless account
+          puts "Error: Account #{args[:account]} not found."
+          exit 1
+        end
+        params['domainid'] = account["domainid"]
+        params['account'] = args[:account]
+      end
+      params['listall'] = args[:listall] if args[:listall]
+
+      json = send_request(params)
+      json['publicipaddress'] || []
+    end
+
+    ##
     # Finds the public ip address for a given ip address string.
 
     def get_public_ip_address(ip_address)
