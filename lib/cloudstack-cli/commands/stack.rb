@@ -3,21 +3,25 @@ class Stack < CloudstackCli::Base
 	desc "create STACKFILE", "create a stack of servers"
   def create(stackfile)
   	stack = parse_stackfile(stackfile)
-    say "Crate stack #{stack["name"]}..."
+    say "Create stack #{stack["name"]}..."
     puts
+    threads = []
     stack["servers"].each do |server|
-      server["name"].split(', ').each do |name|
-        CloudstackCli::Helper.new(options[:config]).bootstrap_server(
-          name,
-          server["zone"] || stack['zone'],
-          server["template"],
-          server["offering"],
-          server["networks"] ? server["networks"].split(', ') : nil,
-          server["port_rules"] ? server["port_rules"].split(', ') : nil,
-          stack["project"]
-        )
+      server["name"].split(', ').each_with_index do |name, i|
+        threads << Thread.new(i) {
+          CloudstackCli::Helper.new(options[:config]).bootstrap_server(
+            name,
+            server["zone"] || stack["zone"],
+            server["template"],
+            server["offering"],
+            server["networks"] ? server["networks"].split(', ') : nil,
+            server["port_rules"] ? server["port_rules"].split(', ') : nil,
+            stack["project"]
+          )
+        }
       end
     end
+    threads.each {|t| t.join }
   end
 
   desc "destroy STACKFILE", "destroy a stack of servers"

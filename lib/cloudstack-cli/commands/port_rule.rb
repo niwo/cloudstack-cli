@@ -7,9 +7,9 @@ class PortRule < CloudstackCli::Base
     aliases: '-r'
   option :network, required: true, aliases: '-n'
   option :project
-  def create(name)
-    unless server = client.get_server(name)
-      error "Server #{name} not found."
+  def create(server_name)
+    unless server = client.get_server(server_name)
+      error "Server #{server_name} not found."
       exit 1
     end
     frontendip = nil
@@ -25,7 +25,7 @@ class PortRule < CloudstackCli::Base
       end
       port = pf_rule.split(":")[1]
       puts
-      say "Create port forwarding rule #{ip_addr["ipaddress"]}:#{port} ", :yellow
+      say "Create port forwarding rule #{ip_addr["ipaddress"]}:#{port} for server #{server_name}.", :yellow
       client.create_port_forwarding_rule(ip_addr["id"], port, 'TCP', port, server["id"])
       puts
     end

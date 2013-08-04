@@ -55,41 +55,34 @@ module CloudstackCli
     end
 
     def bootstrap_server(name, zone, template, offering, networks, pf_rules = [], project = nil)
-
-      server = @cs.get_server(name)
-
+      if project = @cs.get_project(project)
+        project_id = project["id"]
+      end
+      server = @cs.get_server(name, project_id)
       unless server
   		  puts "Create server #{name}...".color(:yellow)
   		  server = @cs.create_server(
-  			 name,
-  			 offering,
-  			 template,
-  			 zone,
-  			 networks,
-  			 project
+  			 name, offering, template,
+  			 zone, networks, project
   		  )
-
         puts
         puts "Server #{server["name"]} has been created.".color(:green)
-        puts
-        puts "Make sure the server is running...".color(:yellow)
         @cs.wait_for_server_state(server["id"], "Running")
-        puts "OK!".color(:green)
+        puts "Server #{server["name"]} is running.".color(:green)
       else
-        puts "Server #{name} already exists".color(:green)
+        puts "Server #{name} already exists.".color(:green)
       end
 
   		if pf_rules && pf_rules.size > 0
   			puts
         frontendip = nil
-        project = @cs.get_project(project)
   			pf_rules.each do |pf_rule|
           ip = pf_rule.split(":")[0]
           if ip != ''
   				  ip_addr = @cs.get_public_ip_address(ip)
           else
             ip_addr = frontendip ||= @cs.associate_ip_address(
-              @cs.get_network(networks[0], project ? project["id"] : nil)["id"]
+              @cs.get_network(networks[0], project_id)["id"]
             )
           end
   				port = pf_rule.split(":")[1]

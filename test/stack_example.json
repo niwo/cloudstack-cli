@@ -10,7 +10,7 @@
       "description": "Web nodes",
       "template": "CentOS-6.4-x64-v1.2",
       "offering": "1cpu_1gb",
-      "networks": "M_ROOT",
+      "networks": "M_PLAY",
       "port_rules": ":80, :443"
     },
     {
@@ -18,7 +18,7 @@
       "description": "PostgreSQL Master",
       "template": "CentOS-6.4-x64-v1.2",
       "offering": "2cpu_4gb",
-      "networks": "M_ROOT"
+      "networks": "M_PLAY"
     }
   ]
 }

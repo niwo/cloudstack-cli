@@ -42,15 +42,31 @@ class Server < CloudstackCli::Base
     desc: "Port Forwarding Rules [public_ip]:port ..."
   option :interactive, type: :boolean
   def create(name)
-    CloudstackCli::Helper.new(options[:config]).bootstrap_server(
-      name,
-      options[:zone],
-      options[:template],
-      options[:offering],
-      options[:networks],
-      options[:port_rules],
-      options[:project]
-    )
+    if project = @cs.get_project(project)
+      project_id = project["id"]
+    end 
+    server = client.get_server(name, project_id)
+    unless server
+      say "Create server #{name}...", :yellow
+      server = client.create_server(
+       name, options[:offering], options[:template],
+       options[:zone], options[:networks], options[:project]
+      )
+      puts
+      say "Server #{name} has been created.", :green
+      client.wait_for_server_state(server["id"], "Running")
+      say "Server #{name} is running.", :green
+    else
+      say "Server #{name} already exists.", :green
+      # TODO: check status of server
+    end
+
+    if options[:port_rules] && options[:port_rules].size > 0
+      invoke "port_rule:create", name,
+        project: options[:project],
+        network: options[:networks].first,
+        rules: options[:port_rules]
+    end
   end
 
   desc "destroy NAME [NAME2 ..]", "destroy a server"
