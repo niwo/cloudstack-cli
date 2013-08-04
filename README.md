@@ -18,13 +18,13 @@ cloudstack-cli expects to find a configuartion file with the API URL and your Cl
 
 Example content of the configuration file:
 
-    :url:         "https://my-cloudstack-server/client/api/"
+  :url:         "https://my-cloudstack-server/client/api/"
 	:api_key:     "cloudstack-api-key"
 	:secret_key:  "cloudstack-api-secret"
 
 ## Usage
 
-Please see http://rubydoc.info/gems/cloudstack-cli/0.0.3/frames
+Please see http://rubydoc.info/gems/cloudstack-cli/
 
 See the help screen:
 
@@ -82,8 +82,8 @@ Sort all computing offerings by CPU and Memory grouped my Domain:
 
 ### Example 5
 
-Stop all virtual routers of project Demo (you could filter by Zone too):
-(This command is helpful if you have to deploy new versions of Cloudstack when using redumdant routers)
+Stop all virtual routers of project Demo (you could filter by zone too):
+(This command is helpful if you have to deploy new versions of Cloudstack when using redundant routers)
 
     $ cs router list --project Demo --status running --redundant-state BACKUP --command stop
 
