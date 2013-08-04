@@ -24,7 +24,7 @@ Example content of the configuration file:
 
 ## Usage
 
-Please see http://rubydoc.info/gems/cloudstack-cli/
+See [RubyDoc](http://rubydoc.info/gems/cloudstack-cli/).
 
 See the help screen:
 
