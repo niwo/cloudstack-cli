@@ -8,7 +8,7 @@ class Template < CloudstackCli::Base
       say "unsupported template type '#{type}'", :red
       exit 1
     end
-    templates = client.list_templates(type, project ? project['id'] : nil)
+    templates = client.list_templates(type: type, project_id: project ? project['id'] : nil)
     if templates.size < 1
       puts "No templates found"
     else

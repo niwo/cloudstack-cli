@@ -1,172 +1,121 @@
 module CloudstackCli
-  class Helper
-    attr_reader :cs
-
-    def initialize(config_file)
-      @config_file = config_file
-	    @cs = CloudstackClient::Connection.new(
-	      options[:url],
-	      options[:api_key],
-	      options[:secret_key]
-	    )
-    end
-
-    def options
-       @options ||= CloudstackClient::ConnectionHelper.load_configuration(@config_file)
-    end
-
+  module Helper
     def print_options(options, attr = 'name')
       options.to_enum.with_index(1).each do |option, i|
          puts "#{i}: #{option[attr]}"
       end   
     end
 
-    def domains(name = nil)
-      @cs.list_domains(name)
-    end
-
-    def server_offerings(domain = nil)
-      @server_offerings ||= @cs.list_service_offerings(domain)
-    end
-    
-    def templates(type = 'featured', project_id = -1)
-      @templates ||= @cs.list_templates(type, project_id)
-    end
-
-    def projects
-      @projects ||= @cs.list_projects
-    end
-
-    def zones
-      @zones ||= @cs.list_zones
-    end
-
-    def networks(project_id = nil)
-      @cs.list_networks(project_id)
-    end
-
-
-    def volumes(project_id = nil)
-      @cs.list_volumes(project_id)
-    end
-    
-    def virtual_machines(options = {})
-      @cs.list_servers(options)
+    def ask_number(question)
+      number = ask(question).to_i - 1
+      number < 0 ? 0 : number
     end
 
     def bootstrap_server(name, zone, template, offering, networks, pf_rules = [], project = nil)
-      if project = @cs.get_project(project)
+      if project = client.get_project(project)
         project_id = project["id"]
+        project_name = project['name']
       end
-      server = @cs.get_server(name, project_id)
+      server = client.get_server(name, project_id)
       unless server
-  		  puts "Create server #{name}...".color(:yellow)
-  		  server = @cs.create_server(
-  			 name, offering, template,
-  			 zone, networks, project
-  		  )
+        say "Create server #{name}..."
+        server = client.create_server(
+         name, offering, template,
+         zone, networks, project_name
+        )
         puts
-        puts "Server #{server["name"]} has been created.".color(:green)
-        @cs.wait_for_server_state(server["id"], "Running")
-        puts "Server #{server["name"]} is running.".color(:green)
+        say "Server #{server["name"]} has been created.", :green
+        client.wait_for_server_state(server["id"], "Running")
+        say "Server #{server["name"]} is running.", :green
       else
-        puts "Server #{name} already exists.".color(:green)
+        say "Server #{name} already exists.", :green
       end
 
-  		if pf_rules && pf_rules.size > 0
-  			puts
+      if pf_rules && pf_rules.size > 0
+        puts
         frontendip = nil
-  			pf_rules.each do |pf_rule|
+        pf_rules.each do |pf_rule|
           ip = pf_rule.split(":")[0]
           if ip != ''
-  				  ip_addr = @cs.get_public_ip_address(ip)
+            ip_addr = client.get_public_ip_address(ip)
           else
-            ip_addr = frontendip ||= @cs.associate_ip_address(
-              @cs.get_network(networks[0], project_id)["id"]
+            ip_addr = frontendip ||= client.associate_ip_address(
+              client.get_network(networks[0], project_id)["id"]
             )
           end
-  				port = pf_rule.split(":")[1]
+          port = pf_rule.split(":")[1]
           puts
-  			  print "Create port forwarding rule #{ip}:#{port} ".color(:yellow)
-  			  @cs.create_port_forwarding_rule(ip_addr["id"], port, 'TCP', port, server["id"])
-  			  puts
-  			end
-  		end
-
-  		puts
-  		puts "Complete!".color(:green)
-    end
-
-    def list_accounts(name = nil)
-      @cs.list_accounts({ name: name })
-    end 
-
-    def list_load_balancer_rules(project = nil)
-      @cs.list_load_balancer_rules(project)
-    end
-
-    def create_load_balancer_rule(name, ip, private_port, public_port, options = {})
-      puts "Create rule #{name}...".color(:yellow)
-      @cs.create_load_balancer_rule(name, ip, private_port, public_port, options = {})
-      puts "OK!".color(:green)
-    end
-
-    def assign_to_load_balancer_rule(id, names)
-      puts "Add #{names.join(', ')} to rule #{id}...".color(:yellow)
-      rule = @cs.assign_to_load_balancer_rule(id, names)
-      if rule['success']
-        puts "OK!".color(:green)
-      else
-        puts "Failed!".color(:red)
+          say "Create port forwarding rule #{ip}:#{port} ", :yellow
+          client.create_port_forwarding_rule(ip_addr["id"], port, 'TCP', port, server["id"])
+          puts
+        end
       end
+      puts
     end
 
     def bootstrap_server_interactive
-      ARGV.clear 
-    	puts
-    	puts "We are going to deploy a new server and..."
-    	puts "- assign a public IP address"
-    	puts "- create a firewall rule for SSH and HTTP access"
-    	puts "- connect to the server and install the puppet client}"
-    	puts
+      zones = client.list_zones
+      if zones.size > 1
+        say "Select a availability zone:", :yellow
+        print_options(zones)
+        zone = ask_number("Zone Nr.: ")
+      else
+        zone = 0
+      end
 
-    	print "Please provide a name for the new server".background(:blue)
-    	puts " (spaces or special characters are NOT allowed): "
-    	server_name = gets.chomp
+      projects = client.list_projects
+      if yes?("Do you want to deploy your server within a project?") && projects.size > 0
+        if projects.size > 0
+          say "Select a project", :yellow
+          print_options(projects)
+          project = ask_number("Project Nr.: ")
+        end
+        project_id = projects[project]['id'] rescue nil
+      end
 
-    	if projects.size > 0
-    	  puts "Select a project".background(:blue)
-    	  print_options(projects)
-    	  project = gets.chomp.to_i - 1
-    	end
+      say "Please provide a name for the new server", :yellow
+      say "(spaces or special characters are NOT allowed)"
+      server_name = ask("Server name: ")
 
-    	puts "Select a computing offering:".background(:blue)
-    	print_options(server_offerings)
-    	service_offering = gets.chomp.to_i - 1
+      server_offerings = client.list_service_offerings
+      say "Select a computing offering:", :yellow
+      print_options(server_offerings)
+      service_offering = ask_number("Offering Nr.: ")
 
-    	puts "Select a template:".background(:blue)
-    	print_options(templates)
-    	template = gets.chomp.to_i - 1
+      templates = client.list_templates(project_id: project_id, zone_id: zones[zone]["id"])
+      say "Select a template:", :yellow
+      print_options(templates)
+      template = ask_number("Template Nr.: ")
 
-    	puts "Select a availability zone:".background(:blue)
-    	print_options(zones)
-    	zone = gets.chomp.to_i - 1
-	
-    	# FIXME: show only networks in selected zone
-    	puts "Select a network:".background(:blue)
-    	project_id = projects[project]['id'] rescue nil
-    	networks = @cs.list_networks(project_id)
-    	print_options(networks)
-    	network = gets.chomp.to_i - 1
+      networks = client.list_networks(project_id: project_id, zone_id: zones[zone]["id"])
+      if networks.size > 1
+        say "Select a network:", :yellow
+        print_options(networks)
+        network = ask_number("Network Nr.: ")
+      else
+        network = 0
+      end
 
-    	bootstrap_server(
-    	  server_name,
-    	  zones[zone]["name"],
-    	  templates[template]["name"],
-    	  server_offerings[service_offering]["name"],
-    	  [networks[network]["name"]],
-    	  projects[project]["name"]
-    	)
+      say "You entered the following configuration:", :yellow
+      table =  [["Zone", zones[zone]["name"]]]
+      table << ["Server Name", server_name]
+      table << ["Template", templates[template]["name"]]
+      table << ["Offering", server_offerings[service_offering]["name"]]
+      table << ["Network", networks[network]["name"]]
+      table << ["Project", projects[project]["name"]] if project
+      print_table table
+
+      if yes? "Do you want to deploy this server?"
+        bootstrap_server(
+          server_name,
+          zones[zone]["name"],
+          templates[template]["name"],
+          server_offerings[service_offering]["name"],
+          [networks[network]["name"]], nil,
+          project ? projects[project]["name"] : nil
+        )
+      end
     end
+
   end
 end

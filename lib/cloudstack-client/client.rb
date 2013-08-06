@@ -103,7 +103,7 @@ module CloudstackClient
       return nil unless server
 
       nic = get_server_default_nic(server) || {}
-      networks = list_networks(server['projectid']) || {}
+      networks = list_networks(project_id: server['projectid']) || {}
 
       id = nic['networkid']
       network = networks.select { |net|
@@ -418,13 +418,14 @@ module CloudstackClient
     # * executable - all templates that can be used to deploy a new VM
     # * community - templates that are public
 
-    def list_templates(filter, project_id = nil)
-      filter ||= 'featured'
+    def list_templates(args = {})
+      filter = args[:filter] || 'featured'
       params = {
           'command' => 'listTemplates',
           'templateFilter' => filter
       }
-      params['projectid'] = project_id if project_id
+      params['projectid'] = args[:project_id] if args[:project_id]
+      params['zoneid'] = args[:zone_id] if args[:zone_id]
       
       json = send_request(params)
       json['template'] || []
@@ -481,19 +482,20 @@ module CloudstackClient
     ##
     # Lists all available networks.
 
-    def list_networks(project_id = nil, account = nil)
+    def list_networks(args = {})
       params = {
         'command' => 'listNetworks',
         'listall' => true,
       }
-      params['projectid'] = project_id if project_id
-      if account
-        domain = list_accounts({name: account})
+      params['projectid'] = args[:project_id] if args[:project_id]
+      params['zoneid'] = args[:zone_id] if args[:zone_id]
+      if args[:account]
+        domain = list_accounts(name: args[:account])
         if domain.size > 0
-          params['account'] = account
+          params['account'] = args[:account]
           params['domainid'] = domain.first["domainid"]
         else
-          puts "Account #{account} not found."
+          puts "Account #{args[:account]} not found."
         end
       end
       json = send_request(params)

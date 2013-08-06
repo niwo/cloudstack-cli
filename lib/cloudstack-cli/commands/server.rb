@@ -1,4 +1,5 @@
 class Server < CloudstackCli::Base
+  include CloudstackCli::Helper
 
   desc "list", "list servers"
   option :project
@@ -92,7 +93,7 @@ class Server < CloudstackCli::Base
 
   desc "bootstrap", "interactive creation of a server with network access"
   def bootstrap
-    CloudstackCli::Helper.new(options[:config]).bootstrap_server_interactive()
+    bootstrap_server_interactive
   end
 
   desc "stop NAME", "stop a server"

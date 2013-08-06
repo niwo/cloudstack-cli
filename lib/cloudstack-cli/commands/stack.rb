@@ -1,15 +1,15 @@
 class Stack < CloudstackCli::Base
+	include CloudstackCli::Helper
 
 	desc "create STACKFILE", "create a stack of servers"
   def create(stackfile)
   	stack = parse_stackfile(stackfile)
     say "Create stack #{stack["name"]}..."
-    puts
     threads = []
     stack["servers"].each do |server|
       server["name"].split(', ').each_with_index do |name, i|
         threads << Thread.new(i) {
-          CloudstackCli::Helper.new(options[:config]).bootstrap_server(
+          bootstrap_server(
             name,
             server["zone"] || stack["zone"],
             server["template"],

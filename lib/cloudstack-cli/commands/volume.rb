@@ -4,7 +4,7 @@ class Volume < CloudstackCli::Base
   option :project
   def list
     project = find_project if options[:project]
-    networks = client.list_networks(project ? project['id'] : nil)
+    networks = client.list_networks(project_id: project ? project['id'] : nil)
     if networks.size < 1
       puts "No networks found"
     else

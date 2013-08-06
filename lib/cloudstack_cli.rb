@@ -1,5 +1,4 @@
 require 'yaml'
-require 'rainbow'
 require "thor"
 
 require "cloudstack-cli/version"

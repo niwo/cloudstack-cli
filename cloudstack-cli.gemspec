@@ -24,5 +24,4 @@ Gem::Specification.new do |gem|
   
   gem.add_dependency('thor', '~> 0.18.1')
   gem.add_dependency('net-ssh', '~> 2.6.7')
-  gem.add_dependency('rainbow', '~> 1.1.4')
 end
