@@ -130,8 +130,10 @@ module CloudstackClient
       }
       params['projectid'] = options[:project_id] if options[:project_id]
       if options[:account]
-        params['domainid'] = list_accounts({name: options[:account]}).first["domainid"]
-        params['account'] = options[:account]
+        if account = list_accounts({name: options[:account]}).first
+          params['domainid'] = account["domainid"]
+          params['account'] = options[:account]
+        end
       end
 
       json = send_request(params)
