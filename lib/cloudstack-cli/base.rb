@@ -20,6 +20,7 @@ module CloudstackCli
       end
 
       def find_project(project_name = options[:project])
+        return nil unless project_name
         unless project = client.get_project(project_name)
           say "Project '#{options[:project]}' not found", :red
           exit 1

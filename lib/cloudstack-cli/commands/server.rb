@@ -43,7 +43,7 @@ class Server < CloudstackCli::Base
     desc: "Port Forwarding Rules [public_ip]:port ..."
   option :interactive, type: :boolean
   def create(name)
-    if project = @cs.get_project(project)
+    if project = find_project
       project_id = project["id"]
     end 
     server = client.get_server(name, project_id)
