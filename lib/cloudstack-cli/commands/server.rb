@@ -34,14 +34,15 @@ class Server < CloudstackCli::Base
 
   desc "create NAME", "create a server"
   option :zone, required: true
-  option :template, required: true
+  option :template, required: true, desc: "name of template or iso"
   option :offering, required: true
   option :networks, type: :array, required: true
   option :project
   option :port_rules, type: :array,
     default: [],
     desc: "Port Forwarding Rules [public_ip]:port ..."
-  option :interactive, type: :boolean
+  option :disk_offering
+  option :hypervisor, desc: "only used for iso deployments, defaults to vmware"
   def create(name)
     if project = find_project
       project_id = project["id"]
@@ -51,14 +52,15 @@ class Server < CloudstackCli::Base
       say "Create server #{name}...", :yellow
       server = client.create_server(
        name, options[:offering], options[:template],
-       options[:zone], options[:networks], options[:project]
+       options[:zone], options[:networks], options[:project],
+       options[:disk_offering], options[:hypervisor]
       )
       puts
       say "Server #{name} has been created.", :green
       client.wait_for_server_state(server["id"], "Running")
       say "Server #{name} is running.", :green
     else
-      say "Server #{name} already exists.", :green
+      say "Server #{name} already exists.", :yellow
       # TODO: check status of server
     end
 

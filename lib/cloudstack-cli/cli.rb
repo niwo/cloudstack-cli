@@ -65,6 +65,9 @@ module CloudstackCli
     desc "offering SUBCOMMAND ...ARGS", "Manage offerings"
     subcommand "offering", Offering
 
+    desc "disk_offering SUBCOMMAND ...ARGS", "Manage disk offerings"
+    subcommand "disk_offering", DiskOffering
+
     desc "network SUBCOMMAND ...ARGS", "Manage networks"
     subcommand "network", Network
 
@@ -74,8 +77,11 @@ module CloudstackCli
     desc "load_balancer SUBCOMMAND ...ARGS", "Manage load balancing rules"
     subcommand "load_balancer", LoadBalancer
 
-    desc "template SUBCOMMAND ...ARGS", "Manage template"
+    desc "template SUBCOMMAND ...ARGS", "Manage templates"
     subcommand "template", Template
+
+    desc "iso SUBCOMMAND ...ARGS", "Manage iso's"
+    subcommand "iso", Iso
 
     desc "router SUBCOMMAND ...ARGS", "Manage virtual routers"
     subcommand "router", Router

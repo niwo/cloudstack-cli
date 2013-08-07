@@ -1,18 +1,9 @@
 class Offering < CloudstackCli::Base
 
-  desc 'list', 'list offerings by type [compute|network|storage]'
+  desc 'list', 'list compute offerings'
   option :domain
-  def list(type='compute')
+  def list
     offerings = client.list_service_offerings(options[:domain])
-
-    offerings.group_by{|o| o["domain"]}.each_value do |offers|
-      offers.sort {
-        |oa, ob| [oa["cpunumber"], oa["memory"]] <=> [ob["cpunumber"], ob["memory"]]
-      }.each do |offer|
-        puts "#{offer['domain']} - #{offer["displaytext"]}"
-      end
-    end
-
     if offerings.size < 1
       puts "No offerings found"
     else

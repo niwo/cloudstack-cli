@@ -28,7 +28,7 @@ module CloudstackCli
         client.wait_for_server_state(server["id"], "Running")
         say "Server #{server["name"]} is running.", :green
       else
-        say "Server #{name} already exists.", :green
+        say "Server #{name} already exists.", :yellow
       end
 
       if pf_rules && pf_rules.size > 0

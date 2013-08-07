@@ -9,6 +9,11 @@ module CloudstackCli
       exit!
     }
 
+    # exit with return code 1 in case of a error
+    def self.exit_on_failure?
+      true
+    end
+
     no_commands do  
       def client
         @config ||= CloudstackClient::ConnectionHelper.load_configuration(options[:config])
@@ -29,7 +34,7 @@ module CloudstackCli
       end
 
       def filter_by(objects, tag_name, tag)
-        objects.select {|r| r[tag_name].downcase == tag }
+        objects.select {|r| r[tag_name].downcase == tag.downcase }
       end
     end
   end

@@ -143,7 +143,8 @@ module CloudstackClient
     ##
     # Deploys a new server using the specified parameters.
 
-    def create_server(host_name, service_name, template_name, zone_name=nil, network_names=[], project_name=nil)
+    def create_server(host_name, service_name, template_name, zone_name=nil,
+      network_names=[], project_name=nil, disk_offering=nil, hypervisor=nil)
       if host_name then
         if get_server(host_name) then
           puts "Error: Server '#{host_name}' already exists."
@@ -159,8 +160,11 @@ module CloudstackClient
 
       template = get_template(template_name)
       if !template then
-        puts "Error: Template '#{template_name}' is invalid"
-        exit 1
+        template = get_iso(template_name)
+        if !template then
+          puts "Error: Template '#{template_name}' is invalid"
+          exit 1
+        end
       end
 
       zone = zone_name ? get_zone(zone_name) : get_default_zone
@@ -199,6 +203,16 @@ module CloudstackClient
         network['id']
       }
 
+      if disk_offering
+        disk_offering = get_disk_offering(disk_offering)
+        unless disk_offering
+          msg = zone_name ? "Zone '#{zone_name}' is invalid" : "No default zone found"
+          puts "Error: #{msg}"
+          exit 1
+        end
+
+      end
+
       params = {
           'command' => 'deployVirtualMachine',
           'serviceOfferingId' => service['id'],
@@ -208,6 +222,8 @@ module CloudstackClient
       }
       params['name'] = host_name if host_name
       params['projectid'] = project['id'] if project_name
+      params['diskofferingid'] = disk_offering['id'] if disk_offering
+      params['hypervisor'] = hypervisor || 'vmware' if disk_offering
 
       json = send_async_request(params)
       json['virtualmachine']
@@ -310,7 +326,6 @@ module CloudstackClient
           return s
         end
       }
-
       nil
     end
 
@@ -381,6 +396,47 @@ module CloudstackClient
     end
 
     ##
+    # Lists all available disk offerings.
+
+    def list_disk_offerings(domain = nil)
+      params = {
+          'command' => 'listDiskOfferings'
+      }
+
+      if domain
+        params['domainid'] = list_domains(domain).first["id"]
+      end
+
+      json = send_request(params)
+      json['diskoffering'] || []
+    end
+
+    ##
+    # Get disk offering by name.
+
+    def get_disk_offering(name)
+
+      # TODO: use name parameter
+      # listServiceOfferings in CloudStack 2.2 doesn't seem to work
+      # when the name parameter is specified. When this is fixed,
+      # the name parameter should be added to the request.
+      params = {
+          'command' => 'listDiskOfferings'
+      }
+      json = send_request(params)
+
+      services = json['diskoffering']
+      return nil unless services
+
+      services.each { |s|
+        if s['name'] == name then
+          return s
+        end
+      }
+      nil
+    end
+
+    ##
     # Finds the template with the specified name.
 
     def get_template(name)
@@ -434,6 +490,59 @@ module CloudstackClient
     end
 
     ##
+    # Lists all isos that match the specified filter.
+    #
+    # Allowable filter values are:
+    #
+    # * featured - isos that are featured and are public
+    # * self - isos that have been registered/created by the owner
+    # * self-executable - isos that have been registered/created by the owner that can be used to deploy a new VM
+    # * executable - all isos that can be used to deploy a new VM
+    # * community - isos that are public
+
+    def list_isos(args = {})
+      filter = args[:filter] || 'featured'
+      params = {
+          'command' => 'listIsos',
+          'templateFilter' => filter
+      }
+      params['projectid'] = args[:project_id] if args[:project_id]
+      params['zoneid'] = args[:zone_id] if args[:zone_id]
+      
+      json = send_request(params)
+      json['iso'] || []
+    end
+
+    ##
+    # Finds the template with the specified name.
+
+    def get_iso(name)
+
+      # TODO: use name parameter
+      # listIsos in CloudStack 2.2 doesn't seem to work
+      # when the name parameter is specified. When this is fixed,
+      # the name parameter should be added to the request.
+      params = {
+          'command' => 'listIsos',
+          'templateFilter' => 'executable'
+      }
+      json = send_request(params)
+
+      isos = json['iso']
+      if !isos then
+        return nil
+      end
+
+      isos.each { |t|
+        if t['name'] == name then
+          return t
+        end
+      }
+
+      nil
+    end
+
+    ##
     # Finds the network with the specified name.
 
     def get_network(name, project_id = nil)
@@ -458,27 +567,26 @@ module CloudstackClient
     ##
     # Finds the default network.
 
-    def get_default_network
+    def get_default_network(zone = nil)
       params = {
           'command' => 'listNetworks',
           'isDefault' => true
       }
+      if zone
+        params['zoneid'] = get_zone(zone)['id']
+      end
       json = send_request(params)
 
       networks = json['network']
       return nil if !networks || networks.empty?
-
-      default = networks.first
-      return default if networks.length == 1
+      return networks.first if networks.length == 1
 
       networks.each { |n|
         if n['type'] == 'Direct' then
-          default = n
-          break
+          return n
         end
       }
-
-      default
+      nil
     end
 
     ##
@@ -491,6 +599,7 @@ module CloudstackClient
       }
       params['projectid'] = args[:project_id] if args[:project_id]
       params['zoneid'] = args[:zone_id] if args[:zone_id]
+      params['isDefault'] = true if args[:isdefault]
       if args[:account]
         domain = list_accounts(name: args[:account])
         if domain.size > 0
@@ -502,6 +611,18 @@ module CloudstackClient
       end
       json = send_request(params)
       json['network'] || []
+    end
+
+    ##
+    # Delete network.
+
+    def delete_network(id)
+      params = {
+        'command' => 'deleteNetwork',
+        'id' => id,
+      }
+      p json = send_async_request(params)
+      json['network']
     end
 
     ##
