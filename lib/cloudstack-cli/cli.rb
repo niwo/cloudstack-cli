@@ -26,15 +26,12 @@ module CloudstackCli
         say "Example: https://my-cloudstack-server/client/api/", :yellow
         config[:url] = ask("URL:", :magenta)
       end
-
       unless options[:api_key]
         config[:api_key] = ask("API Key:", :magenta)
       end
-
       unless options[:secret_key]
         config[:secret_key] = ask("Secret Key:", :magenta)
       end
-
       if File.exists? file
         say "Warning: #{file} already exists.", :red
         exit unless yes?("Overwrite [y/N]", :red)
@@ -44,13 +41,12 @@ module CloudstackCli
 
     desc "command COMMAND [arg1=val1 arg2=val2...]", "run a custom api command"
     def command(command, *args)
-      client = CloudstackCli::Helper.new(options[:config])
       params = {'command' => command}
       args.each do |arg|
         arg = arg.split('=')
         params[arg[0]] = arg[1] 
       end
-      puts JSON.pretty_generate(client.cs.send_request params)
+      puts JSON.pretty_generate(client.send_request params)
     end
     
     desc "zone SUBCOMMAND ...ARGS", "Manage zones"
