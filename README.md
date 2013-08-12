@@ -34,7 +34,7 @@ See the help screen:
 
 Bootsrap a server:
 
-    $ cs server create server01 --zone ZUERICH_IX --port-forwarding 193.218.104.10:22 193.218.104.10:80 --template CentOS-6.4-x64-v1.4 --offering 1cpu_1gb --networks M_Demo
+    $ cs server create server-01 --template CentOS-6.4-x64-v1.4 --offering 1cpu_1gb --port-rules 193.218.104.10:22 193.218.104.10:80
 
 ### Example 2
 
