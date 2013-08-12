@@ -143,49 +143,48 @@ module CloudstackClient
     ##
     # Deploys a new server using the specified parameters.
 
-    def create_server(host_name, service_name, template_name, zone_name=nil,
-      network_names=[], project_name=nil, disk_offering=nil, hypervisor=nil)
-      if host_name then
-        if get_server(host_name) then
-          puts "Error: Server '#{host_name}' already exists."
+    def create_server(args = {})
+      if args[:name] then
+        if get_server(args[:name]) then
+          puts "Error: Server '#{args[:name]}' already exists."
           exit 1
         end
       end
 
-      service = get_service_offering(service_name)
+      service = get_service_offering(args[:service])
       if !service then
-        puts "Error: Service offering '#{service_name}' is invalid"
+        puts "Error: Service offering '#{args[:service]}' is invalid"
         exit 1
       end
 
-      template = get_template(template_name)
+      template = get_template(args[:template])
       if !template then
-        template = get_iso(template_name)
+        template = get_iso(args[:template])
         if !template then
-          puts "Error: Template '#{template_name}' is invalid"
+          puts "Error: Template '#{args[:template]}' is invalid"
           exit 1
         end
       end
 
-      zone = zone_name ? get_zone(zone_name) : get_default_zone
+      zone = args[:zone] ? get_zone(args[:zone]) : get_default_zone
       if !zone then
-        msg = zone_name ? "Zone '#{zone_name}' is invalid" : "No default zone found"
+        msg = args[:zone] ? "Zone '#{args[:zone]}' is invalid" : "No default zone found"
         puts "Error: #{msg}"
         exit 1
       end
 
-      if project_name
-        project = get_project(project_name)
+      if args[:project]
+        project = get_project(args[:project])
         if !project then
-          msg = "Project '#{project_name}' is invalid"
+          msg = "Project '#{args[:project]}' is invalid"
           puts "Error: #{msg}"
           exit 1
         end
       end
 
       networks = []
-      network_names.each do |name|
-        network = project_name ? get_network(name, project['id']) : get_network(name)
+      args[:networks].each do |name|
+        network = project ? get_network(name, project['id']) : get_network(name)
         if !network then
           puts "Error: Network '#{name}' not found"
           exit 1
@@ -203,14 +202,13 @@ module CloudstackClient
         network['id']
       }
 
-      if disk_offering
-        disk_offering = get_disk_offering(disk_offering)
+      if args[:disk_offering]
+        disk_offering = get_disk_offering(args[:disk_offering])
         unless disk_offering
-          msg = zone_name ? "Zone '#{zone_name}' is invalid" : "No default zone found"
+          msg = "Disk offering '#{args[:disk_offering]}' is invalid"
           puts "Error: #{msg}"
           exit 1
         end
-
       end
 
       params = {
@@ -220,10 +218,11 @@ module CloudstackClient
           'zoneId' => zone['id'],
           'networkids' => network_ids.join(',')
       }
-      params['name'] = host_name if host_name
-      params['projectid'] = project['id'] if project_name
+      params['name'] = args[:name] if args[:name]
+      params['projectid'] = project['id'] if project
       params['diskofferingid'] = disk_offering['id'] if disk_offering
-      params['hypervisor'] = hypervisor || 'vmware' if disk_offering
+      params['hypervisor'] = args[:hypervisor] || 'vmware' if disk_offering
+      params['keypair'] = args[:keypair] if args[:keypair]
 
       json = send_async_request(params)
       json['virtualmachine']

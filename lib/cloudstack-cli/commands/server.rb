@@ -43,6 +43,7 @@ class Server < CloudstackCli::Base
     desc: "Port Forwarding Rules [public_ip]:port ..."
   option :disk_offering
   option :hypervisor, desc: "only used for iso deployments, defaults to vmware"
+  option :keypair, desc: "the name of the ssh keypair to use"
   def create(name)
     if project = find_project
       project_id = project["id"]
@@ -51,9 +52,7 @@ class Server < CloudstackCli::Base
     unless server
       say "Create server #{name}...", :yellow
       server = client.create_server(
-       name, options[:offering], options[:template],
-       options[:zone], options[:networks], options[:project],
-       options[:disk_offering], options[:hypervisor]
+       options.merge({name: name})
       )
       puts
       say "Server #{name} has been created.", :green

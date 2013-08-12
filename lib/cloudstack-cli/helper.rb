@@ -20,8 +20,12 @@ module CloudstackCli
       unless server
         say "Create server #{name}..."
         server = client.create_server(
-         name, offering, template,
-         zone, networks, project_name
+         name: name, 
+         offering: offering
+         template: template,
+         zone: zone,
+         networks: networks,
+         project: project_name
         )
         puts
         say "Server #{server["name"]} has been created.", :green
