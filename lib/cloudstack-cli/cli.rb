@@ -48,6 +48,11 @@ module CloudstackCli
       end
       puts JSON.pretty_generate(client.send_request params)
     end
+
+    # require subcommands
+    Dir[File.dirname(__FILE__) + '/commands/*.rb'].each do |command| 
+      require command
+    end
     
     desc "zone SUBCOMMAND ...ARGS", "Manage zones"
     subcommand "zone", Zone

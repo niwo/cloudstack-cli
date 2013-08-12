@@ -1,3 +1,6 @@
+require "thor"
+require "yaml"
+
 module CloudstackCli  
   class Base < Thor
     include Thor::Actions

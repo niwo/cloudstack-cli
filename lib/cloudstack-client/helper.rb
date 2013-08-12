@@ -1,5 +1,5 @@
 module CloudstackClient
-  class ConnectionHelper
+  module ConnectionHelper
     def self.load_configuration(config_file)
       begin
         return YAML::load(IO.read(config_file))

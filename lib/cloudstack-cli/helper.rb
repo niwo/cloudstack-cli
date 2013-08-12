@@ -21,7 +21,7 @@ module CloudstackCli
         say "Create server #{name}..."
         server = client.create_server(
          name: name, 
-         offering: offering
+         offering: offering,
          template: template,
          zone: zone,
          networks: networks,

@@ -34,9 +34,10 @@ class Server < CloudstackCli::Base
 
   desc "create NAME", "create a server"
   option :zone, required: true
-  option :template, required: true, desc: "name of template or iso"
+  option :template, desc: "name of the template"
+  option :iso, desc: "name of the iso"
   option :offering, required: true
-  option :networks, type: :array, required: true
+  option :networks, type: :array
   option :project
   option :port_rules, type: :array,
     default: [],
