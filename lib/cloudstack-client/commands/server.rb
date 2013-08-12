@@ -115,9 +115,9 @@ module CloudstackClient
         end
       end
 
-      service = get_service_offering(args[:service])
+      service = get_service_offering(args[:offering])
       if !service
-        puts "Error: Service offering '#{args[:service]}' is invalid"
+        puts "Error: Service offering '#{args[:offering]}' is invalid"
         exit 1
       end
 
@@ -151,7 +151,7 @@ module CloudstackClient
       end
 
       if !template && !iso
-        puts "Error: Iso or Template are required"
+        puts "Error: Iso or Template is required"
         exit 1
       end
 
@@ -172,13 +172,15 @@ module CloudstackClient
       end
 
       networks = []
-      args[:networks].each do |name|
-        network = project ? get_network(name, project['id']) : get_network(name)
-        if !network
-          puts "Error: Network '#{name}' not found"
-          exit 1
+      if args[:networks]
+        args[:networks].each do |name|
+          network = project ? get_network(name, project['id']) : get_network(name)
+          if !network
+            puts "Error: Network '#{name}' not found"
+            exit 1
+          end
+          networks << network
         end
-        networks << network
       end
       if networks.empty?
         networks << get_default_network
@@ -194,15 +196,16 @@ module CloudstackClient
       params = {
           'command' => 'deployVirtualMachine',
           'serviceOfferingId' => service['id'],
-          'templateId' => template['id'],
+          'templateId' => template ? template['id'] : iso['id'],
           'zoneId' => zone['id'],
           'networkids' => network_ids.join(',')
       }
       params['name'] = args[:name] if args[:name]
       params['projectid'] = project['id'] if project
       params['diskofferingid'] = disk_offering['id'] if disk_offering
-      params['hypervisor'] = args[:hypervisor] || 'vmware' if iso
+      params['hypervisor'] = (args[:hypervisor] || 'vmware') if iso
       params['keypair'] = args[:keypair] if args[:keypair]
+      params['size'] = args[:disk_size] if args[:disk_size]
 
       json = send_async_request(params)
       json['virtualmachine']

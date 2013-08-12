@@ -33,17 +33,18 @@ class Server < CloudstackCli::Base
   end
 
   desc "create NAME", "create a server"
-  option :zone, required: true
   option :template, desc: "name of the template"
   option :iso, desc: "name of the iso"
   option :offering, required: true
   option :networks, type: :array
+  option :zone
   option :project
   option :port_rules, type: :array,
     default: [],
     desc: "Port Forwarding Rules [public_ip]:port ..."
   option :disk_offering
-  option :hypervisor, desc: "only used for iso deployments, defaults to vmware"
+  option :disk_size, desc: "disk size in GB"
+  option :hypervisor, desc: "only used for iso deployments, default: vmware"
   option :keypair, desc: "the name of the ssh keypair to use"
   def create(name)
     if project = find_project
