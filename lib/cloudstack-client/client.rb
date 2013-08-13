@@ -11,7 +11,7 @@ module CloudstackClient
   class Connection
 
     @@async_poll_interval = 2.0
-    @@async_timeout = 300
+    @@async_timeout = 400
 
     # include all commands
     Dir.glob(File.dirname(__FILE__) + "/commands/*.rb").each do |file| 
@@ -62,7 +62,7 @@ module CloudstackClient
         exit 1
       end
 
-      if !response.is_a?(Net::HTTPOK) then
+      if !response.is_a?(Net::HTTPOK)
         puts "Error #{response.code}: #{response.message}"
         puts JSON.pretty_generate(JSON.parse(response.body))
         puts "URL: #{url}"
@@ -99,9 +99,9 @@ module CloudstackClient
 
         print "." if @verbose
 
-        if status == 1 then
+        if status == 1
           return json['jobresult']
-        elsif status == 2 then
+        elsif status == 2
           puts
           puts "Request failed (#{json['jobresultcode']}): #{json['jobresult']}"
           exit 1

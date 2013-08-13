@@ -45,7 +45,6 @@ module CloudstackCli
           old_config = YAML::load(IO.read(file))
         rescue
           error "Can't load configuration from file #{config_file}."
-          error "To create a new configuration file run \"cs setup\"."
           exit 1
         end
         say "Warning: #{file} already exists.", :red
