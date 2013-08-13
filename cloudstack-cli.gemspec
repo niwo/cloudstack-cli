@@ -11,6 +11,7 @@ Gem::Specification.new do |gem|
   gem.description   = %q{cloudstack-cli is a CloudStack API client written in Ruby.}
   gem.summary       = %q{cloudstack-cli CloudStack API client}
   gem.homepage      = "https://bitbucket.org/swisstxt/cloudstack-cli"
+  gem.license       = 'MIT'
 
   gem.required_ruby_version = '>= 1.9.3'
   gem.files         = `git ls-files`.split($/)
