@@ -20,11 +20,12 @@ module CloudstackClient
       include Object.const_get("CloudstackClient").const_get(module_name)
     end
 
-    def initialize(api_url, api_key, secret_key)
+    def initialize(api_url, api_key, secret_key, opts = {})
       @api_url = api_url
       @api_key = api_key
       @secret_key = secret_key
       @use_ssl = api_url.start_with? "https"
+      @verbose = !opts[:quiet]
     end
 
     ##
@@ -91,12 +92,12 @@ module CloudstackClient
         json = send_request(params)
         status = json['jobstatus']
 
-        print "."
+        print "." if @verbose
 
         if status == 1 then
           return json['jobresult']
         elsif status == 2 then
-          print "\n"
+          puts
           puts "Request failed (#{json['jobresultcode']}): #{json['jobresult']}"
           exit 1
         end

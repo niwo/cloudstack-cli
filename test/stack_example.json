@@ -4,9 +4,10 @@
   "version": "1.0",
   "zone": "BIEL_CU01",
   "project": "Playground",
+  "group": "my_web_stack",
   "servers": [
     {
-      "name": "web-01, web-02",
+      "name": "web-001, web-002",
       "description": "Web nodes",
       "template": "CentOS-6.4-x64-v1.2",
       "offering": "1cpu_1gb",
@@ -14,9 +15,11 @@
       "port_rules": ":80, :443"
     },
     {
-      "name": "db-01",
+      "name": "db-001",
       "description": "PostgreSQL Master",
-      "template": "CentOS-6.4-x64-v1.2",
+      "iso": "CentOS-6.4-x86_64-swisstxt-v15",
+      "disk_offering": "Perf Storage",
+      "disk_size": "5",
       "offering": "2cpu_4gb",
       "networks": "M_PLAY"
     }

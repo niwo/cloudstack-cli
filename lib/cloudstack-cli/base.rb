@@ -18,12 +18,13 @@ module CloudstackCli
     end
 
     no_commands do  
-      def client
+      def client(opts = {})
         @config ||= CloudstackClient::ConnectionHelper.load_configuration(options[:config])
         @client ||= CloudstackClient::Connection.new(
           @config[:url],
           @config[:api_key],
-          @config[:secret_key]
+          @config[:secret_key],
+          opts
         )
       end
 

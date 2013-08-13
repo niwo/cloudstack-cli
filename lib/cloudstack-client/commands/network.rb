@@ -2,6 +2,20 @@ module CloudstackClient
 
 	module Network
 
+    ##
+    # Finds the network with the specified name.
+
+    def networkid_to_name(id, project_id=nil)
+      params = {
+          'command' => 'listNetworks',
+          'id' => id
+      }
+      params['projectid'] = project_id if project_id
+      json = send_request(params)
+
+      json['network'] ? json['network'].first['name'] : nil
+    end
+
 		##
     # Finds the network with the specified name.
 

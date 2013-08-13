@@ -206,6 +206,8 @@ module CloudstackClient
       params['hypervisor'] = (args[:hypervisor] || 'vmware') if iso
       params['keypair'] = args[:keypair] if args[:keypair]
       params['size'] = args[:disk_size] if args[:disk_size]
+      params['group'] = args[:group] if args[:group]
+      params['displayname'] = args[:displayname] if args[:displayname]
 
       json = send_async_request(params)
       json['virtualmachine']

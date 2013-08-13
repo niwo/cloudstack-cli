@@ -55,6 +55,8 @@ An example stackfile looks like this
       "description": "Web Application Stack",
       "version": "1.0",
       "zone": "DC-BIE-1",
+      "group": "my_web_stack",
+      "keypair": "mykeypair",
       "servers": [
         {
           "name": "web-d1, web-d2",
@@ -67,7 +69,9 @@ An example stackfile looks like this
         {
           "name": "db-01",
           "description": "PostgreSQL Master",
-          "template": "CentOS-6.4-x64-v1.2",
+          "iso": "CentOS-6.4-x86_64-swisstxt-v15",
+          "disk_offering": "Perf Storage",
+          "disk_size": "5",
           "offering": "2cpu_4gb",
           "networks": "server_network, storage_network"
         }

@@ -33,44 +33,22 @@ class Server < CloudstackCli::Base
   end
 
   desc "create NAME", "create a server"
-  option :template, desc: "name of the template"
-  option :iso, desc: "name of the iso"
-  option :offering, required: true
-  option :networks, type: :array
-  option :zone
-  option :project
-  option :port_rules, type: :array,
+  option :template, aliases: '-t', desc: "name of the template"
+  option :iso, desc: "name of the iso", desc: "name of the iso template"
+  option :offering, aliases: '-o', required: true, desc: "computing offering name"
+  option :networks, aliases: '-n', type: :array, desc: "network names"
+  option :zone, aliases: '-z', desc: "availability zone name"
+  option :project, aliases: '-p', desc: "project name"
+  option :port_rules, aliases: '-pr', type: :array,
     default: [],
     desc: "Port Forwarding Rules [public_ip]:port ..."
-  option :disk_offering
+  option :disk_offering, desc: "disk offering - data disk for template, root disk for iso"
   option :disk_size, desc: "disk size in GB"
   option :hypervisor, desc: "only used for iso deployments, default: vmware"
   option :keypair, desc: "the name of the ssh keypair to use"
+  option :group, desc: "group name"
   def create(name)
-    if project = find_project
-      project_id = project["id"]
-    end 
-    server = client.get_server(name, project_id)
-    unless server
-      say "Create server #{name}...", :yellow
-      server = client.create_server(
-       options.merge({name: name})
-      )
-      puts
-      say "Server #{name} has been created.", :green
-      client.wait_for_server_state(server["id"], "Running")
-      say "Server #{name} is running.", :green
-    else
-      say "Server #{name} already exists.", :yellow
-      # TODO: check status of server
-    end
-
-    if options[:port_rules] && options[:port_rules].size > 0
-      invoke "port_rule:create", name,
-        project: options[:project],
-        network: options[:networks].first,
-        rules: options[:port_rules]
-    end
+    bootstrap_server(options.merge({name: name}))
   end
 
   desc "destroy NAME [NAME2 ..]", "destroy a server"
@@ -85,8 +63,8 @@ class Server < CloudstackCli::Base
         say "Server #{server_name} not found.", :red
       else
         ask = "Destroy #{server_name} (#{server['state']})?"
-        if options[:force] == true || yes?(ask)
-          say "Destroying #{server_name} "
+        if options[:force] == true || yes?(ask, :yellow)
+          say "destroying #{server_name} "
           client.destroy_server(server["id"])
           puts  
         end

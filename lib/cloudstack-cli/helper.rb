@@ -11,50 +11,38 @@ module CloudstackCli
       number < 0 ? 0 : number
     end
 
-    def bootstrap_server(name, zone, template, offering, networks, pf_rules = [], project = nil)
-      if project = client.get_project(project)
+    def bootstrap_server(args = {})
+      if args[:project] && project = client(quiet: true).get_project(args[:project])
         project_id = project["id"]
         project_name = project['name']
       end
-      server = client.get_server(name, project_id)
+      server = client(quiet: true).get_server(args[:name], project_id)
       unless server
-        say "Create server #{name}..."
-        server = client.create_server(
-         name: name, 
-         offering: offering,
-         template: template,
-         zone: zone,
-         networks: networks,
-         project: project_name
-        )
-        puts
+        say "Create server #{args[:name]}...", :yellow
+        server = client.create_server(args)
         say "Server #{server["name"]} has been created.", :green
         client.wait_for_server_state(server["id"], "Running")
         say "Server #{server["name"]} is running.", :green
       else
-        say "Server #{name} already exists.", :yellow
+        say "Server #{args[:name]} already exists (#{server['state']}).", :yellow
       end
 
-      if pf_rules && pf_rules.size > 0
-        puts
+      if args[:port_rules] && args[:port_rules].size > 0
         frontendip = nil
-        pf_rules.each do |pf_rule|
+        args[:port_rules].each do |pf_rule|
           ip = pf_rule.split(":")[0]
           if ip != ''
             ip_addr = client.get_public_ip_address(ip)
           else
             ip_addr = frontendip ||= client.associate_ip_address(
-              client.get_network(networks[0], project_id)["id"]
+              server["nic"].first["networkid"]
             )
           end
           port = pf_rule.split(":")[1]
-          puts
-          say "Create port forwarding rule #{ip}:#{port} ", :yellow
+          say "Create port forwarding rule #{ip_addr['ipaddress']}:#{port} for server #{args[:name]}.", :yellow
           client.create_port_forwarding_rule(ip_addr["id"], port, 'TCP', port, server["id"])
-          puts
         end
       end
-      puts
     end
 
     def bootstrap_server_interactive
