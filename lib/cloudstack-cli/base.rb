@@ -19,13 +19,31 @@ module CloudstackCli
 
     no_commands do  
       def client(opts = {})
-        @config ||= CloudstackClient::ConnectionHelper.load_configuration(options[:config])
+        @config ||= load_configuration
         @client ||= CloudstackClient::Connection.new(
           @config[:url],
           @config[:api_key],
           @config[:secret_key],
           opts
         )
+      end
+
+      def load_configuration(config_file = options[:config], env = options[:environment])
+        begin
+          config = YAML::load(IO.read(config_file))
+        rescue
+          error "Can't load configuration from file #{config_file}."
+          error "To create a new configuration file run \"cs setup\"."
+          exit 1
+        end
+        if env
+          config = config[env]
+          unless config
+            error "Can't find environment #{env} in configuration file."
+            exit 1
+          end
+        end
+        config
       end
 
       def find_project(project_name = options[:project])
@@ -38,7 +56,7 @@ module CloudstackCli
       end
 
       def filter_by(objects, tag_name, tag)
-        objects.select {|r| r[tag_name].downcase == tag.downcase }
+        objects.select {|r| r[tag_name].downcase == tag.downcase}
       end
     end
   end

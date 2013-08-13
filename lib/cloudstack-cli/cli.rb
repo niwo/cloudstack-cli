@@ -8,7 +8,11 @@ module CloudstackCli
     class_option :config,
       default: File.join(Dir.home, '.cloudstack-cli.yml'),
       aliases: '-c',
-      desc: 'localition of your cloudstack-cli configuration file'
+      desc: 'location of your cloudstack-cli configuration file'
+
+    class_option :environment,
+      aliases: '-e',
+      desc: 'environment to load from the configuration file'
 
     desc "version", "outputs the cloudstack-cli version"
     def version
@@ -22,8 +26,9 @@ module CloudstackCli
     def setup(file = options[:config])
       config = {}
       unless options[:url]
+        say "Configuring #{options[:environment] || 'default'} environment."
         say "What's the URL of your Cloudstack API?", :yellow
-        say "Example: https://my-cloudstack-server/client/api/", :yellow
+        say "Example: https://my-cloudstack-service/client/api/"
         config[:url] = ask("URL:", :magenta)
       end
       unless options[:api_key]
@@ -32,9 +37,20 @@ module CloudstackCli
       unless options[:secret_key]
         config[:secret_key] = ask("Secret Key:", :magenta)
       end
+      if options[:environment]
+        config = {options[:environment] => config}
+      end
       if File.exists? file
+        begin
+          old_config = YAML::load(IO.read(file))
+        rescue
+          error "Can't load configuration from file #{config_file}."
+          error "To create a new configuration file run \"cs setup\"."
+          exit 1
+        end
         say "Warning: #{file} already exists.", :red
-        exit unless yes?("Overwrite [y/N]", :red)
+        exit unless yes?("Do you want to merge your settings? [y/N]", :red)
+        config = old_config.merge(config)
       end
       File.open(file, 'w+') {|f| f.write(config.to_yaml) }
     end    

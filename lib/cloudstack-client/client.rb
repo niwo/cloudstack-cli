@@ -69,7 +69,12 @@ module CloudstackClient
         exit 1
       end
 
-      json = JSON.parse(response.body)
+      begin 
+        json = JSON.parse(response.body)
+      rescue JSON::ParserError
+        puts "Error parsing response from server."
+        exit 1
+      end
       json[params['command'].downcase + 'response']
     end
 
