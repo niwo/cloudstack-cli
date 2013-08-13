@@ -17,7 +17,7 @@ module CloudstackClient
     Dir.glob(File.dirname(__FILE__) + "/commands/*.rb").each do |file| 
       require file
       module_name = File.basename(file, '.rb').split('_').map{|f| f.capitalize}.join
-      include Object.const_get("CloudstackClient::" + module_name)
+      include Object.const_get("CloudstackClient").const_get(module_name)
     end
 
     def initialize(api_url, api_key, secret_key)
