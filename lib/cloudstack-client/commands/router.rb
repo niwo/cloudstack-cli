@@ -2,6 +2,20 @@ module CloudstackClient
 
 	module Router
 
+    ##
+    # Get a router with a given name.
+
+    def get_router(name)
+      params = {
+          'command' => 'listRouters',
+          'listall' => 'true',
+          'name' => name
+      }
+
+      json = send_request(params)
+      json['router'] ? json['router'].first : nil
+    end
+
 		##
     # Lists all virtual routers.
 
@@ -39,34 +53,34 @@ module CloudstackClient
     ##
     # Destroy virtual router.
 
-    def destroy_router(id, async = false)
+    def destroy_router(id, opts = {async: true})
       params = {
         'command' => 'destroyRouter',
         'id' => id
       }
-      async ? send_async_request(params) : send_request(params)
+      opts[:async] ? send_async_request(params)['router'] : send_request(params)
     end
 
     ##
     # Start virtual router.
 
-    def start_router(id, async = false)
+    def start_router(id, opts = {async: true})
       params = {
         'command' => 'startRouter',
         'id' => id
       }
-      async ? send_async_request(params) : send_request(params)
+      opts[:async] ? send_async_request(params)['router'] : send_request(params)
     end
 
     ##
     # Stop virtual router.
 
-    def stop_router(id, async = false)
+    def stop_router(id, opts = {async: true})
       params = {
         'command' => 'stopRouter',
         'id' => id
       }
-      async ? send_async_request(params) : send_request(params)
+      opts[:async] ? send_async_request(params)['router'] : send_request(params)
     end
 
 	end

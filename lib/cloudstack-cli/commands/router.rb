@@ -44,7 +44,7 @@ class Router < CloudstackCli::Base
 			say "No routers found."
 		else
 		  table = [[
-		  	'Name', 'Zone', 'Account', 'Project', 'Redundant-State', 'Linklocal IP', 'Status', 'ID'
+		  	'Name', 'Zone', 'Account', 'Project', 'Redundant-State', 'IP', 'Linklocal IP', 'Status', 'ID'
 		  ]]
 		  table[0].delete('ID') unless options[:showid]
       routers.each do |router|
@@ -54,6 +54,7 @@ class Router < CloudstackCli::Base
           router["account"],
           router["project"],
           router["redundantstate"],
+          router["nic"].first ? router["nic"].first['ipaddress'] : "",
           router["linklocalip"],
           router["state"],
           router["id"]
@@ -71,14 +72,14 @@ class Router < CloudstackCli::Base
 	  		exit unless yes?("Start the routers above? [y/N]:", :magenta)
 	  		routers.each do |router|
 	  			say "Start router #{router['name']}... "
-	  			say "job started ", :green if job = client.start_router(router['id'])
+	  			say "job started ", :green if job = client.start_router(router['id'], async: false)
 	  			say "(jobid: #{job['jobid']})"
 	  		end
 	  	when "stop"
 	  		exit unless yes?("Stop the routers above? [y/N]:", :magenta)
 	  		routers.each do |router|
 	  			say "Stop router #{router['name']}... "
-	  			say "job started ", :green if job = client.stop_router(router['id'])
+	  			say "job started ", :green if job = client.stop_router(router['id'], async: false)
 	  			say "(jobid: #{job['jobid']})"
 	  		end
 	  	else
@@ -88,22 +89,47 @@ class Router < CloudstackCli::Base
 	  end
   end
 
-  desc "stop ID", "stop virtual router"
-  def stop(id)
-  	exit unless yes?("Stop the router with ID #{id}?", :magenta)
-  	client.stop_router id
+  desc "stop NAME [NAME2 ..]", "stop virtual router(s)"
+  option :force, description: "stop without asking", type: :boolean, aliases: '-f'
+  def stop(*names)
+  	names.each do |name|
+  		router = get_router(name)
+  		exit unless options[:force] || yes?("Stop router #{router['name']}?", :magenta)
+  		client.stop_router router['id']
+  		puts
+  	end
   end
 
-  desc "start ID", "start virtual router"
-  def start(id)
-  	exit unless yes?("Start the router with ID #{id}?", :magenta)
-  	client.start_router id
+  desc "start NAME [NAME2 ..]", "start virtual router(s)"
+  option :force, description: "start without asking", type: :boolean, aliases: '-f'
+  def start(*names)
+  	names.each do |name|
+  		router = get_router(name)
+  		exit unless options[:force] || yes?("Start router #{router['name']}?", :magenta)
+  		client.start_router router['id']
+  		puts
+  	end
   end
 
-  desc "destroy ID", "destroy virtual router"
-  def destroy(id)
-  	exit unless yes?("Destroy the router with ID #{id}?", :magenta)
-  	say "OK", :green if client.destroy_router(id)
+  desc "destroy NAME [NAME2 ..]", "destroy virtual router(s)"
+  option :force, description: "destroy without asking", type: :boolean, aliases: '-f'
+  def destroy(*names)
+  	names.each do |name|
+  		router = get_router(name)
+  		exit unless options[:force] || yes?("Destroy router #{router['name']}?", :magenta)
+  		say "OK", :green if client.destroy_router(router['id'])
+  		puts
+  	end
+  end
+
+  no_commands do
+  	def get_router(name)
+  		unless router = client.get_router(name)
+  			say "Can't find router with name #{name}.", :red
+  			exit 1
+  		end
+  		router
+  	end
   end
 
 end

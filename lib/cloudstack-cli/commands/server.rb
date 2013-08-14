@@ -32,7 +32,7 @@ class Server < CloudstackCli::Base
     end
   end
 
-  desc "create NAME", "create a server"
+  desc "create NAME [NAME2 ...]", "create server(s)"
   option :template, aliases: '-t', desc: "name of the template"
   option :iso, desc: "name of the iso", desc: "name of the iso template"
   option :offering, aliases: '-o', required: true, desc: "computing offering name"
@@ -51,20 +51,19 @@ class Server < CloudstackCli::Base
     bootstrap_server(options.merge({name: name}))
   end
 
-  desc "destroy NAME [NAME2 ..]", "destroy a server"
+  desc "destroy NAME [NAME2 ..]", "destroy server(s)"
   option :project
   option :force, description: "destroy without asking", type: :boolean, aliases: '-f'
-  def destroy(*name)
+  def destroy(*names)
     projectid = find_project['id'] if options[:project]
-
-    name.each do |server_name|
-      server = client.get_server(server_name, projectid)
+    names.each do |name|
+      server = client.get_server(name, projectid)
       unless server
-        say "Server #{server_name} not found.", :red
+        say "Server #{name} not found.", :red
       else
-        ask = "Destroy #{server_name} (#{server['state']})?"
-        if options[:force] == true || yes?(ask, :yellow)
-          say "destroying #{server_name} "
+        ask = "Destroy #{name} (#{server['state']})?"
+        if options[:force] || yes?(ask, :yellow)
+          say "destroying #{name} "
           client.destroy_server(server["id"])
           puts  
         end

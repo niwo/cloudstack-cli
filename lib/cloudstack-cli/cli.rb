@@ -120,7 +120,10 @@ module CloudstackCli
     desc "capacity SUBCOMMAND ...ARGS", "Lists all the system wide capacities"
     subcommand "capacity", Capacity
 
-    desc "port_rules SUBCOMMAND ...ARGS", "Manage portforwarding rules"
+    desc "port_rule SUBCOMMAND ...ARGS", "Manage portforwarding rules"
     subcommand "port_rule", PortRule
+
+    desc "job SUBCOMMAND ...ARGS", "Display async jobs"
+    subcommand "job", Job
   end
 end
