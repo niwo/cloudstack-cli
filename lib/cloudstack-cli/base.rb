@@ -4,6 +4,8 @@ require "yaml"
 module CloudstackCli  
   class Base < Thor
     include Thor::Actions
+    include CloudstackCli::Helper
+    
     attr_reader :config
 
     # catch control-c and exit

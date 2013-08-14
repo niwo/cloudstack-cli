@@ -11,6 +11,36 @@ module CloudstackCli
       number < 0 ? 0 : number
     end
 
+    def get_async_job_status(ids)
+      ids.map do |id|
+        client.query_job(id)['jobstatus']
+      end
+    end
+
+    def watch_jobs(jobs)
+      chars = %w(| / - \\)
+      async_state = {0 => "running", 1 => "completed", 2 => "error"}
+      status = get_async_job_status(jobs.map {|job| job[:id]})
+      call = 0
+      while status.include?(0) do
+        status = call.modulo(40) == 0 ? get_async_job_status(jobs.map {|job| job[:id]}) : status
+        print ("\r" + "\e[A\e[K" * (status.size)) if call > 0
+
+        status.each_with_index do |job_status, i|
+          puts "#{jobs[i][:name]} : job #{async_state[job_status]}  #{chars[0]}"
+        end
+
+        sleep 0.1
+        chars.push chars.shift
+        call += 1
+      end
+      
+      print ("\r" + "\e[A\e[K" * (status.size))
+      status.each_with_index do |job_status, i|
+        puts "#{jobs[i][:name]} : job #{async_state[job_status]}"
+      end
+    end
+
     def bootstrap_server(args = {})
       if args[:project] && project = client(quiet: true).get_project(args[:project])
         project_id = project["id"]

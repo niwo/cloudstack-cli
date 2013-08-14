@@ -1,5 +1,4 @@
 class Stack < CloudstackCli::Base
-	include CloudstackCli::Helper
 
 	desc "create STACKFILE", "create a stack of servers"
   def create(stackfile)

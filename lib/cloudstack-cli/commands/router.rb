@@ -92,23 +92,27 @@ class Router < CloudstackCli::Base
   desc "stop NAME [NAME2 ..]", "stop virtual router(s)"
   option :force, description: "stop without asking", type: :boolean, aliases: '-f'
   def stop(*names)
+    jobs = []
   	names.each do |name|
   		router = get_router(name)
   		exit unless options[:force] || yes?("Stop router #{router['name']}?", :magenta)
-  		client.stop_router router['id']
-  		puts
+  		jobs << {id: client.stop_router(router['id'], async: false)['jobid'], name: "Stop router #{name}"}
   	end
+    puts
+    watch_jobs(jobs)
   end
 
   desc "start NAME [NAME2 ..]", "start virtual router(s)"
   option :force, description: "start without asking", type: :boolean, aliases: '-f'
   def start(*names)
-  	names.each do |name|
-  		router = get_router(name)
-  		exit unless options[:force] || yes?("Start router #{router['name']}?", :magenta)
-  		client.start_router router['id']
-  		puts
-  	end
+  	jobs = []
+    names.each do |name|
+      router = get_router(name)
+      exit unless options[:force] || yes?("Start router #{router['name']}?", :magenta)
+      jobs << {id: client.start_router(router['id'], async: false)['jobid'], name: "Start router #{name}"}
+    end
+    puts
+    watch_jobs(jobs)
   end
 
   desc "destroy NAME [NAME2 ..]", "destroy virtual router(s)"

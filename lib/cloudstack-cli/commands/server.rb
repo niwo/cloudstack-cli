@@ -1,5 +1,4 @@
 class Server < CloudstackCli::Base
-  include CloudstackCli::Helper
 
   desc "list", "list servers"
   option :project
