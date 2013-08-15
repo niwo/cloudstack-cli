@@ -40,63 +40,38 @@ class Router < CloudstackCli::Base
 		end
 
 		routers.reverse! if options[:reverse]
-		if routers.size < 1
-			say "No routers found."
-		else
-		  table = [[
-		  	'Name', 'Zone', 'Account', 'Project', 'Redundant-State', 'IP', 'Linklocal IP', 'Status', 'ID'
-		  ]]
-		  table[0].delete('ID') unless options[:showid]
-      routers.each do |router|
-        table << [
-          router["name"],
-          router["zonename"],
-          router["account"],
-          router["project"],
-          router["redundantstate"],
-          router["nic"].first ? router["nic"].first['ipaddress'] : "",
-          router["linklocalip"],
-          router["state"],
-          router["id"]
-        ]
-        table[-1].delete_at(-1) unless table[0].index "ID"
-      end
-      print_table table
-      puts
-      say "Number of routers: #{routers.size}"
-	  end
+    
+    print_routers(routers, options)		
 
 	  if options[:command]
 	  	case options[:command].downcase
 	  	when "start"
-	  		exit unless yes?("Start the routers above? [y/N]:", :magenta)
-	  		routers.each do |router|
-	  			say "Start router #{router['name']}... "
-	  			say "job started ", :green if job = client.start_router(router['id'], async: false)
-	  			say "(jobid: #{job['jobid']})"
+	  		exit unless yes?("\nStart the router(s) above? [y/N]:", :magenta)
+	  		jobs = routers.map do |router|
+	  			{id: client.start_router(router['id'], async: false)['jobid'], name: "Start router #{router['name']}"}
 	  		end
 	  	when "stop"
-	  		exit unless yes?("Stop the routers above? [y/N]:", :magenta)
-	  		routers.each do |router|
-	  			say "Stop router #{router['name']}... "
-	  			say "job started ", :green if job = client.stop_router(router['id'], async: false)
-	  			say "(jobid: #{job['jobid']})"
+	  		exit unless yes?("\nStop the router(s) above? [y/N]:", :magenta)
+	  		jobs = routers.map do |router|
+	  			{id: client.stop_router(router['id'], async: false)['jobid'], name: "Stop router #{router['name']}"}
 	  		end
 	  	else
-	  		say "Command #{options[:command]} not supported", :red
-	  		exit
+	  		say "\nCommand #{options[:command]} not supported.", :red
+	  		exit 1
 	  	end
+      puts
+      watch_jobs(jobs)
 	  end
   end
 
   desc "stop NAME [NAME2 ..]", "stop virtual router(s)"
   option :force, description: "stop without asking", type: :boolean, aliases: '-f'
   def stop(*names)
-    jobs = []
-  	names.each do |name|
-  		router = get_router(name)
-  		exit unless options[:force] || yes?("Stop router #{router['name']}?", :magenta)
-  		jobs << {id: client.stop_router(router['id'], async: false)['jobid'], name: "Stop router #{name}"}
+    routers = names.map {|name| get_router(name)}
+    print_routers(routers)
+    exit unless options[:force] || yes?("\nStop router(s) above?", :magenta)
+  	jobs = routers.map do |router|
+  		{id: client.stop_router(router['id'], async: false)['jobid'], name: "Stop router #{router['name']}"}
   	end
     puts
     watch_jobs(jobs)
@@ -105,11 +80,11 @@ class Router < CloudstackCli::Base
   desc "start NAME [NAME2 ..]", "start virtual router(s)"
   option :force, description: "start without asking", type: :boolean, aliases: '-f'
   def start(*names)
-  	jobs = []
-    names.each do |name|
-      router = get_router(name)
-      exit unless options[:force] || yes?("Start router #{router['name']}?", :magenta)
-      jobs << {id: client.start_router(router['id'], async: false)['jobid'], name: "Start router #{name}"}
+    routers = names.map {|name| get_router(name)}
+    print_routers(routers)
+    exit unless options[:force] || yes?("\nStart router(s) above?", :magenta)
+  	jobs = routers.map do |router|
+      {id: client.start_router(router['id'], async: false)['jobid'], name: "Start router #{router['name']}"}
     end
     puts
     watch_jobs(jobs)
@@ -118,15 +93,18 @@ class Router < CloudstackCli::Base
   desc "destroy NAME [NAME2 ..]", "destroy virtual router(s)"
   option :force, description: "destroy without asking", type: :boolean, aliases: '-f'
   def destroy(*names)
-  	names.each do |name|
-  		router = get_router(name)
-  		exit unless options[:force] || yes?("Destroy router #{router['name']}?", :magenta)
-  		say "OK", :green if client.destroy_router(router['id'])
-  		puts
+    routers = names.map {|name| get_router(name)}
+    print_routers(routers)
+    exit unless options[:force] || yes?("\nDestroy router(s) above?", :magenta)
+  	jobs = routers.map do |router|
+  		{id: client.destroy_router(router['id'], async: false)['jobid'], name: "Destroy router #{router['name']}"}
   	end
+    puts
+    watch_jobs(jobs)
   end
 
   no_commands do
+
   	def get_router(name)
   		unless router = client.get_router(name)
   			say "Can't find router with name #{name}.", :red
@@ -134,6 +112,34 @@ class Router < CloudstackCli::Base
   		end
   		router
   	end
+
+    def print_routers(routers, options = {})
+      if routers.size < 1
+        say "No routers found."
+      else
+        table = [[
+          'Name', 'Zone', 'Account', 'Project', 'Redundant-State', 'IP', 'Linklocal IP', 'Status', 'ID'
+        ]]
+        table[0].delete('ID') unless options[:showid]
+        routers.each do |router|
+          table << [
+            router["name"],
+            router["zonename"],
+            router["account"],
+            router["project"],
+            router["redundantstate"],
+            router["nic"].first ? router["nic"].first['ipaddress'] : "",
+            router["linklocalip"],
+            router["state"],
+            router["id"]
+          ]
+          table[-1].delete_at(-1) unless table[0].index "ID"
+        end
+        print_table table
+        puts
+        say "Number of routers: #{routers.size}"
+      end
+    end
   end
 
 end

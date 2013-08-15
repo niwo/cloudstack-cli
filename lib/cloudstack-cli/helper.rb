@@ -17,28 +17,43 @@ module CloudstackCli
       end
     end
 
+    ASYNC_STATES = {
+      0 => "running",
+      1 => "completed",
+      2 => "error"
+    }
+
     def watch_jobs(jobs)
       chars = %w(| / - \\)
-      async_state = {0 => "running", 1 => "completed", 2 => "error"}
       status = get_async_job_status(jobs.map {|job| job[:id]})
       call = 0
       while status.include?(0) do
-        status = call.modulo(40) == 0 ? get_async_job_status(jobs.map {|job| job[:id]}) : status
-        print ("\r" + "\e[A\e[K" * (status.size)) if call > 0
-
-        status.each_with_index do |job_status, i|
-          puts "#{jobs[i][:name]} : job #{async_state[job_status]}  #{chars[0]}"
+        if call.modulo(40) == 0
+          t = Thread.new { status = get_async_job_status(jobs.map {|job| job[:id]}) }
+          while t.alive?
+            print ("\r" + "\e[A\e[K" * (status.size))
+            chars = print_job_status(jobs, status, chars)
+          end
+          t.join
+        else
+          print ("\r" + "\e[A\e[K" * (status.size)) if call > 0
+          chars = print_job_status(jobs, status, chars)
+          call += 1
         end
-
-        sleep 0.1
-        chars.push chars.shift
-        call += 1
       end
-      
       print ("\r" + "\e[A\e[K" * (status.size))
       status.each_with_index do |job_status, i|
-        puts "#{jobs[i][:name]} : job #{async_state[job_status]}"
+        puts "#{jobs[i][:name]} : job #{ASYNC_STATES[job_status]}"
       end
+    end
+
+    def print_job_status(jobs, status, spinner, sleeptime = 0.1)
+      status.each_with_index do |job_status, i|
+        puts "#{jobs[i][:name]} : job #{ASYNC_STATES[job_status]}  #{spinner.first}"
+      end
+      sleep sleeptime
+      spinner.push spinner.shift
+      spinner
     end
 
     def bootstrap_server(args = {})
