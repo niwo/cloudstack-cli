@@ -4,7 +4,7 @@ class Job < CloudstackCli::Base
   def list
     jobs = client.list_jobs()
     if jobs.size < 1
-      puts "No jobs found"
+      say "No jobs found."
     else
       table = [["Command", "Created", "Status", "ID", "User ID"]]
       jobs.each do |job|

@@ -12,6 +12,10 @@ module CloudstackClient
       }
       if args[:project]
         project = get_project(args[:project])
+        unless project
+          puts "Error: project #{args[:project]} not found."
+          exit 1
+        end
         params['projectid'] = project['id']
       end
       if args[:account]

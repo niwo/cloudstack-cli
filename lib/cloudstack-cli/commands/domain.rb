@@ -4,7 +4,7 @@ class Domain < CloudstackCli::Base
   def list(name = nil)
     domains = client.list_domains(name)
     if domains.size < 1
-      puts "No domains found"
+      puts "No domains found."
     else
       table = [["Name", "Path"]]
       domains.each do |domain|

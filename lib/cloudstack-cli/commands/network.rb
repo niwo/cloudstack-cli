@@ -1,10 +1,5 @@
 class Network < CloudstackCli::Base
 
-  desc "create NAME", "create network"
-  def create(name)
-    # TODO
-  end
-
   desc "default", "get the default network"
   option :zone
   def default

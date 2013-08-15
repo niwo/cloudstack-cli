@@ -8,7 +8,7 @@ class LoadBalancer < CloudstackCli::Base
       { project_name: project ? project['name'] : nil }
     )
     if rules.size < 1
-      puts "No load balancer rules found"
+      puts "No load balancer rules found."
     else
       table = [["Name", "Public-IP", "Public-Port"]]
       rules.each do |rule|

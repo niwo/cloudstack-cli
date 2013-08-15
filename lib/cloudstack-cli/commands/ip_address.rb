@@ -2,7 +2,7 @@ class IpAddress < CloudstackCli::Base
 
   desc "release ID", "release public IP address"
   def release(id)
-    puts "OK" if client.disassociate_ip_address(id)
+    say("OK", :green) if client.disassociate_ip_address(id)
   end
 
   desc "assign NETWORK", "assign a public IP address"
@@ -24,10 +24,15 @@ class IpAddress < CloudstackCli::Base
   option :listall
   def list
   	table = [["Address", "Account", "Zone"]]
-  	client.list_public_ip_addresses(options).each do |address|
-  		table << [address["ipaddress"], address["account"], address["zonename"]]
-  	end
-  	print_table table
+    addresses = client.list_public_ip_addresses(options)
+    if addresses.size < 1
+      say "No ip addresses found."
+    else
+      addresses.each do |address|
+        table << [address["ipaddress"], address["account"], address["zonename"]]
+      end
+      print_table table
+    end
   end
 
 end

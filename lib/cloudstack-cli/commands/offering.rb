@@ -5,7 +5,7 @@ class Offering < CloudstackCli::Base
   def list
     offerings = client.list_service_offerings(options[:domain])
     if offerings.size < 1
-      puts "No offerings found"
+      puts "No offerings found."
     else
       table = [["Name", "Displaytext", "Domain", "ID"]]
       offerings.each do |offering|

@@ -72,6 +72,12 @@ module CloudstackCli
     desc "zone SUBCOMMAND ...ARGS", "Manage zones"
     subcommand "zone", Zone
 
+    desc "pod SUBCOMMAND ...ARGS", "List pods"
+    subcommand "pod", Pod
+
+    desc "cluster SUBCOMMAND ...ARGS", "List clusters"
+    subcommand "cluster", Cluster
+
     desc "project SUBCOMMAND ...ARGS", "Manage servers"
     subcommand "project", Project
 
@@ -105,11 +111,17 @@ module CloudstackCli
     desc "volume SUBCOMMAND ...ARGS", "Manage volumes"
     subcommand "volume", Volume
 
+    desc "snapshot SUBCOMMAND ...ARGS", "Manage snapshots"
+    subcommand "snapshot", Snapshot
+
     desc "stack SUBCOMMAND ...ARGS", "Manage stacks"
     subcommand "stack", Stack
 
     desc "account SUBCOMMAND ...ARGS", "Manage accounts"
     subcommand "account", Account
+
+    desc "user SUBCOMMAND ...ARGS", "Manage users"
+    subcommand "user", User
 
     desc "domain SUBCOMMAND ...ARGS", "Manage domains"
     subcommand "domain", Domain
@@ -125,5 +137,8 @@ module CloudstackCli
 
     desc "job SUBCOMMAND ...ARGS", "Display async jobs"
     subcommand "job", Job
+
+    desc "ssh_key_pair SUBCOMMAND ...ARGS", "Manage ssh key pairs"
+    subcommand "ssh_key_pair", SshKeyPair
   end
 end

@@ -10,7 +10,7 @@ class Account < CloudstackCli::Base
   def list(name = nil)
     accounts = client.list_accounts({name: name})
     if accounts.size < 1
-      puts "No accounts found"
+      puts "No accounts found."
     else
       table = [["Name", "Type", "Domain"]]
       accounts.each do |account|

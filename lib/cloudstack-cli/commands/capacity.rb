@@ -1,5 +1,5 @@
 class Capacity < CloudstackCli::Base
-	TYPES = {
+	CAPACITY_TYPES = {
 		0 => "Memory",
 		1 => "CPU",
 		2 => "Storage",
@@ -21,7 +21,7 @@ class Capacity < CloudstackCli::Base
     capacities.each do |c|
     	table << [
     		c['zonename'],
-    	 	TYPES[c['type']],
+    	 	CAPACITY_TYPES[c['type']],
     	 	c['capacityused'],
     	 	c['capacitytotal'],
     	 	"#{c['percentused']}%"
