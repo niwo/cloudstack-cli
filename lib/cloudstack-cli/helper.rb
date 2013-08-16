@@ -27,31 +27,35 @@ module CloudstackCli
       chars = %w(| / - \\)
       status = get_async_job_status(jobs.map {|job| job[:id]})
       call = 0
+      opts = {t_start: Time.now}
+      puts
       while status.include?(0) do
         if call.modulo(40) == 0
           t = Thread.new { status = get_async_job_status(jobs.map {|job| job[:id]}) }
           while t.alive?
-            print ("\r" + "\e[A\e[K" * (status.size))
-            chars = print_job_status(jobs, status, chars)
+            chars = print_job_status(jobs, status, chars, opts)
           end
           t.join
         else
-          print ("\r" + "\e[A\e[K" * (status.size)) if call > 0
-          chars = print_job_status(jobs, status, chars)
+          print ("\r" + "\e[A\e[K" * (status.size + 1)) if call > 0
+          chars = print_job_status(jobs, status, chars,
+            call == 0 ? opts.merge(no_clear: true) : opts
+          )
           call += 1
         end
       end
-      print ("\r" + "\e[A\e[K" * (status.size))
-      status.each_with_index do |job_status, i|
-        puts "#{jobs[i][:name]} : job #{ASYNC_STATES[job_status]}"
-      end
+      print_job_status(jobs, status, chars, opts)
     end
 
-    def print_job_status(jobs, status, spinner, sleeptime = 0.1)
+    def print_job_status(jobs, status, spinner, opts = {t_start: Time.now})
+      print ("\r" + "\e[A\e[K" * (status.size + 1)) unless opts[:no_clear]
       status.each_with_index do |job_status, i|
-        puts "#{jobs[i][:name]} : job #{ASYNC_STATES[job_status]}  #{spinner.first}"
+        print "#{jobs[i][:name]} : job #{ASYNC_STATES[job_status]} "
+        puts job_status == 0 ? spinner.first : ""
       end
-      sleep sleeptime
+      t_elapsed = opts[:t_start] ? (Time.now - opts[:t_start]).round(1) : 0
+      puts "Runtime: #{t_elapsed}s"
+      sleep opts[:sleeptime] || 0.1
       spinner.push spinner.shift
       spinner
     end

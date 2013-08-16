@@ -46,6 +46,7 @@ class Server < CloudstackCli::Base
   option :hypervisor, desc: "only used for iso deployments, default: vmware"
   option :keypair, desc: "the name of the ssh keypair to use"
   option :group, desc: "group name"
+  option :account, desc: "account name"
   def create(name)
     bootstrap_server(options.merge({name: name}))
   end

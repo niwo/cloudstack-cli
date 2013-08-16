@@ -193,6 +193,7 @@ module CloudstackClient
         network['id']
       }
 
+
       params = {
           'command' => 'deployVirtualMachine',
           'serviceOfferingId' => service['id'],
@@ -208,6 +209,16 @@ module CloudstackClient
       params['size'] = args[:disk_size] if args[:disk_size]
       params['group'] = args[:group] if args[:group]
       params['displayname'] = args[:displayname] if args[:displayname]
+
+      if args[:account]
+        account = list_accounts({name: args[:account]}).first
+        unless account
+          puts "Error: Account #{args[:account]} not found."
+          exit 1
+        end
+        params['domainid'] = account["domainid"]
+        params['account'] = args[:account]
+      end
 
       json = send_async_request(params)
       json['virtualmachine']
