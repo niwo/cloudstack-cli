@@ -15,8 +15,8 @@ class Stack < CloudstackCli::Base
             template: server["template"],
             iso: server["iso"] ,
             offering: server["offering"],
-            networks: server["networks"] ? server["networks"].split(', ') : nil,
-            port_rules: server["port_rules"] ? server["port_rules"].split(', ') : nil,
+            networks: string_to_array(server["networks"]),
+            port_rules: string_to_array(server["port_rules"]),
             project: stack["project"],
             disk_offering: server["disk_offering"],
             disk_size: server["disk_size"],
@@ -56,6 +56,10 @@ class Stack < CloudstackCli::Base
         $stderr.puts "Error parsing json file.\n#{e.message}."
         exit
       end
+    end
+
+    def string_to_array(string)
+      string ? string.gsub(', ', ',').split(', ') : nil
     end
   end
 

@@ -37,7 +37,6 @@ module CloudstackCli
           end
           t.join
         else
-          print ("\r" + "\e[A\e[K" * (status.size + 1)) if call > 0
           chars = print_job_status(jobs, status, chars,
             call == 0 ? opts.merge(no_clear: true) : opts
           )
@@ -77,20 +76,25 @@ module CloudstackCli
       end
 
       if args[:port_rules] && args[:port_rules].size > 0
-        frontendip = nil
-        args[:port_rules].each do |pf_rule|
-          ip = pf_rule.split(":")[0]
-          if ip != ''
-            ip_addr = client.get_public_ip_address(ip)
-          else
-            ip_addr = frontendip ||= client.associate_ip_address(
-              server["nic"].first["networkid"]
-            )
-          end
-          port = pf_rule.split(":")[1]
-          say "Create port forwarding rule #{ip_addr['ipaddress']}:#{port} for server #{args[:name]}.", :yellow
-          client.create_port_forwarding_rule(ip_addr["id"], port, 'TCP', port, server["id"])
+        create_port_rules(server, args[:port_rules])
+      end
+      server
+    end
+
+    def create_port_rules(server, port_rules)
+      frontendip = nil
+      port_rules.each do |pf_rule|
+        ip = pf_rule.split(":")[0]
+        if ip != ''
+          ip_addr = client.get_public_ip_address(ip)
+        else
+          ip_addr = frontendip ||= client.associate_ip_address(
+            server["nic"].first["networkid"]
+          )
         end
+        port = pf_rule.split(":")[1]
+        say "Create port forwarding rule #{ip_addr['ipaddress']}:#{port} for server #{server["name"]}.", :yellow
+        client.create_port_forwarding_rule(ip_addr["id"], port, 'TCP', port, server["id"])
       end
     end
 
