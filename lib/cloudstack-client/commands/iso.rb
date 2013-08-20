@@ -17,10 +17,14 @@ module CloudstackClient
       filter = args[:filter] || 'featured'
       params = {
           'command' => 'listIsos',
-          'templateFilter' => filter
+          'isoFilter' => filter
       }
       params['projectid'] = args[:project_id] if args[:project_id]
       params['zoneid'] = args[:zone_id] if args[:zone_id]
+      if args[:listall]
+        params['listall'] = true
+        params['isrecursive'] = true
+      end
       
       json = send_request(params)
       json['iso'] || []
@@ -37,7 +41,7 @@ module CloudstackClient
       # the name parameter should be added to the request.
       params = {
           'command' => 'listIsos',
-          'templateFilter' => 'executable'
+          'isoFilter' => 'executable'
       }
       json = send_request(params)
 

@@ -4,6 +4,7 @@ class Iso < CloudstackCli::Base
   option :project
   option :zone
   option :account
+  option :listall
   def list(type='featured')
     project = find_project if options[:project]
     unless %w(featured self self-executable executable community).include? type
