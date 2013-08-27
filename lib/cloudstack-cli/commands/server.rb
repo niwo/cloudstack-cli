@@ -47,8 +47,16 @@ class Server < CloudstackCli::Base
   option :keypair, desc: "the name of the ssh keypair to use"
   option :group, desc: "group name"
   option :account, desc: "account name"
-  def create(name)
-    bootstrap_server(options.merge({name: name}))
+  def create(*names)
+    servers = names.map do |name|
+      create_server(options.merge({name: name}))
+    end
+
+    if options[:port_rules]
+      servers.each do |server|
+        create_port_rules(server, options[:port_rules])
+      end
+    end
   end
 
   desc "destroy NAME [NAME2 ..]", "destroy server(s)"

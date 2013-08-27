@@ -81,6 +81,18 @@ module CloudstackCli
       server
     end
 
+    def create_server(args = {})
+      if args[:project] && project = client(quiet: true).get_project(args[:project])
+        project_id = project["id"]
+        project_name = project['name']
+      end
+      server = client(quiet: true).get_server(args[:name], project_id)
+      unless server
+        server = client.create_server(args)
+      end
+      server
+    end
+
     def create_port_rules(server, port_rules)
       frontendip = nil
       port_rules.each do |pf_rule|

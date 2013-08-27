@@ -33,7 +33,8 @@ class Network < CloudstackCli::Base
     elsif options[:account]
       networks = client.list_networks(account: options[:account])
     else
-      networks = client.list_networks(project_id: -1, isdefault: options[:isdefault])
+      networks = client.list_networks(isdefault: options[:isdefault])
+      networks += client.list_networks(project_id: -1, isdefault: options[:isdefault])
     end
 
     if networks.size < 1

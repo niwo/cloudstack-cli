@@ -20,6 +20,7 @@ class SshKeyPair < CloudstackCli::Base
   desc 'create NAME', 'create ssh key pair'
   option :account
   option :project
+  option :public_key
   def create(name)
     pair = client.create_ssh_key_pair(name, options)
     say "Name : #{pair['name']}"

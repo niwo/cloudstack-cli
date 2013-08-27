@@ -64,6 +64,7 @@ module CloudstackClient
         params['domainid'] = account["domainid"]
         params['account'] = args[:account]
       end
+      params['publickey'] = args[:public_key] if args[:public_key]
       
       json = send_request(params)['keypair']
     end

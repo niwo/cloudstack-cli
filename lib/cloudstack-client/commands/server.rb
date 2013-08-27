@@ -193,7 +193,6 @@ module CloudstackClient
         network['id']
       }
 
-
       params = {
           'command' => 'deployVirtualMachine',
           'serviceOfferingId' => service['id'],
@@ -222,6 +221,8 @@ module CloudstackClient
 
       json = send_async_request(params)
       json['virtualmachine']
+
+      args[:sync] ? send_request(params) : send_async_request(params)['virtualmachine']
     end
 
     ##
