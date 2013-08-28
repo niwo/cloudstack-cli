@@ -18,6 +18,10 @@ class PortRule < CloudstackCli::Base
       ip = pf_rule.split(":")[0]
       if ip != ''
         ip_addr = client.get_public_ip_address(ip)
+        unless ip_addr
+          say "Error: IP #{ip} not found.", :red
+          next
+        end
       else
         ip_addr = frontendip ||= client.associate_ip_address(
           client.get_network(options[:network], project ? project["id"] : nil)["id"]

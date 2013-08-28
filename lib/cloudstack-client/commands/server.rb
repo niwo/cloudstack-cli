@@ -219,9 +219,6 @@ module CloudstackClient
         params['account'] = args[:account]
       end
 
-      json = send_async_request(params)
-      json['virtualmachine']
-
       args[:sync] ? send_request(params) : send_async_request(params)['virtualmachine']
     end
 
@@ -290,14 +287,13 @@ module CloudstackClient
     # Destroy the server with the specified name.
     #
 
-    def destroy_server(id)
+    def destroy_server(id, async = true)
       params = {
           'command' => 'destroyVirtualMachine',
           'id' => id
       }
 
-      json = send_async_request(params)
-      json['virtualmachine']
+      async ? send_async_request(params)['virtualmachine'] : send_request(params)
     end
   
   end

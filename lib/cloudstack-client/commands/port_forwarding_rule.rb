@@ -32,7 +32,7 @@ module CloudstackClient
     ##
     # Creates a port forwarding rule.
 
-    def create_port_forwarding_rule(ip_address_id, private_port, protocol, public_port, virtual_machine_id)
+    def create_port_forwarding_rule(ip_address_id, private_port, protocol, public_port, virtual_machine_id, async = true)
       params = {
           'command' => 'createPortForwardingRule',
           'ipAddressId' => ip_address_id,
@@ -41,8 +41,7 @@ module CloudstackClient
           'publicPort' => public_port,
           'virtualMachineId' => virtual_machine_id
       }
-      json = send_async_request(params)
-      json['portforwardingrule']
+      async ? send_async_request(params)['portforwardingrule'] : send_request(params)
     end
 
 	end

@@ -11,12 +11,6 @@ module CloudstackCli
       number < 0 ? 0 : number
     end
 
-    def get_async_job_status(ids)
-      ids.map do |id|
-        client.query_job(id)['jobstatus']
-      end
-    end
-
     ASYNC_STATES = {
       0 => "running",
       1 => "completed",
@@ -25,32 +19,45 @@ module CloudstackCli
 
     def watch_jobs(jobs)
       chars = %w(| / - \\)
-      status = get_async_job_status(jobs.map {|job| job[:id]})
       call = 0
       opts = {t_start: Time.now}
-      puts
-      while status.include?(0) do
+      jobs = update_job_status(jobs)
+      while jobs.select{|job| job[:status] == 0}.size > 0 do
         if call.modulo(40) == 0
-          t = Thread.new { status = get_async_job_status(jobs.map {|job| job[:id]}) }
+          t = Thread.new { jobs = update_job_status(jobs) }
           while t.alive?
-            chars = print_job_status(jobs, status, chars, opts)
+            chars = print_job_status(jobs, chars,
+              call == 0 ? opts.merge(no_clear: true) : opts
+            )
+            call += 1
           end
           t.join
         else
-          chars = print_job_status(jobs, status, chars,
+          chars = print_job_status(jobs, chars,
             call == 0 ? opts.merge(no_clear: true) : opts
           )
           call += 1
         end
       end
-      print_job_status(jobs, status, chars, opts)
+      print_job_status(jobs, chars,
+        call == 0 ? opts.merge(no_clear: true) : opts
+      )
     end
 
-    def print_job_status(jobs, status, spinner, opts = {t_start: Time.now})
-      print ("\r" + "\e[A\e[K" * (status.size + 1)) unless opts[:no_clear]
-      status.each_with_index do |job_status, i|
-        print "#{jobs[i][:name]} : job #{ASYNC_STATES[job_status]} "
-        puts job_status == 0 ? spinner.first : ""
+    def update_job_status(jobs)
+      jobs.each do |job|
+        unless job[:status] && job[:status] > 0
+          job[:status] = client.query_job(job[:id])['jobstatus']
+        end
+      end
+      jobs
+    end
+
+    def print_job_status(jobs, spinner, opts = {t_start: Time.now})
+      print ("\r" + "\e[A\e[K" * (jobs.size + 1)) unless opts[:no_clear]
+      jobs.each_with_index do |job, i|
+        print "#{job[:name]} : job #{ASYNC_STATES[job[:status]]} "
+        puts job[:status] == 0 ? spinner.first : ""
       end
       t_elapsed = opts[:t_start] ? (Time.now - opts[:t_start]).round(1) : 0
       puts "Runtime: #{t_elapsed}s"
@@ -93,21 +100,37 @@ module CloudstackCli
       server
     end
 
-    def create_port_rules(server, port_rules)
+    def create_port_rules(server, port_rules, async = true)
       frontendip = nil
+      jobs = []
+      client.verbose = async
       port_rules.each do |pf_rule|
         ip = pf_rule.split(":")[0]
         if ip != ''
           ip_addr = client.get_public_ip_address(ip)
+          unless ip_addr
+            say "Error: IP #{ip} not found.", :red
+            next
+          end
         else
           ip_addr = frontendip ||= client.associate_ip_address(
             server["nic"].first["networkid"]
           )
         end
         port = pf_rule.split(":")[1]
-        say "Create port forwarding rule #{ip_addr['ipaddress']}:#{port} for server #{server["name"]}.", :yellow
-        client.create_port_forwarding_rule(ip_addr["id"], port, 'TCP', port, server["id"])
+        if async 
+          say "Create port forwarding rule #{ip_addr['ipaddress']}:#{port} for server #{server["name"]}.", :yellow
+          client.create_port_forwarding_rule(ip_addr["id"], port, 'TCP', port, server["id"])
+          return
+        else
+          jobs << client.create_port_forwarding_rule(
+            ip_addr["id"],
+            port, 'TCP', port, server["id"],
+            false
+          )['jobid']
+        end
       end
+      jobs
     end
 
     def bootstrap_server_interactive

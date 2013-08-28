@@ -48,15 +48,41 @@ class Server < CloudstackCli::Base
   option :group, desc: "group name"
   option :account, desc: "account name"
   def create(*names)
-    servers = names.map do |name|
-      create_server(options.merge({name: name}))
-    end
-
-    if options[:port_rules]
-      servers.each do |server|
-        create_port_rules(server, options[:port_rules])
+    projectid = find_project['id'] if options[:project]
+    say "Start deploying servers...", :green
+    jobs = names.map do |name|
+      server = client(quiet: true).get_server(name, projectid)
+      if server
+        say "Server #{name} (#{server["state"]}) already exists.", :yellow
+        job = {
+          id: 0,
+          name: "Create server #{name}",
+          status: 1
+        }
+      else
+        job = {
+          id: client.create_server(options.merge({name: name, sync: true}))['jobid'],
+          name: "Create server #{name}"
+        }
       end
+      job
     end
+    watch_jobs(jobs)
+    if options[:port_rules].size > 0
+      say "Create port forwarding rules...", :green
+      jobs = []
+      names.each do |name|
+        server = client(quiet: true).get_server(name, projectid)
+        create_port_rules(server, options[:port_rules], false).each_with_index do |job_id, index|
+          jobs << {
+            id: job_id,
+            name: "Create port forwarding ##{index + 1} rules for server #{server['name']}"
+          }
+        end
+      end
+      watch_jobs(jobs)
+    end
+    say "Finished.", :green
   end
 
   desc "destroy NAME [NAME2 ..]", "destroy server(s)"

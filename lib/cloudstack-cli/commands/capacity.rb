@@ -38,7 +38,7 @@ class Capacity < CloudstackCli::Base
         (capacity[entity] / CAPACITY_TYPES[capacity['type']][:divider]).round(1) : 
         capacity[entity]
       CAPACITY_TYPES[capacity['type']][:unit] ? 
-        "#{value} #{CAPACITY_TYPES[capacity['type']][:unit]}" :
+        "#{value}#{CAPACITY_TYPES[capacity['type']][:unit]}" :
         value.to_s
     end
 

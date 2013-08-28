@@ -20,12 +20,14 @@ module CloudstackClient
       include Object.const_get("CloudstackClient").const_get(module_name)
     end
 
+    attr_accessor :verbose
+
     def initialize(api_url, api_key, secret_key, opts = {})
       @api_url = api_url
       @api_key = api_key
       @secret_key = secret_key
       @use_ssl = api_url.start_with? "https"
-      @verbose = !opts[:quiet]
+      @verbose = opts[:quiet] ? false : true
     end
 
     ##
