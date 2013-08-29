@@ -29,7 +29,7 @@ class Network < CloudstackCli::Base
     project = find_project if options[:project]
     networks = []
     if project
-      networks = client.list_networks(project['id'])
+      networks = client.list_networks(project_id: project['id'])
     elsif options[:account]
       networks = client.list_networks(account: options[:account])
     else

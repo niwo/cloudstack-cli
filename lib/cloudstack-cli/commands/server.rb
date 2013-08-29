@@ -31,6 +31,27 @@ class Server < CloudstackCli::Base
     end
   end
 
+  desc "info NAME", "show detailed infos about a server"
+  option :project
+  def info(name)
+    if options[:project]
+      if options[:project].downcase == "all"
+        options[:project_id] = -1
+      else
+        project = find_project
+        options[:project_id] = project['id']
+      end
+    end
+    unless server = client.get_server(name, options[:project_id])
+      puts "No server found."
+    else
+      server.each do |key, value|
+        say "#{key}: ", :yellow
+        say "#{value}"
+      end
+    end
+  end
+
   desc "create NAME [NAME2 ...]", "create server(s)"
   option :template, aliases: '-t', desc: "name of the template"
   option :iso, desc: "name of the iso", desc: "name of the iso template"
