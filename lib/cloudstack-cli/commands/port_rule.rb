@@ -8,23 +8,23 @@ class PortRule < CloudstackCli::Base
   option :network, required: true, aliases: '-n'
   option :project
   def create(server_name)
-    unless server = client.get_server(server_name)
+    projectid = find_project['id'] if options[:project]
+    unless server = client.get_server(server_name, projectid)
       error "Server #{server_name} not found."
       exit 1
     end
     frontendip = nil
-    project = client.get_project(project)
     options[:rules].each do |pf_rule|
       ip = pf_rule.split(":")[0]
       if ip != ''
-        ip_addr = client.get_public_ip_address(ip)
+        ip_addr = client.get_public_ip_address(ip, projectid)
         unless ip_addr
           say "Error: IP #{ip} not found.", :red
           next
         end
       else
         ip_addr = frontendip ||= client.associate_ip_address(
-          client.get_network(options[:network], project ? project["id"] : nil)["id"]
+          client.get_network(options[:network], projectid)
         )
       end
       port = pf_rule.split(":")[1]

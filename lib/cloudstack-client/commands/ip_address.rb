@@ -36,11 +36,12 @@ module CloudstackClient
     ##
     # Finds the public ip address for a given ip address string.
 
-    def get_public_ip_address(ip_address)
+    def get_public_ip_address(ip_address, project_id = nil)
       params = {
           'command' => 'listPublicIpAddresses',
           'ipaddress' => ip_address
       }
+      params['projectid'] = project_id if project_id
       json = send_request(params)
       ip_address = json['publicipaddress']
 
