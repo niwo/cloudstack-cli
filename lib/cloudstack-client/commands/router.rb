@@ -5,12 +5,13 @@ module CloudstackClient
     ##
     # Get a router with a given name.
 
-    def get_router(name)
+    def get_router(name, project_id = nil)
       params = {
           'command' => 'listRouters',
           'listall' => 'true',
           'name' => name
       }
+      params['projectid'] = project_id if project_id 
 
       json = send_request(params)
       json['router'] ? json['router'].first : nil

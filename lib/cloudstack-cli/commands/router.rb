@@ -5,7 +5,7 @@ class Router < CloudstackCli::Base
   option :account
   option :zone
   option :status, desc: "Running or Stopped"
-  option :redundant_state, desc: "master, backup, failed or unknown"
+  option :redundant_state, desc: "master, backup, fault or unknown"
   option :listall, type: :boolean
   option :showid, type: :boolean
   option :command, desc: "command to execute for each router: START or STOP"
@@ -90,6 +90,27 @@ class Router < CloudstackCli::Base
     watch_jobs(jobs)
   end
 
+  desc "start NAME [NAME2 ..]", "restart virtual router(s) (stop and start)"
+  option :force, description: "restart without asking", type: :boolean, aliases: '-f'
+  def restart(*names)
+    routers = names.map {|name| get_router(name)}
+    print_routers(routers)
+    exit unless options[:force] || yes?("\nRestart router(s) above?", :magenta)
+    jobs = routers.map do |router|
+      {id: client.stop_router(router['id'], async: false)['jobid'], name: "Stop router #{router['name']}"}
+    end
+    puts
+    watch_jobs(jobs)
+
+    jobs = routers.map do |router|
+      {id: client.start_router(router['id'], async: false)['jobid'], name: "Start router #{router['name']}"}
+    end
+    puts
+    watch_jobs(jobs)
+
+    say "Finished.", :green
+  end
+
   desc "destroy NAME [NAME2 ..]", "destroy virtual router(s)"
   option :force, description: "destroy without asking", type: :boolean, aliases: '-f'
   def destroy(*names)
@@ -107,8 +128,10 @@ class Router < CloudstackCli::Base
 
   	def get_router(name)
   		unless router = client.get_router(name)
-  			say "Can't find router with name #{name}.", :red
-  			exit 1
+        unless router = client.get_router(name, -1)
+  			 say "Can't find router with name #{name}.", :red
+  			 exit 1
+        end
   		end
   		router
   	end
