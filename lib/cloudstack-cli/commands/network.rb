@@ -20,6 +20,27 @@ class Network < CloudstackCli::Base
     end
   end
 
+  desc "show NAME", "show detailed infos about a network"
+  option :project
+  def show(name)
+    if options[:project]
+      if options[:project].downcase == "all"
+        options[:project_id] = -1
+      else
+        project = find_project
+        options[:project_id] = project['id']
+      end
+    end
+    unless server = client.get_network(name, options[:project_id])
+      puts "No network found."
+    else
+      server.each do |key, value|
+        say "#{key}: ", :yellow
+        say "#{value}"
+      end
+    end
+  end
+
   desc "list", "list networks"
   option :project
   option :account

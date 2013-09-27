@@ -31,9 +31,9 @@ class Server < CloudstackCli::Base
     end
   end
 
-  desc "info NAME", "show detailed infos about a server"
+  desc "show NAME", "show detailed infos about a server"
   option :project
-  def info(name)
+  def show(name)
     if options[:project]
       if options[:project].downcase == "all"
         options[:project_id] = -1

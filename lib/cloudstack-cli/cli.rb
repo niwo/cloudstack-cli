@@ -78,6 +78,9 @@ module CloudstackCli
     desc "cluster SUBCOMMAND ...ARGS", "List clusters"
     subcommand "cluster", Cluster
 
+    desc "host SUBCOMMAND ...ARGS", "List hosts"
+    subcommand "host", Host
+
     desc "project SUBCOMMAND ...ARGS", "Manage servers"
     subcommand "project", Project
 
