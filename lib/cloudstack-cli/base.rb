@@ -26,7 +26,7 @@ module CloudstackCli
           @config[:url],
           @config[:api_key],
           @config[:secret_key],
-          opts
+          opts.merge({debug: options[:debug]})
         )
       end
 

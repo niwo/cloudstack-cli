@@ -14,6 +14,10 @@ module CloudstackCli
       aliases: '-e',
       desc: 'environment to load from the configuration file'
 
+    class_option :debug,
+      desc: 'enable debug output',
+      type: :boolean
+
     desc "version", "outputs the cloudstack-cli version"
     def version
       say "cloudstack-cli v#{CloudstackCli::VERSION}"

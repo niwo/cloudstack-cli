@@ -28,6 +28,7 @@ module CloudstackClient
       @secret_key = secret_key
       @use_ssl = api_url.start_with? "https"
       @verbose = opts[:quiet] ? false : true
+      @debug = opts[:debug] ? true : false
     end
 
     ##
@@ -44,6 +45,9 @@ module CloudstackClient
       params.sort.each { |elem|
         params_arr << elem[0].to_s + '=' + CGI.escape(elem[1].to_s).gsub('+', '%20').gsub(' ','%20')
       }
+
+      debug_output JSON.pretty_generate(params) if @debug
+
       data = params_arr.join('&')
       signature = OpenSSL::HMAC.digest('sha1', @secret_key, data.downcase)
       signature = Base64.encode64(signature).chomp
@@ -116,6 +120,16 @@ module CloudstackClient
       print "\n"
       puts "Error: Asynchronous request timed out"
       exit 1
+    end
+
+    private
+
+    def debug_output(output, seperator = '-' * 80)
+      puts
+      puts seperator 
+      puts output
+      puts seperator
+      puts
     end
 
   end # class

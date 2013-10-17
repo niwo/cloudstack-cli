@@ -100,6 +100,19 @@ module CloudstackClient
     end
 
     ##
+    # Restart network.
+
+    def restart_network(id, cleanup = false)
+      params = {
+        'command' => 'restartNetwork',
+        'id' => id,
+        'cleanup' => cleanup,
+      }
+      p json = send_async_request(params)
+      json['network']
+    end
+
+    ##
     # Lists all physical networks.
 
     def list_physical_networks

@@ -1,5 +1,18 @@
 class Project < CloudstackCli::Base
 
+  desc "show NAME", "show detailed infos about a project"
+  option :project
+  def show(name)
+    unless project = client.get_project(name)
+      puts "No project with name #{name} found."
+    else
+      project.each do |key, value|
+        say "#{key}: ", :yellow
+        say "#{value}"
+      end
+    end
+  end
+
   desc "list", "list projects"
   def list
     projects = client.list_projects

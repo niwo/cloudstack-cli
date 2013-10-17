@@ -79,14 +79,29 @@ class Network < CloudstackCli::Base
     end
   end
 
-  desc "delete NAME", "delete network"
-  def delete(name)
-    network = client.get_network(name, -1)
+  desc "restart NAME", "restart network"
+  option :cleanup, type: :boolean, default: true
+  def restart(name)
+    network = client.get_network(name)
+    network = client.get_network(name, -1) unless network
     unless network
       say "Network #{name} not found."
       exit 1
     end
-    if yes? "Destroy network #{network['name']} - #{network['name']}?"
+    if yes? "Restart network \"#{network['name']}\" (cleanup=#{options[:cleanup]})?"
+      p client.restart_network(network['id'], options[:cleanup])
+    end
+  end
+
+  desc "delete NAME", "delete network"
+  def delete(name)
+    network = client.get_network(name)
+    network = client.get_network(name, -1) unless network
+    unless network
+      say "Network \"#{name}\" not found."
+      exit 1
+    end
+    if yes? "Destroy network \"#{network['name']}\"?"
       p client.delete_network(network['id'])
     end
   end

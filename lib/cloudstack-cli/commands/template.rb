@@ -1,6 +1,6 @@
 class Template < CloudstackCli::Base
 
-  desc 'list [TYPE]', 'list templates by type [featured|self|self-executable|executable|community]' 
+  desc 'list [TYPE]', 'list templates by type [featured|self|self-executable|executable|community], default is featured' 
   option :project
   option :zone
   def list(type='featured')
@@ -11,7 +11,7 @@ class Template < CloudstackCli::Base
     end
     zone = client.get_zone(options[:zone]) if options[:zone]
     templates = client.list_templates(
-      type: type,
+      filter: type,
       project_id: project ? project['id'] : nil,
       zone_id: zone ? zone['id'] : nil
     )

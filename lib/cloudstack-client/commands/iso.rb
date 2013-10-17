@@ -17,7 +17,7 @@ module CloudstackClient
       filter = args[:filter] || 'featured'
       params = {
           'command' => 'listIsos',
-          'isoFilter' => filter
+          'isofilter' => filter
       }
       params['projectid'] = args[:project_id] if args[:project_id]
       params['zoneid'] = args[:zone_id] if args[:zone_id]
