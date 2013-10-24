@@ -3,14 +3,17 @@ class Volume < CloudstackCli::Base
   desc "list", "list networks"
   option :project
   def list
-    project = find_project if options[:project]
-    networks = client.list_networks(project_id: project ? project['id'] : nil)
-    if networks.size < 1
-      puts "No networks found"
+    projectid = find_project['id'] if options[:project]
+    volumes = client.list_volumes(projectid)
+    if volumes.size < 1
+      puts "No volumes found."
     else
-      table = [["Name", "Displaytext", "Default?"]]
-      networks.each do |network|
-        table << [network['name'], network['displaytext'], network['isdefault']]
+      table = [["Name", "Type", "Size", "VM", "Storage", "Offeringname"]]
+      volumes.each do |volume|
+        table << [volume['name'], volume['type'],
+          (volume['size'] / 1024**3).to_s + 'GB',
+          volume['vmname'],
+          volume['storage'], volume['diskofferingname']]
       end
       print_table(table)
     end

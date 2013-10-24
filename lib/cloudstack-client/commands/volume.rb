@@ -12,7 +12,7 @@ module CloudstackClient
       }
       params['projectid'] = project_id if project_id
       json = send_request(params)
-      json['network'] || []
+      json['volume'] || []
     end
 
 	end
