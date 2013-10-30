@@ -56,6 +56,21 @@ module CloudstackCli
         config = old_config.merge(config)
       end
       File.open(file, 'w+') {|f| f.write(config.to_yaml) }
+    end
+
+    desc "environments", "list cloudstack-cli environments"
+    def environments(file = options[:config])
+      config = {}
+      if File.exists? file
+        begin
+          config = YAML::load(IO.read(file))
+        rescue
+          error "Can't load configuration from file #{config_file}."
+          exit 1
+        end
+        say "cloudstack-cli environments besides the default:", :yellow
+        config.each_key {|key| puts key unless key.class == Symbol }
+      end
     end    
 
     desc "command COMMAND [arg1=val1 arg2=val2...]", "run a custom api command"

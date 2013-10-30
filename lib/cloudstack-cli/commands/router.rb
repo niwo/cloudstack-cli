@@ -151,7 +151,7 @@ class Router < CloudstackCli::Base
             router["account"],
             router["project"],
             router["redundantstate"],
-            router["nic"].first ? router["nic"].first['ipaddress'] : "",
+            router["nic"] && router["nic"].first ? router["nic"].first['ipaddress'] : "",
             router["linklocalip"],
             router["state"],
             router["isredundantrouter"],
