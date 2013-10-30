@@ -3,6 +3,7 @@ class Server < CloudstackCli::Base
   desc "server list", "list servers"
   option :project
   option :account
+  option :zone
   def list
     if options[:project]
       if options[:project].downcase == "all"

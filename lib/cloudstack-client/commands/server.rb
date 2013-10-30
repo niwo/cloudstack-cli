@@ -93,6 +93,16 @@ module CloudstackClient
         'listAll' => true
       }
       params['projectid'] = options[:project_id] if options[:project_id]
+
+      if options[:zone]
+        zone = get_zone(options[:zone])
+        unless zone 
+          puts "Error: Zone #{options[:zone]} not found"
+          exit 1
+        end
+        params['zoneid'] = zone['id']  
+      end
+
       if options[:account]
         if account = list_accounts({name: options[:account]}).first
           params['domainid'] = account["domainid"]
