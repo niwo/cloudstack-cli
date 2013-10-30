@@ -1,6 +1,6 @@
 class Server < CloudstackCli::Base
 
-  desc "list", "list servers"
+  desc "server list", "list servers"
   option :project
   option :account
   def list
@@ -31,7 +31,7 @@ class Server < CloudstackCli::Base
     end
   end
 
-  desc "show NAME", "show detailed infos about a server"
+  desc "server show NAME", "show detailed infos about a server"
   option :project
   def show(name)
     if options[:project]
@@ -52,7 +52,7 @@ class Server < CloudstackCli::Base
     end
   end
 
-  desc "create NAME [NAME2 ...]", "create server(s)"
+  desc "server create NAME [NAME2 ...]", "create server(s)"
   option :template, aliases: '-t', desc: "name of the template"
   option :iso, desc: "name of the iso", desc: "name of the iso template"
   option :offering, aliases: '-o', required: true, desc: "computing offering name"
@@ -106,7 +106,7 @@ class Server < CloudstackCli::Base
     say "Finished.", :green
   end
 
-  desc "destroy NAME [NAME2 ..]", "destroy server(s)"
+  desc "server destroy NAME [NAME2 ..]", "destroy server(s)"
   option :project
   option :force, description: "destroy without asking", type: :boolean, aliases: '-f'
   def destroy(*names)
@@ -126,24 +126,24 @@ class Server < CloudstackCli::Base
     end
   end
 
-  desc "bootstrap", "interactive creation of a server with network access"
+  desc "server bootstrap", "interactive creation of a server with network access"
   def bootstrap
     bootstrap_server_interactive
   end
 
-  desc "stop NAME", "stop a server"
+  desc "server stop NAME", "stop a server"
   def stop(name)
     client.stop_server(name)
     puts
   end
 
-  desc "start NAME", "start a server"
+  desc "server start NAME", "start a server"
   def start(name)
     client.start_server(name)
     puts
   end
 
-  desc "reboot NAME", "reboot a server"
+  desc "server reboot NAME", "reboot a server"
   def restart(name)
     client.reboot_server(name)
     puts

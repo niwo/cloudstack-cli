@@ -1,6 +1,6 @@
 class Offering < CloudstackCli::Base
 
-  desc 'list', 'list compute offerings'
+  desc 'offering list', 'list compute offerings'
   option :domain
   def list
     offerings = client.list_service_offerings(options[:domain])
@@ -20,7 +20,7 @@ class Offering < CloudstackCli::Base
     end
   end
 
-  desc 'create NAME', 'create offering'
+  desc 'offering create NAME', 'create offering'
   option :cpunumber, required: true
   option :cpuspeed, required: true
   option :displaytext, required: true
@@ -39,7 +39,7 @@ class Offering < CloudstackCli::Base
   end
 
 
-  desc 'sort', 'sort by cpu and memory grouped by domain'
+  desc 'offering sort', 'sort by cpu and memory grouped by domain'
   def sort
     offerings = client.list_service_offerings(options[:domain])
     sortkey = -1

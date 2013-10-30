@@ -1,6 +1,6 @@
 class Host < CloudstackCli::Base
 
-  desc 'list', 'list hosts'
+  desc 'host list', 'list hosts'
   option :zone
   def list
     hosts = client.list_hosts(options)

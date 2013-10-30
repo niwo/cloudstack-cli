@@ -6,7 +6,7 @@ class User < CloudstackCli::Base
     2 => 'admin'
   }
 
-  desc 'list', 'list async jobs'
+  desc 'user list', 'list users'
   option :listall
   option :account
   def list

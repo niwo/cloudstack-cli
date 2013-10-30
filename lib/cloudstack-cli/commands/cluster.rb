@@ -1,6 +1,6 @@
 class Cluster < CloudstackCli::Base
 
-  desc 'list', 'list clusters'
+  desc 'cluster list', 'list clusters'
   def list
     clusters = client.list_clusters(options)
     if clusters.size < 1

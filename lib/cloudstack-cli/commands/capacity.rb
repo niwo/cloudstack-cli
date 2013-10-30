@@ -12,7 +12,7 @@ class Capacity < CloudstackCli::Base
 		9 => {name: "Local Storage", unit: "TB", divider: 1024.0**4}
 	}
 
-  desc "list", "list system capacity"
+  desc "capacity list", "list system capacity"
   option :zone
   def list
   	capacities = client.list_capacity

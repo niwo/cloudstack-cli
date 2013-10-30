@@ -1,6 +1,6 @@
 class Project < CloudstackCli::Base
 
-  desc "show NAME", "show detailed infos about a project"
+  desc "project show NAME", "show detailed infos about a project"
   option :project
   def show(name)
     unless project = client.get_project(name)
@@ -13,7 +13,7 @@ class Project < CloudstackCli::Base
     end
   end
 
-  desc "list", "list projects"
+  desc "project list", "list projects"
   def list
     projects = client.list_projects
     if projects.size < 1

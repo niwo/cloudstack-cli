@@ -1,6 +1,6 @@
 class Stack < CloudstackCli::Base
 
-	desc "create STACKFILE", "create a stack of servers"
+	desc "stack create STACKFILE", "create a stack of servers"
   def create(stackfile)
   	stack = parse_stackfile(stackfile)
     say "Create stack #{stack["name"]}...", :green

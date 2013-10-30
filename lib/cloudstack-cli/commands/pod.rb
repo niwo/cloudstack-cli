@@ -1,6 +1,6 @@
 class Pod < CloudstackCli::Base
 
-  desc 'list', 'list pods'
+  desc 'pod list', 'list pods'
   def list
     pods = client.list_pods(options)
     if pods.size < 1

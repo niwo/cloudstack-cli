@@ -1,6 +1,6 @@
 class Snapshot < CloudstackCli::Base
 
-  desc 'list', 'list snapshots'
+  desc 'snapshot list', 'list snapshots'
   option :account
   option :project
   option :domain

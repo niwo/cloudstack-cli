@@ -6,7 +6,7 @@ class Account < CloudstackCli::Base
     2 => 'admin'
   }
 
-  desc 'list [NAME]', 'list accounts'
+  desc 'account list [NAME]', 'list accounts (by name)'
   def list(name = nil)
     accounts = client.list_accounts({name: name})
     if accounts.size < 1

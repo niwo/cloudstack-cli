@@ -1,6 +1,6 @@
 class Domain < CloudstackCli::Base
 
-  desc 'list [NAME]', 'list domains'
+  desc 'domain list [NAME]', 'list domains'
   def list(name = nil)
     domains = client.list_domains(name)
     if domains.size < 1

@@ -1,6 +1,6 @@
 class DiskOffering < CloudstackCli::Base
 
-  desc 'list', 'list disk offerings'
+  desc 'disk_offering list', 'list disk offerings'
   option :domain
   def list
     offerings = client.list_disk_offerings(options[:domain])

@@ -1,10 +1,11 @@
 class SshKeyPair < CloudstackCli::Base
 
-  desc 'list', 'list ssh key pairs'
+  desc "ssh_key_pair list", 'list ssh key pairs'
   option :listall
   option :account
   option :project
   def list
+    puts self.methods
     pairs = client.list_ssh_key_pairs(options)
     if pairs.size < 1
       say "No ssh key pairs found."
@@ -17,7 +18,7 @@ class SshKeyPair < CloudstackCli::Base
     end
   end
 
-  desc 'create NAME', 'create ssh key pair'
+  desc 'ssh_key_pair create NAME', 'create ssh key pair'
   option :account
   option :project
   option :public_key
@@ -29,7 +30,7 @@ class SshKeyPair < CloudstackCli::Base
     say pair['privatekey']
   end
 
-  desc 'delete NAME', 'delete ssh key pair'
+  desc 'ssh_key_pair delete NAME', 'delete ssh key pair'
   option :account
   option :project
   option :force, aliases: '-f', desc: "delete without asking"

@@ -1,6 +1,6 @@
 class Zone < CloudstackCli::Base
 
-  desc "list", "list zones"
+  desc "zone list", "list zones"
   def list
     zones = client.list_zones
     if zones.size < 1

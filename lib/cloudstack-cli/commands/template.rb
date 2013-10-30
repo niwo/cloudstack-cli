@@ -1,6 +1,6 @@
 class Template < CloudstackCli::Base
 
-  desc 'list [TYPE]', 'list templates by type [featured|self|self-executable|executable|community], default is featured' 
+  desc 'template list [TYPE]', 'list templates by type [featured|self|self-executable|executable|community], default is featured' 
   option :project
   option :zone
   def list(type='featured')

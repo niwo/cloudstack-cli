@@ -1,47 +1,6 @@
 class Network < CloudstackCli::Base
 
-  desc "default", "get the default network"
-  option :zone
-  def default
-    network = client.get_default_network(options[:zone])
-    unless network
-      puts "No default network found."
-    else
-      table = [["Name", "Displaytext", "Domain", "Zone"]]
-      table[0] << "ID" if options[:showid]
-        table << [
-          network["name"],
-          network["displaytext"],
-          network["domain"],
-          network["zonename"]
-        ]
-        table[-1] << network["id"] if options[:showid]
-      print_table table
-    end
-  end
-
-  desc "show NAME", "show detailed infos about a network"
-  option :project
-  def show(name)
-    if options[:project]
-      if options[:project].downcase == "all"
-        options[:project_id] = -1
-      else
-        project = find_project
-        options[:project_id] = project['id']
-      end
-    end
-    unless server = client.get_network(name, options[:project_id])
-      puts "No network found."
-    else
-      server.each do |key, value|
-        say "#{key}: ", :yellow
-        say "#{value}"
-      end
-    end
-  end
-
-  desc "list", "list networks"
+  desc "network list", "list networks"
   option :project
   option :account
   option :showid, type: :boolean
@@ -79,7 +38,48 @@ class Network < CloudstackCli::Base
     end
   end
 
-  desc "restart NAME", "restart network"
+  desc "network default", "get the default network"
+  option :zone
+  def default
+    network = client.get_default_network(options[:zone])
+    unless network
+      puts "No default network found."
+    else
+      table = [["Name", "Displaytext", "Domain", "Zone"]]
+      table[0] << "ID" if options[:showid]
+        table << [
+          network["name"],
+          network["displaytext"],
+          network["domain"],
+          network["zonename"]
+        ]
+        table[-1] << network["id"] if options[:showid]
+      print_table table
+    end
+  end
+
+  desc "network show NAME", "show detailed infos about a network"
+  option :project
+  def show(name)
+    if options[:project]
+      if options[:project].downcase == "all"
+        options[:project_id] = -1
+      else
+        project = find_project
+        options[:project_id] = project['id']
+      end
+    end
+    unless server = client.get_network(name, options[:project_id])
+      puts "No network found."
+    else
+      server.each do |key, value|
+        say "#{key}: ", :yellow
+        say "#{value}"
+      end
+    end
+  end
+
+  desc "network restart NAME", "restart network"
   option :cleanup, type: :boolean, default: true
   def restart(name)
     network = client.get_network(name)
@@ -93,7 +93,7 @@ class Network < CloudstackCli::Base
     end
   end
 
-  desc "delete NAME", "delete network"
+  desc "network delete NAME", "delete network"
   def delete(name)
     network = client.get_network(name)
     network = client.get_network(name, -1) unless network

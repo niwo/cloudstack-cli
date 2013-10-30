@@ -3,7 +3,7 @@ module CloudstackCli
     include Thor::Actions
 
     package_name "cloudstack-cli" 
-    map %w(-v --version) => :version 
+    map %w(-v --version) => :version
 
     class_option :config,
       default: File.join(Dir.home, '.cloudstack-cli.yml'),
@@ -68,10 +68,15 @@ module CloudstackCli
           error "Can't load configuration from file #{config_file}."
           exit 1
         end
-        say "cloudstack-cli environments besides the default:", :yellow
-        config.each_key {|key| puts key unless key.class == Symbol }
+        table = [%w(Name URL)]
+        table << ["default", config[:url]]
+        config.each_key do |key|
+          table << [key, config[key][:url]] unless key.class == Symbol
+        end
+        print_table table
       end
-    end    
+    end
+    map :envs => :environments
 
     desc "command COMMAND [arg1=val1 arg2=val2...]", "run a custom api command"
     def command(command, *args)
@@ -89,78 +94,79 @@ module CloudstackCli
     end
     
     desc "zone SUBCOMMAND ...ARGS", "Manage zones"
-    subcommand "zone", Zone
+    subcommand :zone, Zone
 
     desc "pod SUBCOMMAND ...ARGS", "List pods"
-    subcommand "pod", Pod
+    subcommand :pod, Pod
 
     desc "cluster SUBCOMMAND ...ARGS", "List clusters"
-    subcommand "cluster", Cluster
+    subcommand :cluster, Cluster
 
     desc "host SUBCOMMAND ...ARGS", "List hosts"
-    subcommand "host", Host
+    subcommand :host, Host
 
     desc "project SUBCOMMAND ...ARGS", "Manage servers"
-    subcommand "project", Project
+    subcommand :project, Project
 
     desc "server SUBCOMMAND ...ARGS", "Manage servers"
-    subcommand "server", Server
+    subcommand :server, Server
 
     desc "offering SUBCOMMAND ...ARGS", "Manage offerings"
-    subcommand "offering", Offering
+    subcommand :offering, Offering
 
     desc "disk_offering SUBCOMMAND ...ARGS", "Manage disk offerings"
-    subcommand "disk_offering", DiskOffering
+    subcommand :disk_offering, DiskOffering
 
     desc "network SUBCOMMAND ...ARGS", "Manage networks"
-    subcommand "network", Network
+    subcommand :network, Network
+    map 'networks' => 'network'
 
     desc "physical_network SUBCOMMAND ...ARGS", "Manage physical networks"
-    subcommand "physical_network", PhysicalNetwork
+    subcommand :physical_network, PhysicalNetwork
 
     desc "load_balancer SUBCOMMAND ...ARGS", "Manage load balancing rules"
-    subcommand "load_balancer", LoadBalancer
+    subcommand :load_balancer, LoadBalancer
 
     desc "template SUBCOMMAND ...ARGS", "Manage templates"
-    subcommand "template", Template
+    subcommand :template, Template
 
     desc "iso SUBCOMMAND ...ARGS", "Manage iso's"
-    subcommand "iso", Iso
+    subcommand :iso, Iso
 
     desc "router SUBCOMMAND ...ARGS", "Manage virtual routers"
-    subcommand "router", Router
+    subcommand :router, Router
 
     desc "volume SUBCOMMAND ...ARGS", "Manage volumes"
-    subcommand "volume", Volume
+    subcommand :volume, Volume
 
     desc "snapshot SUBCOMMAND ...ARGS", "Manage snapshots"
-    subcommand "snapshot", Snapshot
+    subcommand :snapshot, Snapshot
 
     desc "stack SUBCOMMAND ...ARGS", "Manage stacks"
-    subcommand "stack", Stack
+    subcommand :stack, Stack
 
     desc "account SUBCOMMAND ...ARGS", "Manage accounts"
-    subcommand "account", Account
+    subcommand :account, Account
 
     desc "user SUBCOMMAND ...ARGS", "Manage users"
-    subcommand "user", User
+    subcommand :user, User
 
     desc "domain SUBCOMMAND ...ARGS", "Manage domains"
-    subcommand "domain", Domain
+    subcommand :domain, Domain
 
     desc "ip_address SUBCOMMAND ...ARGS", "Manage ip addresses"
-    subcommand "ip_address", IpAddress
+    subcommand :ip_address, IpAddress
 
     desc "capacity SUBCOMMAND ...ARGS", "Lists all the system wide capacities"
-    subcommand "capacity", Capacity
+    subcommand :capacity, Capacity
 
     desc "port_rule SUBCOMMAND ...ARGS", "Manage portforwarding rules"
-    subcommand "port_rule", PortRule
+    subcommand :port_rule, PortRule
 
     desc "job SUBCOMMAND ...ARGS", "Display async jobs"
-    subcommand "job", Job
+    subcommand :job, Job
 
     desc "ssh_key_pair SUBCOMMAND ...ARGS", "Manage ssh key pairs"
-    subcommand "ssh_key_pair", SshKeyPair
+    subcommand :ssh_key_pair, SshKeyPair
   end
 end

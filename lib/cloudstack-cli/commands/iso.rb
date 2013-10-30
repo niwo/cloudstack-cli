@@ -1,6 +1,6 @@
 class Iso < CloudstackCli::Base
 
-  desc 'list [TYPE]', "list iso's by type [featured|self|self-executable|executable|community], default is featured"
+  desc 'iso list [TYPE]', "list iso's by type [featured|self|self-executable|executable|community], default is featured"
   option :project
   option :zone
   option :account

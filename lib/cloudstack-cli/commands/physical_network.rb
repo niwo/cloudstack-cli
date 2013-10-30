@@ -1,6 +1,6 @@
 class PhysicalNetwork < CloudstackCli::Base
 
-  desc "list", "list physical networks"
+  desc "physical_network list", "list physical networks"
   option :project
   def list
     project = find_project if options[:project]
