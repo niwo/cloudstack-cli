@@ -11,7 +11,9 @@ class Router < CloudstackCli::Base
   option :command, desc: "command to execute for each router: START or STOP"
   option :reverse, type: :boolean, default: false, desc: "reverse listing of routers"
   def list
-   	projectid = find_project['id'] if options[:project]
+    if options[:project]
+   	  projectid = options[:project] =~ /-1|all/ ? '-1' : find_project['id']
+    end
 		routers = client.list_routers(
 			{
 				account: options[:account], 
