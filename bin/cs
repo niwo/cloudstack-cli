@@ -1,6 +1,5 @@
 #!/usr/bin/env ruby
 
-require 'cloudstack_client'
-require 'cloudstack_cli'
+require 'cloudstack-cli'
 
 CloudstackCli::Cli.start(ARGV)
