@@ -1,6 +1,7 @@
 # Cloudstack CLI
 
-Cloudstack CLI is a [CloudStack](http://cloudstack.apache.org/) API client written in Ruby.
+cloudstack-cli is a [CloudStack](http://cloudstack.apache.org/) API client written in Ruby.
+cloudstack-cli uses the [cloudstack_client](https://bitbucket.org/swisstxt/cloudstack_client) to talk to the Cloudstack API.
 
 ## Installation
 
@@ -37,25 +38,21 @@ See the help screen:
 
     $ cs
 
-### Example 1
+### Example: Bootsrapping a server
 
-Bootsrap a server:
+Bootsraps a server using a template and creating port-forwarding rules for port 22 and 80.
 
-    $ cs server create server-01 --template CentOS-6.4-x64-v1.4 --offering 1cpu_1gb --port-rules 193.218.104.10:22 193.218.104.10:80
+    $ cs server create server-01 --template CentOS-6.4-x64-v1.4 --offering 1cpu_1gb --port-rules :22 :80
 
-### Example 2
+### Example: Run a any custom API command
 
-Run a custom API command:
+Run the "listAlerts" command against the Cloudstack API with an argument of type=8:
 
     $ cs command listAlerts type=8
 
-### Example 3
+### Example: Creating a complete stack of servers
 
-Create a stack of servers:
-
-    $ cs stack create my_stackfile.json
-
-An example stackfile looks like this
+An example stackfile looks like this (my_stackfile.json)
 
     {
       "name": "web_stack-a",
@@ -85,13 +82,17 @@ An example stackfile looks like this
       ]
     }
 
-### Example 4
+Create the stack of servers from above:
+
+    $ cs stack create my_stackfile.json
+
+### Example: Sort computing offerings
 
 Sort all computing offerings by CPU and Memory grouped my Domain:
 
     $ cs offering sort
 
-### Example 5
+### Example: Stop all backup routers of a given project
 
 Stop all virtual routers of project Demo (you could filter by zone too):
 (This command is helpful if you have to deploy new versions of Cloudstack when using redundant routers)
