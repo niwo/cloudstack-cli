@@ -20,9 +20,26 @@ class SshKeyPair < CloudstackCli::Base
   desc 'ssh_key_pair create NAME', 'create ssh key pair'
   option :account
   option :project
-  option :public_key
   def create(name)
     pair = client.create_ssh_key_pair(name, options)
+    say "Name : #{pair['name']}"
+    say "Fingerprint : #{pair['fingerprint']}"
+    say "Privatekey:"
+    say pair['privatekey']
+  end
+
+  desc 'ssh_key_pair register NAME', 'register ssh key pair'
+  option :account
+  option :project
+  option :public_key, required: true, desc: "path to public_key file"
+  def register(name)
+    if File.exist?(options[:public_key])
+      public_key = IO.read(options[:public_key])
+    else
+      say("Can't open public key #{options[:public_key]}", :red)
+      exit 1
+    end
+    pair = client.register_ssh_key_pair(name, public_key, options)
     say "Name : #{pair['name']}"
     say "Fingerprint : #{pair['fingerprint']}"
     say "Privatekey:"

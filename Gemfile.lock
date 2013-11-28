@@ -1,14 +1,14 @@
 PATH
   remote: .
   specs:
-    cloudstack-cli (0.4.0)
-      cloudstack_client (~> 0.2.13)
+    cloudstack-cli (0.4.3)
+      cloudstack_client (~> 0.2.14)
       thor (~> 0.18.1)
 
 GEM
   remote: https://rubygems.org/
   specs:
-    cloudstack_client (0.2.13)
+    cloudstack_client (0.2.14)
     json (1.8.1)
     rake (10.0.4)
     rdoc (4.0.1)
