@@ -12,7 +12,11 @@ class Router < CloudstackCli::Base
   option :reverse, type: :boolean, default: false, desc: "reverse listing of routers"
   def list
     if options[:project]
-   	  projectid = options[:project] =~ /-1|all/ ? '-1' : find_project['id']
+   	  if ['-1', 'all'].include? options[:project]
+        projectid = '-1'
+      else
+        projectid = find_project['id']
+      end
     end
 		routers = client.list_routers(
 			{

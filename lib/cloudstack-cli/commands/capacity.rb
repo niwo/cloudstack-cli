@@ -14,8 +14,9 @@ class Capacity < CloudstackCli::Base
 
   desc "capacity list", "list system capacity"
   option :zone
+  option :type, desc: "specify type, see types for a list of types"
   def list
-  	capacities = client.list_capacity
+  	capacities = client.list_capacity(options)
   	table = []
     header = ["Zone", "Type", "Capacity Used", "Capacity Total", "Used"]
     capacities.each do |c|
@@ -31,6 +32,15 @@ class Capacity < CloudstackCli::Base
     print_table table
   end
 
+  desc "capacity types", "show capacity types"
+  def types
+    table = [['type', 'name']]
+    CAPACITY_TYPES.each_pair do |type, data|
+      table << [type, data[:name]]
+    end
+    print_table table
+  end
+
   no_commands do
 
     def capacity_to_s(capacity, entity)
@@ -38,7 +48,7 @@ class Capacity < CloudstackCli::Base
         (capacity[entity] / CAPACITY_TYPES[capacity['type']][:divider]).round(1) : 
         capacity[entity]
       CAPACITY_TYPES[capacity['type']][:unit] ? 
-        "#{value}#{CAPACITY_TYPES[capacity['type']][:unit]}" :
+        "#{value} #{CAPACITY_TYPES[capacity['type']][:unit]}" :
         value.to_s
     end
 
