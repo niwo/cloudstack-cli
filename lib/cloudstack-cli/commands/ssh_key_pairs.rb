@@ -5,7 +5,6 @@ class SshKeyPair < CloudstackCli::Base
   option :account
   option :project
   def list
-    puts self.methods
     pairs = client.list_ssh_key_pairs(options)
     if pairs.size < 1
       say "No ssh key pairs found."
