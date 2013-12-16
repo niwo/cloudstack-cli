@@ -34,21 +34,22 @@ class Server < CloudstackCli::Base
       print_table table
 
       if options[:command]
+        args = { project_id: project_id, async: false, account: options[:account] }
         case options[:command].downcase
           when "start"
             exit unless yes?("\nStart the server(s) above? [y/N]:", :magenta)
             jobs = servers.map do |server|
-              {id: client.start_server(server['name'], project_id, false)['jobid'], name: "Start server #{server['name']}"}
+              {id: client.start_server(server['name'], args)['jobid'], name: "Start server #{server['name']}"}
             end
           when "stop"
             exit unless yes?("\nStop the server(s) above? [y/N]:", :magenta)
             jobs = servers.map do |server|
-              {id: client.stop_server(server['name'], nil, project_id, false)['jobid'], name: "Stop server #{server['name']}"}
+              {id: client.stop_server(server['name'], args)['jobid'], name: "Stop server #{server['name']}"}
             end
           when "restart"
             exit unless yes?("\nRestart the server(s) above? [y/N]:", :magenta)
             jobs = servers.map do |server|
-              {id: client.reboot_server(server['name'], project_id, false)['jobid'], name: "Restart server #{server['name']}"}
+              {id: client.reboot_server(server['name'], args)['jobid'], name: "Restart server #{server['name']}"}
             end
           else
             say "\nCommand #{options[:command]} not supported.", :red
@@ -161,20 +162,34 @@ class Server < CloudstackCli::Base
   end
 
   desc "stop NAME", "stop a server"
+  option :project
+  option :account
+  option :force
   def stop(name)
-    client.stop_server(name)
+    options[project_id] = find_project['id'] if options[:project]
+    exit unless options[:force] || yes?("Stop server #{name}? [y/N]:", :magenta)
+    client.stop_server(name, options)
     puts
   end
 
   desc "start NAME", "start a server"
+  option :project
+  option :account
   def start(name)
-    client.start_server(name)
+    options[project_id] = find_project['id'] if options[:project]
+    say("Start server #{name}", :magenta)
+    client.start_server(name, options)
     puts
   end
 
   desc "reboot NAME", "reboot a server"
+  option :project
+  option :account
+  option :force
   def restart(name)
-    client.reboot_server(name)
+    options[project_id] = find_project['id'] if options[:project]
+    exit unless options[:force] || yes?("Reboot server #{name}? [y/N]:", :magenta)
+    client.reboot_server(name, options)
     puts
   end
 
