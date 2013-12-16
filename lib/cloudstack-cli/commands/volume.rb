@@ -1,6 +1,6 @@
 class Volume < CloudstackCli::Base
 
-  desc "volume list", "list volumes"
+  desc "list", "list volumes"
   option :project
   def list
     projectid = find_project['id'] if options[:project]

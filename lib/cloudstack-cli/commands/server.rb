@@ -1,38 +1,66 @@
 class Server < CloudstackCli::Base
 
-  desc "server list", "list servers"
+  desc "list", "list servers"
   option :project
   option :account
   option :zone
+  option :command, desc: "command to execute for each server: START, STOP or RESTART"
   def list
     if options[:project]
       if options[:project].downcase == "all"
         options[:project_id] = -1
+        project_id = -1
       else
         project = find_project
         options[:project_id] = project['id']
+        project_id = project['id']
       end
     end
     servers = client.list_servers(options)
     if servers.size < 1
       puts "No servers found."
     else
-      table = [["Name", "State", "Offering", "Zone", options[:project] ? "Project" : "Account", "IP's"]]
+      table = [["Name", "State", "Offering", "Zone", project_id ? "Project" : "Account", "IP's"]]
       servers.each do |server|
         table << [
           server['name'],
           server['state'],
           server['serviceofferingname'],
           server['zonename'],
-          options[:project] ? server['project'] : server['account'],
+          project_id ? server['project'] : server['account'],
           server['nic'].map { |nic| nic['ipaddress']}.join(' ')
         ]
       end
       print_table table
-    end
+
+      if options[:command]
+        case options[:command].downcase
+          when "start"
+            exit unless yes?("\nStart the server(s) above? [y/N]:", :magenta)
+            jobs = servers.map do |server|
+              {id: client.start_server(server['name'], project_id, false)['jobid'], name: "Start server #{server['name']}"}
+            end
+          when "stop"
+            exit unless yes?("\nStop the server(s) above? [y/N]:", :magenta)
+            jobs = servers.map do |server|
+              {id: client.stop_server(server['name'], nil, project_id, false)['jobid'], name: "Stop server #{server['name']}"}
+            end
+          when "restart"
+            exit unless yes?("\nRestart the server(s) above? [y/N]:", :magenta)
+            jobs = servers.map do |server|
+              {id: client.reboot_server(server['name'], project_id, false)['jobid'], name: "Restart server #{server['name']}"}
+            end
+          else
+            say "\nCommand #{options[:command]} not supported.", :red
+            exit 1
+          end
+          puts
+          watch_jobs(jobs)
+        end
+      end
   end
 
-  desc "server show NAME", "show detailed infos about a server"
+  desc "show NAME", "show detailed infos about a server"
   option :project
   def show(name)
     if options[:project]
@@ -53,7 +81,7 @@ class Server < CloudstackCli::Base
     end
   end
 
-  desc "server create NAME [NAME2 ...]", "create server(s)"
+  desc "create NAME [NAME2 ...]", "create server(s)"
   option :template, aliases: '-t', desc: "name of the template"
   option :iso, desc: "name of the iso", desc: "name of the iso template"
   option :offering, aliases: '-o', required: true, desc: "computing offering name"
@@ -107,7 +135,7 @@ class Server < CloudstackCli::Base
     say "Finished.", :green
   end
 
-  desc "server destroy NAME [NAME2 ..]", "destroy server(s)"
+  desc "destroy NAME [NAME2 ..]", "destroy server(s)"
   option :project
   option :force, description: "destroy without asking", type: :boolean, aliases: '-f'
   def destroy(*names)
@@ -127,24 +155,24 @@ class Server < CloudstackCli::Base
     end
   end
 
-  desc "server bootstrap", "interactive creation of a server with network access"
+  desc "bootstrap", "interactive creation of a server with network access"
   def bootstrap
     bootstrap_server_interactive
   end
 
-  desc "server stop NAME", "stop a server"
+  desc "stop NAME", "stop a server"
   def stop(name)
     client.stop_server(name)
     puts
   end
 
-  desc "server start NAME", "start a server"
+  desc "start NAME", "start a server"
   def start(name)
     client.start_server(name)
     puts
   end
 
-  desc "server reboot NAME", "reboot a server"
+  desc "reboot NAME", "reboot a server"
   def restart(name)
     client.reboot_server(name)
     puts

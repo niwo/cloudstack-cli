@@ -1,6 +1,6 @@
 class Router < CloudstackCli::Base
 
-	desc "router list", "list virtual routers"
+	desc "list", "list virtual routers"
   option :project
   option :account
   option :zone
@@ -70,7 +70,7 @@ class Router < CloudstackCli::Base
 	  end
   end
 
-  desc "router stop NAME [NAME2 ..]", "stop virtual router(s)"
+  desc "stop NAME [NAME2 ..]", "stop virtual router(s)"
   option :force, description: "stop without asking", type: :boolean, aliases: '-f'
   def stop(*names)
     routers = names.map {|name| get_router(name)}
@@ -83,7 +83,7 @@ class Router < CloudstackCli::Base
     watch_jobs(jobs)
   end
 
-  desc "router start NAME [NAME2 ..]", "start virtual router(s)"
+  desc "start NAME [NAME2 ..]", "start virtual router(s)"
   option :force, description: "start without asking", type: :boolean, aliases: '-f'
   def start(*names)
     routers = names.map {|name| get_router(name)}
@@ -96,7 +96,7 @@ class Router < CloudstackCli::Base
     watch_jobs(jobs)
   end
 
-  desc "router start NAME [NAME2 ..]", "restart virtual router(s) (stop and start)"
+  desc "start NAME [NAME2 ..]", "restart virtual router(s) (stop and start)"
   option :force, description: "restart without asking", type: :boolean, aliases: '-f'
   def restart(*names)
     routers = names.map {|name| get_router(name)}
@@ -117,7 +117,7 @@ class Router < CloudstackCli::Base
     say "Finished.", :green
   end
 
-  desc "router destroy NAME [NAME2 ..]", "destroy virtual router(s)"
+  desc "destroy NAME [NAME2 ..]", "destroy virtual router(s)"
   option :force, description: "destroy without asking", type: :boolean, aliases: '-f'
   def destroy(*names)
     routers = names.map {|name| get_router(name)}

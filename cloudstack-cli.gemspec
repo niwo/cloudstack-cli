@@ -10,7 +10,7 @@ Gem::Specification.new do |gem|
   gem.email         = ["nik.wolfgramm@gmail.com"]
   gem.description   = %q{cloudstack-cli is a CloudStack API client written in Ruby.}
   gem.summary       = %q{cloudstack-cli CloudStack API client}
-  gem.homepage      = "https://bitbucket.org/swisstxt/cloudstack-cli"
+  gem.homepage      = "https://github.com/niwo/cloudstack-cli"
   gem.license       = 'MIT'
 
   gem.required_ruby_version = '>= 1.9.3'
@@ -24,5 +24,5 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency('rake', '~> 10.0.4')
   
   gem.add_dependency('thor', '~> 0.18.1')
-  gem.add_dependency('cloudstack_client', '~> 0.2.14')
+  gem.add_dependency('cloudstack_client', '~> 0.2.16')
 end

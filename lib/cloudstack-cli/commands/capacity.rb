@@ -12,7 +12,7 @@ class Capacity < CloudstackCli::Base
 		9 => {name: "Local Storage", unit: "TB", divider: 1024.0**4}
 	}
 
-  desc "capacity list", "list system capacity"
+  desc "list", "list system capacity"
   option :zone
   option :type, desc: "specify type, see types for a list of types"
   def list
@@ -32,7 +32,7 @@ class Capacity < CloudstackCli::Base
     print_table table
   end
 
-  desc "capacity types", "show capacity types"
+  desc "types", "show capacity types"
   def types
     table = [['type', 'name']]
     CAPACITY_TYPES.each_pair do |type, data|

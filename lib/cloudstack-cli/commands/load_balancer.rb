@@ -1,6 +1,6 @@
 class LoadBalancer < CloudstackCli::Base
   
-  desc "load_balancer list", "list load balancer rules"
+  desc "list", "list load balancer rules"
   option :project
   def list
     project = find_project if options[:project]
@@ -18,7 +18,7 @@ class LoadBalancer < CloudstackCli::Base
     end
   end
 
-  desc "load_balancer create NAME", "create load balancer rule"
+  desc "create NAME", "create load balancer rule"
   option :project
   option :ip, required: true
   option :public_port, required: true
@@ -36,7 +36,7 @@ class LoadBalancer < CloudstackCli::Base
     say "OK!", :green
   end
 
-  desc "load_balancer add NAME", "assign servers to balancer rule"
+  desc "add NAME", "assign servers to balancer rule"
   option :servers, required: true, type: :array, description: 'server names'
   def add(name)
     say "Add #{names.join(', ')} to rule #{id}...", :yellow

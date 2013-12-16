@@ -1,6 +1,6 @@
 class IpAddress < CloudstackCli::Base
 
-  desc "ip_address release ID", "release public IP address"
+  desc "release ID", "release public IP address"
   def release(id)
     say("OK", :green) if client.disassociate_ip_address(id)
   end
@@ -18,7 +18,7 @@ class IpAddress < CloudstackCli::Base
   	say ip['ipaddress']
   end
 
-  desc "ip_address list", "list public IP address"
+  desc "list", "list public IP address"
   option :project
   option :account
   option :listall

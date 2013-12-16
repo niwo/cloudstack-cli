@@ -1,6 +1,6 @@
 class Job < CloudstackCli::Base
 
-  desc 'job list', 'list async jobs'
+  desc 'list', 'list async jobs'
   def list
     jobs = client.list_jobs()
     if jobs.size < 1
@@ -14,7 +14,7 @@ class Job < CloudstackCli::Base
     end
   end
 
-  desc 'job query ID', 'query async job'
+  desc 'query ID', 'query async job'
   def query(id)
     job = client.query_job(id)
     job.each do |key, value| 

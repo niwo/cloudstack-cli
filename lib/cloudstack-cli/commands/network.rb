@@ -1,6 +1,6 @@
 class Network < CloudstackCli::Base
 
-  desc "network list", "list networks"
+  desc "list", "list networks"
   option :project
   option :account
   option :showid, type: :boolean
@@ -38,7 +38,7 @@ class Network < CloudstackCli::Base
     end
   end
 
-  desc "network default", "get the default network"
+  desc "default", "get the default network"
   option :zone
   def default
     network = client.get_default_network(options[:zone])
@@ -58,7 +58,7 @@ class Network < CloudstackCli::Base
     end
   end
 
-  desc "network show NAME", "show detailed infos about a network"
+  desc "show NAME", "show detailed infos about a network"
   option :project
   def show(name)
     if options[:project]
@@ -79,7 +79,7 @@ class Network < CloudstackCli::Base
     end
   end
 
-  desc "network restart NAME", "restart network"
+  desc "restart NAME", "restart network"
   option :cleanup, type: :boolean, default: true
   def restart(name)
     network = client.get_network(name)
@@ -93,7 +93,7 @@ class Network < CloudstackCli::Base
     end
   end
 
-  desc "network delete NAME", "delete network"
+  desc "delete NAME", "delete network"
   def delete(name)
     network = client.get_network(name)
     network = client.get_network(name, -1) unless network

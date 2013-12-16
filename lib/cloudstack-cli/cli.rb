@@ -58,26 +58,6 @@ module CloudstackCli
       File.open(file, 'w+') {|f| f.write(config.to_yaml) }
     end
 
-    desc "environments", "list cloudstack-cli environments"
-    def environments(file = options[:config])
-      config = {}
-      if File.exists? file
-        begin
-          config = YAML::load(IO.read(file))
-        rescue
-          error "Can't load configuration from file #{config_file}."
-          exit 1
-        end
-        table = [%w(Name URL)]
-        table << ["default", config[:url]]
-        config.each_key do |key|
-          table << [key, config[key][:url]] unless key.class == Symbol
-        end
-        print_table table
-      end
-    end
-    map :envs => :environments
-
     desc "command COMMAND [arg1=val1 arg2=val2...]", "run a custom api command"
     def command(command, *args)
       params = {'command' => command}
@@ -92,6 +72,8 @@ module CloudstackCli
     Dir[File.dirname(__FILE__) + '/commands/*.rb'].each do |command| 
       require command
     end
+    
+    map :env => :environment
     
     desc "zone SUBCOMMAND ...ARGS", "Manage zones"
     subcommand :zone, Zone
@@ -111,11 +93,11 @@ module CloudstackCli
     desc "server SUBCOMMAND ...ARGS", "Manage servers"
     subcommand :server, Server
 
-    desc "offering SUBCOMMAND ...ARGS", "Manage offerings"
-    subcommand :offering, Offering
+    desc "compute_offer SUBCOMMAND ...ARGS", "Manage offerings"
+    subcommand :compute_offer, ComputeOffer
 
-    desc "disk_offering SUBCOMMAND ...ARGS", "Manage disk offerings"
-    subcommand :disk_offering, DiskOffering
+    desc "disk_offer SUBCOMMAND ...ARGS", "Manage disk offerings"
+    subcommand :disk_offering, DiskOffer
 
     desc "network SUBCOMMAND ...ARGS", "Manage networks"
     subcommand :network, Network

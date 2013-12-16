@@ -1,7 +1,7 @@
 # Cloudstack CLI
 
 cloudstack-cli is a [CloudStack](http://cloudstack.apache.org/) API client written in Ruby.
-cloudstack-cli uses the [cloudstack_client](https://bitbucket.org/swisstxt/cloudstack_client) to talk to the Cloudstack API.
+cloudstack-cli uses the [cloudstack_client](https://github.com/niwo/cloudstack_client) to talk to the Cloudstack API.
 
 ## Installation
 
@@ -120,4 +120,4 @@ Hint: You can watch the status of the command with watch.
 
 ## License
 
-Released under the MIT License. See the [LICENSE](https://bitbucket.org/swisstxt/cloudstack-cli/raw/master/LICENSE.txt) file for further details.
+Released under the MIT License. See the [LICENSE](https://raw.github.com/niwo/cloudstack-cli/master/LICENSE.txt) file for further details.

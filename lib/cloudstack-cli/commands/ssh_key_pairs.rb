@@ -1,6 +1,6 @@
 class SshKeyPair < CloudstackCli::Base
 
-  desc "ssh_key_pair list", 'list ssh key pairs'
+  desc "list", 'list ssh key pairs'
   option :listall
   option :account
   option :project
@@ -17,7 +17,7 @@ class SshKeyPair < CloudstackCli::Base
     end
   end
 
-  desc 'ssh_key_pair create NAME', 'create ssh key pair'
+  desc 'create NAME', 'create ssh key pair'
   option :account
   option :project
   def create(name)
@@ -28,7 +28,7 @@ class SshKeyPair < CloudstackCli::Base
     say pair['privatekey']
   end
 
-  desc 'ssh_key_pair register NAME', 'register ssh key pair'
+  desc 'register NAME', 'register ssh key pair'
   option :account
   option :project
   option :public_key, required: true, desc: "path to public_key file"
@@ -46,7 +46,7 @@ class SshKeyPair < CloudstackCli::Base
     say pair['privatekey']
   end
 
-  desc 'ssh_key_pair delete NAME', 'delete ssh key pair'
+  desc 'delete NAME', 'delete ssh key pair'
   option :account
   option :project
   option :force, aliases: '-f', desc: "delete without asking"

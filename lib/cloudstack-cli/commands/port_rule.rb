@@ -1,6 +1,6 @@
 class PortRule < CloudstackCli::Base
 
-  desc "port_rule create SERVER", "create portforwarding rules"
+  desc "create SERVER", "create portforwarding rules"
   option :rules, type: :array,
     required: true,
     desc: "Port Forwarding Rules [public_ip]:port ...",
@@ -35,7 +35,7 @@ class PortRule < CloudstackCli::Base
     end
   end
 
-  desc "port_rule list", "list portforwarding rules"
+  desc "list", "list portforwarding rules"
   option :project
   def list
     project_id = find_project['id'] if options[:project]
