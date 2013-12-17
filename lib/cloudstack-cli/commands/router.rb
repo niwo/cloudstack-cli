@@ -75,7 +75,7 @@ class Router < CloudstackCli::Base
   def stop(*names)
     routers = names.map {|name| get_router(name)}
     print_routers(routers)
-    exit unless options[:force] || yes?("\nStop router(s) above?", :magenta)
+    exit unless options[:force] || yes?("\nStop router(s) above? [y/N]:", :magenta)
   	jobs = routers.map do |router|
   		{id: client.stop_router(router['id'], async: false)['jobid'], name: "Stop router #{router['name']}"}
   	end
@@ -88,7 +88,7 @@ class Router < CloudstackCli::Base
   def start(*names)
     routers = names.map {|name| get_router(name)}
     print_routers(routers)
-    exit unless options[:force] || yes?("\nStart router(s) above?", :magenta)
+    exit unless options[:force] || yes?("\nStart router(s) above? [y/N]:", :magenta)
   	jobs = routers.map do |router|
       {id: client.start_router(router['id'], async: false)['jobid'], name: "Start router #{router['name']}"}
     end
@@ -101,7 +101,7 @@ class Router < CloudstackCli::Base
   def restart(*names)
     routers = names.map {|name| get_router(name)}
     print_routers(routers)
-    exit unless options[:force] || yes?("\nRestart router(s) above?", :magenta)
+    exit unless options[:force] || yes?("\nRestart router(s) above? [y/N]:", :magenta)
     jobs = routers.map do |router|
       {id: client.stop_router(router['id'], async: false)['jobid'], name: "Stop router #{router['name']}"}
     end
@@ -122,7 +122,7 @@ class Router < CloudstackCli::Base
   def destroy(*names)
     routers = names.map {|name| get_router(name)}
     print_routers(routers)
-    exit unless options[:force] || yes?("\nDestroy router(s) above?", :magenta)
+    exit unless options[:force] || yes?("\nDestroy router(s) above? [y/N]:", :magenta)
   	jobs = routers.map do |router|
   		{id: client.destroy_router(router['id'], async: false)['jobid'], name: "Destroy router #{router['name']}"}
   	end

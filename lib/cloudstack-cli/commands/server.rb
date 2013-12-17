@@ -5,9 +5,11 @@ class Server < CloudstackCli::Base
   option :account
   option :zone
   option :command, desc: "command to execute for each server: START, STOP or RESTART"
+  option :status
+  option :listall
   def list
     if options[:project]
-      if options[:project].downcase == "all"
+      if %w(all -1).include? options[:project].downcase
         options[:project_id] = -1
         project_id = -1
       else
@@ -20,7 +22,7 @@ class Server < CloudstackCli::Base
     if servers.size < 1
       puts "No servers found."
     else
-      table = [["Name", "State", "Offering", "Zone", project_id ? "Project" : "Account", "IP's"]]
+      table = [["Name", "Status", "Offering", "Zone", project_id ? "Project" : "Account", "IP's"]]
       servers.each do |server|
         table << [
           server['name'],
@@ -32,9 +34,10 @@ class Server < CloudstackCli::Base
         ]
       end
       print_table table
+      say "Total number of servers: #{servers.count}"
 
       if options[:command]
-        args = { project_id: project_id, async: false, account: options[:account] }
+        args = { project_id: project_id, sync: true, account: options[:account] }
         case options[:command].downcase
           when "start"
             exit unless yes?("\nStart the server(s) above? [y/N]:", :magenta)
