@@ -75,7 +75,7 @@ class Server < CloudstackCli::Base
         options[:project_id] = project['id']
       end
     end
-    unless server = client.get_server(name, options[:project_id])
+    unless server = client.get_server(name, options)
       puts "No server found."
     else
       server.each do |key, value|
@@ -105,7 +105,7 @@ class Server < CloudstackCli::Base
     projectid = find_project['id'] if options[:project]
     say "Start deploying servers...", :green
     jobs = names.map do |name|
-      server = client(quiet: true).get_server(name, projectid)
+      server = client(quiet: true).get_server(name, project_id: projectid)
       if server
         say "Server #{name} (#{server["state"]}) already exists.", :yellow
         job = {
@@ -126,7 +126,7 @@ class Server < CloudstackCli::Base
       say "Create port forwarding rules...", :green
       jobs = []
       names.each do |name|
-        server = client(quiet: true).get_server(name, projectid)
+        server = client(quiet: true).get_server(name, project_id: projectid)
         create_port_rules(server, options[:port_rules], false).each_with_index do |job_id, index|
           jobs << {
             id: job_id,
@@ -145,11 +145,11 @@ class Server < CloudstackCli::Base
   def destroy(*names)
     projectid = find_project['id'] if options[:project]
     names.each do |name|
-      server = client.get_server(name, projectid)
+      server = client.get_server(name, project_id: projectid)
       unless server
         say "Server #{name} not found.", :red
       else
-        ask = "Destroy #{name} (#{server['state']})?"
+        ask = "Destroy #{name} (#{server['state']})? [y/N]:"
         if options[:force] || yes?(ask, :yellow)
           say "destroying #{name} "
           client.destroy_server(server["id"])

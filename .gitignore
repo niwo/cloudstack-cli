@@ -4,3 +4,4 @@ config/cloudstack.yml
 pkg
 html
 *.gem
+.bundle
