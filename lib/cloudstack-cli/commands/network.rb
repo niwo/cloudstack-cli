@@ -1,12 +1,11 @@
 class Network < CloudstackCli::Base
 
   desc "list", "list networks"
-  option :project
-  option :account
-  option :zone
+  option :project, desc: 'the project name of the network'
+  option :account, desc: 'the owner of the network'
+  option :zone, desc: 'typehe name of the zone the network belongs to'
   option :type, desc: 'the type of the network'
-  option :showid, type: :boolean
-  option :isdefault, type: :boolean
+  option :showid, type: :boolean, desc: 'show the network id'
   def list
     project = find_project if options[:project]
     if options[:zone]
@@ -23,8 +22,8 @@ class Network < CloudstackCli::Base
     elsif options[:account]
       networks = client.list_networks(account: options[:account], zone_id: zone_id)
     else
-      networks = client.list_networks(isdefault: options[:isdefault], zone_id: zone_id)
-      networks += client.list_networks(project_id: -1, isdefault: options[:isdefault], zone_id: zone_id)
+      networks = client.list_networks(zone_id: zone_id)
+      networks += client.list_networks(project_id: -1, zone_id: zone_id)
     end
 
     if options[:type]
