@@ -3,59 +3,29 @@ module CloudstackCli
     include Thor::Actions
 
     package_name "cloudstack-cli" 
-    map %w(-v --version) => :version
 
-    class_option :config,
+    class_option :config_file,
       default: File.join(Dir.home, '.cloudstack-cli.yml'),
       aliases: '-c',
       desc: 'location of your cloudstack-cli configuration file'
 
-    class_option :environment,
+    class_option :env,
       aliases: '-e',
-      desc: 'environment to load from the configuration file'
+      desc: 'environment to use'
 
     class_option :debug,
       desc: 'enable debug output',
       type: :boolean
 
-    desc "version", "outputs the cloudstack-cli version"
+    desc "version", "print cloudstack-cli version number"
     def version
       say "cloudstack-cli v#{CloudstackCli::VERSION}"
     end
+    map %w(-v --version) => :version
 
-    desc "setup", "initial setup of the Cloudstack connection"
-    option :url
-    option :api_key
-    option :secret_key
-    def setup(file = options[:config])
-      config = {}
-      unless options[:url]
-        say "Configuring #{options[:environment] || 'default'} environment."
-        say "What's the URL of your Cloudstack API?", :yellow
-        say "Example: https://my-cloudstack-service/client/api/"
-        config[:url] = ask("URL:", :magenta)
-      end
-      unless options[:api_key]
-        config[:api_key] = ask("API Key:", :magenta)
-      end
-      unless options[:secret_key]
-        config[:secret_key] = ask("Secret Key:", :magenta)
-      end
-      if options[:environment]
-        config = {options[:environment] => config}
-      end
-      if File.exists? file
-        begin
-          old_config = YAML::load(IO.read(file))
-        rescue
-          error "Can't load configuration from file #{config_file}."
-          exit 1
-        end
-        say "Warning: #{file} already exists.", :red
-        exit unless yes?("Do you want to merge your settings? [y/N]", :red)
-        config = old_config.merge(config)
-      end
-      File.open(file, 'w+') {|f| f.write(config.to_yaml) }
+    desc "setup", "initial configuration of Cloudstack connection settings"
+    def setup
+      invoke "environment:add", :environment => options[:environment]
     end
 
     desc "command COMMAND [arg1=val1 arg2=val2...]", "run a custom api command"
@@ -72,8 +42,10 @@ module CloudstackCli
     Dir[File.dirname(__FILE__) + '/commands/*.rb'].each do |command| 
       require command
     end
-    
-    map :env => :environment
+
+    desc "environment SUBCOMMAND ...ARGS", "Manage cloudstack-cli environments"
+    subcommand :environment, Environment
+    map 'env' => :environment
     
     desc "zone SUBCOMMAND ...ARGS", "Manage zones"
     subcommand :zone, Zone
