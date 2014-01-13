@@ -3,31 +3,45 @@ class Network < CloudstackCli::Base
   desc "list", "list networks"
   option :project
   option :account
+  option :zone
+  option :type, desc: 'the type of the network'
   option :showid, type: :boolean
   option :isdefault, type: :boolean
   def list
     project = find_project if options[:project]
+    if options[:zone]
+      unless zone = client.get_zone(options[:zone])
+        say "Zone '#{options[:zone]}' not found.", :red
+        exit 1
+      end
+      zone_id = zone['id']
+    end
+
     networks = []
     if project
-      networks = client.list_networks(project_id: project['id'])
+      networks = client.list_networks(project_id: project['id'], zone_id: zone_id)
     elsif options[:account]
-      networks = client.list_networks(account: options[:account])
+      networks = client.list_networks(account: options[:account], zone_id: zone_id)
     else
-      networks = client.list_networks(isdefault: options[:isdefault])
-      networks += client.list_networks(project_id: -1, isdefault: options[:isdefault])
+      networks = client.list_networks(isdefault: options[:isdefault], zone_id: zone_id)
+      networks += client.list_networks(project_id: -1, isdefault: options[:isdefault], zone_id: zone_id)
+    end
+
+    if options[:type]
+      networks = filter_by(networks, 'type', options[:type])
     end
 
     if networks.size < 1
       puts "No networks found."
     else
-      table = [["Name", "Displaytext", "Account", "Project", "Domain", "State", "Type"]]
+      table = [["Name", "Displaytext", "Account/Project", "Zone", "Domain", "State", "Type"]]
       table[0] << "ID" if options[:showid]
       networks.each do |network|
         table << [
           network["name"],
           network["displaytext"],
-          network["account"],
-          network["project"],
+          network["account"] || network["project"],
+          network["zonename"],
           network["domain"],
           network["state"],
           network["type"]
