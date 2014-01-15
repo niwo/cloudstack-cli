@@ -30,22 +30,24 @@ module CloudstackCli
         )
       end
 
-      def load_configuration(config_file = options[:config_file], env = options[:environment])
+      def load_configuration(config_file = options[:config_file], env = options[:env])
         unless File.exists?(config_file)
           say "Configuration file #{config_file} not found.", :red
           say "Please run \'cs setup\' to create one."
           exit 1
         end
+
         begin
           config = YAML::load(IO.read(config_file))
         rescue
-          error "Can't load configuration from file #{config_file}."
+          say "Can't load configuration from file #{config_file}.", :red
           exit 1
         end
+        
+        env ||= config[:default]
         if env
-          config = config[env]
-          unless config
-            error "Can't find environment #{env} in configuration file."
+          unless config = config[env]
+            say "Can't find environment #{env}.", :red
             exit 1
           end
         end
