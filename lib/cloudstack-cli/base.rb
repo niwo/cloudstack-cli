@@ -54,7 +54,7 @@ module CloudstackCli
 
       def find_project(name = options[:project], allow_all = true)
         return nil unless name
-        if allow_all && %w(ALL -1).include? name
+        if allow_all && %w(ALL -1).include?(name)
           return {'id' => '-1'} 
         end
         unless project = client.get_project(name)
