@@ -9,14 +9,8 @@ class Server < CloudstackCli::Base
   option :listall
   def list
     if options[:project]
-      if %w(all -1).include? options[:project].downcase
-        options[:project_id] = -1
-        project_id = -1
-      else
-        project = find_project
-        options[:project_id] = project['id']
-        project_id = project['id']
-      end
+      project_id = find_project['id']
+      options[:project_id] = project_id
     end
     servers = client.list_servers(options)
     if servers.size < 1
@@ -67,14 +61,7 @@ class Server < CloudstackCli::Base
   desc "show NAME", "show detailed infos about a server"
   option :project
   def show(name)
-    if options[:project]
-      if options[:project].downcase == "all"
-        options[:project_id] = -1
-      else
-        project = find_project
-        options[:project_id] = project['id']
-      end
-    end
+    options[:project_id] = find_project['id']
     unless server = client.get_server(name, options)
       puts "No server found."
     else

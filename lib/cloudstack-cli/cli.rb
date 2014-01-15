@@ -19,7 +19,7 @@ module CloudstackCli
 
     desc "version", "print cloudstack-cli version number"
     def version
-      say "cloudstack-cli v#{CloudstackCli::VERSION}"
+      say "cloudstack-cli version #{CloudstackCli::VERSION}"
     end
     map %w(-v --version) => :version
 
@@ -29,7 +29,6 @@ module CloudstackCli
     end
 
     desc "command COMMAND [arg1=val1 arg2=val2...]", "run a custom api command"
-    option :filter, type: :hash
     def command(command, *args)
       params = {'command' => command}
       args.each do |arg|
@@ -37,15 +36,6 @@ module CloudstackCli
         params[arg[0]] = arg[1] 
       end
       data = client.send_request(params)
-      if options[:filter]
-        filtered_data = []
-        options[:filter].each_pair do |key, value|
-          filtered_data += filter_by(data.values[1], key, value)
-        end
-        #puts JSON.pretty_generate(filtered_data)
-        puts data
-        exit 0
-      end
       puts JSON.pretty_generate(data)
     end
 
