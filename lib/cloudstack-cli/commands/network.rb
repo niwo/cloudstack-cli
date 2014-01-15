@@ -6,6 +6,7 @@ class Network < CloudstackCli::Base
   option :zone, desc: 'typehe name of the zone the network belongs to'
   option :type, desc: 'the type of the network'
   option :showid, type: :boolean, desc: 'show the network id'
+  option :showvlan, type: :boolean, desc: 'show the VLAN'
   def list
     project = find_project if options[:project]
     if options[:zone]
@@ -35,6 +36,7 @@ class Network < CloudstackCli::Base
     else
       table = [["Name", "Displaytext", "Account/Project", "Zone", "Domain", "State", "Type"]]
       table[0] << "ID" if options[:showid]
+      table[0] << "VLAN" if options[:showvlan]
       networks.each do |network|
         table << [
           network["name"],
@@ -46,6 +48,7 @@ class Network < CloudstackCli::Base
           network["type"]
         ]
         table[-1] << network["id"] if options[:showid]
+        table[-1] << network["vlan"] if options[:showvlan]
       end
       print_table table
     end

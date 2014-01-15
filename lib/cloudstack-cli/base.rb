@@ -61,8 +61,8 @@ module CloudstackCli
         project
       end
 
-      def filter_by(objects, tag_name, tag)
-        objects.select {|r| r[tag_name].downcase == tag.downcase}
+      def filter_by(objects, key, value)
+        objects.select {|r| r[key].downcase == value.downcase}
       end
     end
   end
