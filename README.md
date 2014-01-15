@@ -1,5 +1,7 @@
 # Cloudstack CLI
 
+[![Gem Version](https://badge.fury.io/rb/cloudstack-cli.png)](http://badge.fury.io/rb/cloudstack-cli)
+
 cloudstack-cli is a [CloudStack](http://cloudstack.apache.org/) API client written in Ruby.
 cloudstack-cli uses the [cloudstack_client](https://github.com/niwo/cloudstack_client) to talk to the Cloudstack API.
 
