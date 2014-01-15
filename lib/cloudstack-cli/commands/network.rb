@@ -51,6 +51,7 @@ class Network < CloudstackCli::Base
         table[-1] << network["vlan"] if options[:showvlan]
       end
       print_table table
+      say "Total number of networks: #{networks.count}"
     end
   end
 

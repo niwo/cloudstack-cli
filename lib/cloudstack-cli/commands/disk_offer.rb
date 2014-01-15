@@ -17,6 +17,7 @@ class DiskOffer < CloudstackCli::Base
         ]
       end
       print_table table
+      say "Total number of offerings: #{offerings.size}"
     end
   end
 end

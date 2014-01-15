@@ -32,6 +32,7 @@ class IpAddress < CloudstackCli::Base
         table << [address["ipaddress"], address["account"], address["zonename"]]
       end
       print_table table
+      say "Total number of addresses: #{addresses.size}"
     end
   end
 

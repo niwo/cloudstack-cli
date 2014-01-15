@@ -15,6 +15,7 @@ class LoadBalancer < CloudstackCli::Base
         table << [rule['name'], rule['publicip'], rule['publicport']]
       end
       print_table table
+      say "Total number of rules: #{rules.count}"
     end
   end
 

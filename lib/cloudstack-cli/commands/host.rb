@@ -14,6 +14,7 @@ class Host < CloudstackCli::Base
         ]
       end
       print_table table
+      say "Total number of hosts: #{hosts.size}"
     end
   end
 

@@ -161,7 +161,7 @@ class Router < CloudstackCli::Base
         end
         print_table table
         puts
-        say "Number of routers: #{routers.size}"
+        say "Total number of routers: #{routers.size}"
       end
     end
   end

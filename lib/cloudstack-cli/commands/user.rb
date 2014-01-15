@@ -22,6 +22,7 @@ class User < CloudstackCli::Base
         ]
       end
       print_table table
+      say "Total number of users: #{users.size}"
     end
   end
   

@@ -14,6 +14,7 @@ class Pod < CloudstackCli::Base
         ]
       end
       print_table table
+      say "Total number of pods: #{pods.count}"
     end
   end
 

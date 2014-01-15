@@ -55,6 +55,7 @@ class PortRule < CloudstackCli::Base
         ]
       end
       print_table table
+      say "Total number of rules: #{rules.count}"
     end
   end
 

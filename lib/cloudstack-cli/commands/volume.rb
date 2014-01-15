@@ -23,6 +23,7 @@ class Volume < CloudstackCli::Base
         ]
       end
       print_table(table)
+      say "Total number of volumes: #{volumes.size}"
     end
   end
 

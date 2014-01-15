@@ -25,6 +25,7 @@ class Iso < CloudstackCli::Base
         table <<  [iso['name'], iso['zonename'], iso['bootable']]
       end
       print_table(table)
+      say "Total number of isos: #{isos.size}"
     end
   end
 

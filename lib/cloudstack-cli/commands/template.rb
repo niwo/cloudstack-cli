@@ -16,13 +16,14 @@ class Template < CloudstackCli::Base
       zone_id: zone ? zone['id'] : nil
     )
     if templates.size < 1
-      puts "No templates found"
+      puts "No templates found."
     else
       table = [["Name", "Zone", "Format"]]
       templates.each do |template|
         table <<  [template['name'], template['zonename'], template['format']]
       end
       print_table(table)
+      say "Total number of templates: #{templates.size}"
     end
   end
 

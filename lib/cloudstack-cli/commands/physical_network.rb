@@ -19,6 +19,7 @@ class PhysicalNetwork < CloudstackCli::Base
         ]
       end
       print_table table
+      say "Total number of networks: #{networks.count}"
     end
   end
 

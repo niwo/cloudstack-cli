@@ -14,6 +14,7 @@ class Cluster < CloudstackCli::Base
         ]
       end
       print_table table
+      say "Total number of clusters: #{clusters.size}"
     end
   end
 

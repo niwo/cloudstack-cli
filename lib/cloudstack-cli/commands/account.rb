@@ -17,6 +17,7 @@ class Account < CloudstackCli::Base
         table << [account['name'], TYPES[account['accounttype']], account['domain']]
       end
       print_table table
+      say "Total number of accounts: #{accounts.size}"
     end
   end
   

@@ -24,6 +24,7 @@ class Project < CloudstackCli::Base
         table << [project['name'], project['displaytext'], project['domain']]
       end
       print_table(table)
+      say "Total number of projects: #{projects.count}"
     end
   end
   

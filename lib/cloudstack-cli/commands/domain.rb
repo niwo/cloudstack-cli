@@ -11,6 +11,7 @@ class Domain < CloudstackCli::Base
         table << [domain['name'], domain['path']]
       end
       print_table table
+      say "Total number of domains: #{domains.size}"
     end
   end
   

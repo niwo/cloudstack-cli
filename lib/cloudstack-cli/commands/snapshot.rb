@@ -18,6 +18,7 @@ class Snapshot < CloudstackCli::Base
         ]
       end
       print_table table
+      say "Total number of snapshots: #{snapshots.size}"
     end
   end
 
