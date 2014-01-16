@@ -42,13 +42,15 @@ class Environment < CloudstackCli::Base
     end
     
     if File.exists? options[:config_file]
-      newfile = true
       old_config = parse_config_file
       if !env || old_config.has_key?(env)
         say "This environment already exists!", :red
         exit unless yes?("Do you want to override your settings? [y/N]", :yellow)
       end
       config = old_config.merge(config)
+    else
+      newfile = true
+      config[:default] = env if env
     end
 
     write_config_file(config)
