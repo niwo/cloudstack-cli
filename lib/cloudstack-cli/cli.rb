@@ -128,6 +128,9 @@ module CloudstackCli
     subcommand :storage_pool, StoragePool
 
     desc "region SUBCOMMAND ...ARGS", "Manage regions"
-    subcommand :region, Region  
+    subcommand :region, Region
+
+    desc "affinity_group SUBCOMMAND ...ARGS", "Manage affinity_groups"
+    subcommand :affinity_group, AffinityGroup  
   end
 end
