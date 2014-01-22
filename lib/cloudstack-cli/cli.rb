@@ -123,5 +123,11 @@ module CloudstackCli
 
     desc "ssh_key_pair SUBCOMMAND ...ARGS", "Manage ssh key pairs"
     subcommand :ssh_key_pair, SshKeyPair
+
+    desc "storage_pool SUBCOMMAND ...ARGS", "Manage storage pools"
+    subcommand :storage_pool, StoragePool
+
+    desc "region SUBCOMMAND ...ARGS", "Manage regions"
+    subcommand :region, Region  
   end
 end

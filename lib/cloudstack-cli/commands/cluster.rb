@@ -6,7 +6,7 @@ class Cluster < CloudstackCli::Base
     if clusters.size < 1
       say "No clusters found."
     else
-      table = [["Name", "Pod-Name", "Type", "Zone"]]
+      table = [%w(Name Pod_Name Type Zone)]
       clusters.each do |cluster|
         table << [
         	cluster['name'], cluster['podname'],

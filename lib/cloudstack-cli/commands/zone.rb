@@ -6,7 +6,7 @@ class Zone < CloudstackCli::Base
     if zones.size < 1
       puts "No projects found"
     else
-      table = [["Name", "Description"]]
+      table = [%w(Name Description)]
       zones.each do |zone|
         table << [zone['name'] ,zone['description']]
       end

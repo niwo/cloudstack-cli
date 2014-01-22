@@ -74,9 +74,16 @@ class Environment < CloudstackCli::Base
     end
   end
 
-  desc "default ENV", "set the default environment"
-  def default(env)
+  desc "default [ENV]", "show or set the default environment"
+  def default(env = nil)
     config = parse_config_file
+    
+    unless env
+      default_env = config[:default] || '-'
+      say "The current default environment is \"#{default_env}\""
+      exit 0
+    end
+
     if env == '-'
       config.delete :default
     else
@@ -86,6 +93,7 @@ class Environment < CloudstackCli::Base
       end
       config[:default] = env
     end
+
     write_config_file(config)
     say "Default environment set to #{env}."
   end
