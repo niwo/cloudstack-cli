@@ -10,10 +10,16 @@ class StoragePool < CloudstackCli::Base
       say "No storage pools found."
     else
       table = [%w(Name Pod_Name State Zone)]
+      table[0] << "Size [GB]"
+      table[0] << "Used [GB]"
+      table[0] << "Used [%]"
       storage_pools.each do |storage_pool|
+        total = storage_pool['disksizetotal'] / 1024**3
+        used = (storage_pool['disksizeused'] / 1024**3) rescue 0
         table << [
         	storage_pool['name'], storage_pool['podname'],
-          storage_pool['state'], storage_pool['zonename']
+          storage_pool['state'], storage_pool['zonename'],
+          total, used, (100.0 / total * used).round(0)
         ]
       end
       print_table table
