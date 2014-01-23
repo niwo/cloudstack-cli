@@ -2,7 +2,7 @@
 
 [![Gem Version](https://badge.fury.io/rb/cloudstack-cli.png)](http://badge.fury.io/rb/cloudstack-cli)
 
-cloudstack-cli is a [CloudStack](http://cloudstack.apache.org/) API client written in Ruby.
+cloudstack-cli is a [CloudStack](http://cloudstack.apache.org/) API command line client written in Ruby.
 cloudstack-cli uses the [cloudstack_client](https://github.com/niwo/cloudstack_client) to talk to the Cloudstack API.
 
 ## Installation
@@ -44,7 +44,7 @@ See the help screen:
 
 Bootsraps a server using a template and creating port-forwarding rules for port 22 and 80.
 
-    $ cs server create server-01 --template CentOS-6.4-x64-v1.4 --offering 1cpu_1gb --port-rules :22 :80
+    $ cs server create server-01 --template CentOS-6.4-x64-v1.4 --zone DC1 --offering 1cpu_1gb --port-rules :22 :80
 
 ### Example: Run a any custom API command
 
@@ -107,7 +107,7 @@ Hint: You can watch the status of the command with watch.
 
 
 ## References
--  [Cloudstack API documentation](http://cloudstack.apache.org/docs/api/apidocs-4.1/TOC_Root_Admin.html)
+-  [Cloudstack API documentation](http://cloudstack.apache.org/docs/api/)
 -  This tool was inspired by the Knife extension for Cloudstack: [knife-cloudstack](https://github.com/CloudStack-extras/knife-cloudstack)
 
 
