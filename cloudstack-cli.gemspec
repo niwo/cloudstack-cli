@@ -8,7 +8,7 @@ Gem::Specification.new do |gem|
   gem.version       = CloudstackCli::VERSION
   gem.authors       = ['Nik Wolfgramm']
   gem.email         = %w(nik.wolfgramm@gmail.com)
-  gem.description   = %q{cloudstack-cli is a CloudStack API client written in Ruby.}
+  gem.description   = %q{cloudstack-cli is a CloudStack API command line client written in Ruby.}
   gem.summary       = %q{cloudstack-cli CloudStack API client}
   gem.date          = Time.now.utc.strftime("%Y-%m-%d")
   gem.homepage      = 'https://github.com/niwo/cloudstack-cli'
