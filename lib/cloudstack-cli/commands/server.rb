@@ -5,7 +5,7 @@ class Server < CloudstackCli::Base
   option :account
   option :zone
   option :command, desc: "command to execute for each server: START, STOP or RESTART"
-  option :status
+  option :state
   option :listall
   def list
     if options[:project]
@@ -16,7 +16,7 @@ class Server < CloudstackCli::Base
     if servers.size < 1
       puts "No servers found."
     else
-      table = [["Name", "Status", "Offering", "Zone", project_id ? "Project" : "Account", "IP's"]]
+      table = [["Name", "State", "Offering", "Zone", project_id ? "Project" : "Account", "IP's"]]
       servers.each do |server|
         table << [
           server['name'],
