@@ -9,7 +9,7 @@ class Stack < CloudstackCli::Base
     client.verbose = false
     stack["servers"].each do |instance|
       instance["name"].gsub(', ', ',').split(',').each do |name|
-        server = client.get_server(name, projectid)
+        server = client.get_server(name: name, project_id: projectid)
         if server
           say "Server #{name} (#{server["state"]}) already exists.", :yellow
           jobs << {
@@ -27,7 +27,7 @@ class Stack < CloudstackCli::Base
                 template: instance["template"],
                 iso: instance["iso"] ,
                 offering: instance["offering"],
-                networks: string_to_array(instance["networks"]),
+                networks: load_string_or_array(instance["networks"]),
                 project: stack["project"],
                 disk_offering: instance["disk_offering"],
                 disk_size: instance["disk_size"],
@@ -48,7 +48,7 @@ class Stack < CloudstackCli::Base
     stack["servers"].each do |instance|
       instance["name"].gsub(', ', ',').split(',').each do |name|
         if port_rules = string_to_array(instance["port_rules"])
-          server = client(quiet: true).get_server(name, projectid)
+          server = client(quiet: true).get_server(name, project_id: projectid)
           create_port_rules(server, port_rules, false).each_with_index do |job_id, index|
             jobs << {
               id: job_id,
@@ -80,7 +80,7 @@ class Stack < CloudstackCli::Base
     if options[:force] || yes?("Destroy the following servers #{servers.join(', ')}?", :yellow)
       jobs = []
       servers.each do |name|
-        server = client(quiet: true).get_server(name, projectid)
+        server = client(quiet: true).get_server(name, project_id: projectid)
         if server
           jobs << {
             id: client.destroy_server(
@@ -105,6 +105,10 @@ class Stack < CloudstackCli::Base
         $stderr.puts "Error parsing json file.\n#{e.message}."
         exit
       end
+    end
+
+    def load_string_or_array(item)
+     item.is_a?(Array) ? item : [item]
     end
 
     def string_to_array(string)

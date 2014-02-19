@@ -104,10 +104,11 @@ module CloudstackCli
       frontendip = nil
       jobs = []
       client.verbose = async
+      project_id = server['project'] ? client.get_project(server['project'])['id'] : nil
       port_rules.each do |pf_rule|
         ip = pf_rule.split(":")[0]
         if ip != ''
-          ip_addr = client.get_public_ip_address(ip)
+          ip_addr = client.get_public_ip_address(ip, project_id)
           unless ip_addr
             say "Error: IP #{ip} not found.", :red
             next

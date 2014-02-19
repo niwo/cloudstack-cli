@@ -76,8 +76,8 @@ class Server < CloudstackCli::Base
   option :template, aliases: '-t', desc: "name of the template"
   option :iso, desc: "name of the iso", desc: "name of the iso template"
   option :offering, aliases: '-o', required: true, desc: "computing offering name"
+  option :zone, aliases: '-z', required: true, desc: "availability zone name"
   option :networks, aliases: '-n', type: :array, desc: "network names"
-  option :zone, aliases: '-z', desc: "availability zone name"
   option :project, aliases: '-p', desc: "project name"
   option :port_rules, aliases: '-pr', type: :array,
     default: [],

@@ -12,14 +12,15 @@ class Volume < CloudstackCli::Base
     if volumes.size < 1
       say "No volumes found."
     else
-      table = [%w(Name Type Size VM Storage Offeringname)]
+      table = [%w(Name Type Size VM Storage Offeringname Status)]
       volumes.each do |volume|
         table << [
           volume['name'], volume['type'],
           (volume['size'] / 1024**3).to_s + 'GB',
           volume['vmname'],
           volume['storage'],
-          volume['diskofferingname']
+          volume['diskofferingname'],
+          volume['state']
         ]
       end
       print_table(table)
