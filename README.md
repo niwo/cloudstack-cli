@@ -79,7 +79,10 @@ An example stackfile looks like this (my_stackfile.json)
           "disk_offering": "Perf Storage",
           "disk_size": "5",
           "offering": "2cpu_4gb",
-          "networks": "server_network, storage_network"
+          "networks": [
+            "server_network",
+            "storage_network"
+          ]
         }
       ]
     }
