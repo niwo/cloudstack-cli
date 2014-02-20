@@ -77,7 +77,7 @@ class Stack < CloudstackCli::Base
       server["name"].gsub(', ', ',').split(',').each {|name| servers << name}
     end
 
-    if options[:force] || yes?("Destroy the following servers #{servers.join(', ')}?", :yellow)
+    if options[:force] || yes?("Destroy the following servers #{servers.join(', ')}? [y/N]:", :yellow)
       jobs = []
       servers.each do |name|
         server = client(quiet: true).get_server(name, project_id: projectid)
