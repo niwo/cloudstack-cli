@@ -24,8 +24,9 @@ module CloudstackCli
     map %w(-v --version) => :version
 
     desc "setup", "initial configuration of Cloudstack connection settings"
-    def setup
-      invoke "environment:add", :environment => options[:environment]
+    def setup(env = options[:environment])
+      invoke "environment:add", [env],
+        :config_file => options[:config_file]
     end
 
     desc "command COMMAND [arg1=val1 arg2=val2...]", "run a custom api command"
