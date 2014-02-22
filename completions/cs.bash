@@ -5,7 +5,9 @@ _cs() {
     COMPREPLY=( $(compgen -W "$(cs help | grep cs | cut -d ' ' -f4)" -- "$word") )
   else
     local words=("${COMP_WORDS[@]}")
-    COMPREPLY=( $(compgen -W "$(${words[@]} help | grep cs | cut -d ' ' -f5)" -- "$word") )
+    if [ $(echo ${words[@]} | wc -w) -eq 2 ]; then
+      COMPREPLY=( $(compgen -W "$(${words[@]} help | grep cs | cut -d ' ' -f5)" -- "$word") )
+    fi
   fi
 }
 
