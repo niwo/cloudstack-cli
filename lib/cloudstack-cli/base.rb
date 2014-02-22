@@ -51,6 +51,12 @@ module CloudstackCli
             exit 1
           end
         end
+
+        unless config.key?(:url) && config.key?(:api_key) && config.key?(:secret_key)
+          say "The environment #{env || '\'-\''} contains no valid data.", :red
+          say "Please check with 'cs environment list' and set a valid default environment."
+          exit 1
+        end
         config
       end
 

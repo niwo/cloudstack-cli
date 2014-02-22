@@ -4,7 +4,7 @@ class Environment < CloudstackCli::Base
   def list
     config = parse_config_file
     table = [%w(Name URL Default)]
-    table << ['-', config[:url], !config[:default]]
+    table << ['-', config[:url], !config[:default]] if config.key?(:url)
     config.each_key do |key|
       unless key.class == Symbol
         table << [key, config[key][:url], key == config[:default]]
@@ -64,14 +64,26 @@ class Environment < CloudstackCli::Base
   desc "delete", "delete a Cloudstack connection"
   def delete(env)
     config = parse_config_file
-    if config.delete(env)
-      exit unless yes?("Do you really want to delete environment #{env}? [y/N]", :yellow)
-      config.delete :default if config[:default] == env
-      write_config_file(config)
-      say "OK.", :green
+    if env == '-'
+      config.delete(:url)
+      config.delete(:api_key)
+      config.delete(:secret_key)
+      # check if the config file is empty, delete it if true
+      if config.keys.select { |key| !key.is_a? Symbol}.size == 0
+        exit unless yes?("Do you really want to delete environment #{env}? [y/N]", :yellow)
+        File.delete(options[:config_file])
+        say "OK.", :green    
+        exit
+      end
+    elsif config.delete(env)  
     else
       say "Environment #{env} does not exist.", :red
+      exit 1
     end
+    exit unless yes?("Do you really want to delete environment #{env}? [y/N]", :yellow)
+    config.delete :default if config[:default] == env
+    write_config_file(config)
+    say "OK.", :green
   end
 
   desc "default [ENV]", "show or set the default environment"
@@ -84,7 +96,7 @@ class Environment < CloudstackCli::Base
       exit 0
     end
 
-    if env == '-'
+    if env == '-' && config.key?(:url)
       config.delete :default
     else
       unless config.has_key?(env)
