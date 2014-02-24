@@ -10,7 +10,7 @@
 # Usage:
 #
 # To enable bash <tab> completion for cloudstack-cli, add the following line (minus the
-# leading #, which is the bash comment character) to your ~/.bashrc file:
+# leading #, which is the bash comment character) to your ~/.bash_profile file (use ~/.bashrc on Ubuntu):
 #
 # eval "$(cs completion --shell=bash)"
 

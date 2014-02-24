@@ -27,7 +27,7 @@ cloudstack-cli expects to find a configuartion file with the API URL and your Cl
 
 cloudstack-cli supports multiple environments using the --environment option.
 
-see `cs help environmet` for more options. 
+see `cs help environment` for more options. 
 
 Example content of the configuration file:
 
@@ -51,7 +51,7 @@ To enable tab auto-completion for cloudstack-cli, add the following lines to you
 eval "$(cs completion --shell=bash)"
 ```
 
-Note: use `~/.bashrc` on Ubuntu
+__Note__: use `~/.bashrc` on Ubuntu
 
 ## Usage
 
