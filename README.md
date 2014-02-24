@@ -38,12 +38,14 @@ test:
     :secret_key:    "cloudstack-api-secret"
 ```
 
-Shell tab auto-completion
+### Shell tab auto-completion
 
 To enable tab auto-completion for cloudstack-cli, add the following lines to your ~/.bashrc file.
 
+```bash
 # Bash, ~/.bashrc
 eval "$(cs completion --shell=bash)"
+```
 
 ## Usage
 
