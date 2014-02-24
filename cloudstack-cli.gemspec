@@ -11,7 +11,7 @@ Gem::Specification.new do |gem|
   gem.description   = %q{cloudstack-cli is a CloudStack API command line client written in Ruby.}
   gem.summary       = %q{cloudstack-cli CloudStack API client}
   gem.date          = Time.now.utc.strftime("%Y-%m-%d")
-  gem.homepage      = 'https://github.com/niwo/cloudstack-cli'
+  gem.homepage      = 'http://niwo.github.io/cloudstack-cli/'
   gem.license       = 'MIT'
 
   gem.required_ruby_version = '>= 1.9.3'

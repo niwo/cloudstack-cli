@@ -29,7 +29,7 @@ module CloudstackCli
         :config_file => options[:config_file]
     end
 
-    desc "completion", "loads the shell scripts for tab auto-completion"
+    desc "completion", "loads the shell scripts for <tab> auto-completion"
     option :shell, default: 'bash'
     def completion
       shell_script = File.join(

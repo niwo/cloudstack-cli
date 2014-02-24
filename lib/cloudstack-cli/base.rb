@@ -33,7 +33,7 @@ module CloudstackCli
       def load_configuration(config_file = options[:config_file], env = options[:env])
         unless File.exists?(config_file)
           say "Configuration file #{config_file} not found.", :red
-          say "Please run \'cs setup\' to create one."
+          say "Please run \'cs environment add\' to create one."
           exit 1
         end
 
