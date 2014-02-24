@@ -9,21 +9,25 @@ cloudstack-cli uses the [cloudstack_client](https://github.com/niwo/cloudstack_c
 
 Install the cloudstack-cli gem:
 
-```bash
+```sh
 $ gem install cloudstack-cli
 ```
 
 ## Setup
 
-Create the initial configuration:
+### Create a cloudstack-cli environmet
 
-```bash
-$ cs setup
+Create your first environment, which defines your connection options:
+
+```sh
+$ cs environment add [environment-name]
 ```
 
 cloudstack-cli expects to find a configuartion file with the API URL and your CloudStack credentials in your home directory named .cloudstack-cli.yml. If the file is located elsewhere you can specify the loaction using the --config option.
 
 cloudstack-cli supports multiple environments using the --environment option.
+
+see `cs help environmet` for more options. 
 
 Example content of the configuration file:
 
@@ -40,12 +44,14 @@ test:
 
 ### Shell tab auto-completion
 
-To enable tab auto-completion for cloudstack-cli, add the following lines to your ~/.bashrc file.
+To enable tab auto-completion for cloudstack-cli, add the following lines to your ~/.bash_profile file.
 
-```bash
-# Bash, ~/.bashrc
+```sh
+# Bash, ~/.bash_profile
 eval "$(cs completion --shell=bash)"
 ```
+
+Note: use `~/.bashrc` on Ubuntu
 
 ## Usage
 
@@ -53,7 +59,7 @@ For additional documentation find the RubyDoc [here](http://rubydoc.info/gems/cl
 
 See the help screen:
 
-```bash
+```sh
 $ cs
 ```
 
@@ -61,7 +67,7 @@ $ cs
 
 Bootsraps a server using a template and creating port-forwarding rules for port 22 and 80.
 
-```bash
+```sh
 $ cs server create server-01 --template CentOS-6.4-x64-v1.4 --zone DC1 --offering 1cpu_1gb --port-rules :22 :80
 ```
 
@@ -69,7 +75,7 @@ $ cs server create server-01 --template CentOS-6.4-x64-v1.4 --zone DC1 --offerin
 
 Run the "listAlerts" command against the Cloudstack API with an argument of type=8:
 
-```bash
+```sh
 $ cs command listAlerts type=8
 ```
 
@@ -112,7 +118,7 @@ An example stackfile looks like this (my_stackfile.json)
 
 Create the stack of servers from above:
 
-```bash
+```sh
 $ cs stack create my_stackfile.json
 ```
 
@@ -120,7 +126,7 @@ $ cs stack create my_stackfile.json
 
 Sort all computing offerings by CPU and Memory grouped my Domain:
 
-```bash
+```sh
 $ cs offering sort
 ```
 
@@ -129,13 +135,13 @@ $ cs offering sort
 Stop all virtual routers of project Demo (you could filter by zone too):
 (This command is helpful if you have to deploy new versions of Cloudstack when using redundant routers)
 
-```bash
+```sh
 $ cs router list --project Demo --status running --redundant-state BACKUP --command stop
 ````
 
 Hint: You can watch the status of the command with watch.
 
-```bash
+```sh
 $ watch -n cs router list --project Demo
 ```
 
