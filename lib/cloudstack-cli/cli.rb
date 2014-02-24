@@ -29,6 +29,20 @@ module CloudstackCli
         :config_file => options[:config_file]
     end
 
+    desc "completion", "loads the shell scripts for tab auto-completion"
+    option :shell, default: 'bash'
+    def completion
+      shell_script = File.join(
+        File.dirname(__FILE__), '..', '..',
+        'completions', "cs.#{options[:shell]}"
+      )
+      unless File.file? shell_script
+        say "Specified cloudstack-cli shell auto-completion rules for #{options[:shell]} not found.", :red
+        exit 1
+      end
+      puts File.read shell_script
+    end
+
     desc "command COMMAND [arg1=val1 arg2=val2...]", "run a custom api command"
     def command(command, *args)
       params = {'command' => command}

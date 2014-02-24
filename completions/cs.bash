@@ -1,3 +1,19 @@
+#!/bin/bash
+
+# cloudstack-cli
+# https://github.com/niwo/cloudstack-cli
+#
+# Copyright (c) 2014 Nik Wolfgramm
+# Licensed under the MIT license.
+# https://raw.github.com/niwo/cloudstack-cli/master/LICENSE.txt
+
+# Usage:
+#
+# To enable bash <tab> completion for cloudstack-cli, add the following line (minus the
+# leading #, which is the bash comment character) to your ~/.bashrc file:
+#
+# eval "$(cs completion --shell=bash)"
+
 _cs() {
   COMPREPLY=()
   local word="${COMP_WORDS[COMP_CWORD]}"
