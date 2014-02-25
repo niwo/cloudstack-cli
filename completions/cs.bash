@@ -34,7 +34,7 @@ _cs() {
       local cp1=$(echo ${words[@]} | cut -d ' ' -f1-2)
       local cp2=$(echo ${words[@]} | cut -d ' ' -f3)
       local cp3=$($cp1 help $cp2 2>/dev/null)
-      COMPREPLY=( $(compgen -W "$(echo $cp3 | awk 'NR>1{print $1}' RS=[ FS='\=') 2>/dev/null" -- "$word") )
+      COMPREPLY=( $(compgen -W "$(echo $cp3 | awk 'NR>1{print $1}' RS=[ FS='\=' 2>/dev/null)" -- "$word") )
     fi
   fi
 }
