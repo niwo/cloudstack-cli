@@ -7,6 +7,7 @@ class Server < CloudstackCli::Base
   option :command, desc: "command to execute for each server: START, STOP or RESTART"
   option :state
   option :listall
+  option :keyword, desc: "filter by keyword"
   def list
     if options[:project]
       project_id = find_project['id']

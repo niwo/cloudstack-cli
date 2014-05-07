@@ -1,12 +1,13 @@
 class PortRule < CloudstackCli::Base
 
-  desc "create SERVER", "create portforwarding rules"
+  desc "create SERVER", "create portforwarding rules for a given server"
   option :rules, type: :array,
     required: true,
     desc: "Port Forwarding Rules [public_ip]:port ...",
     aliases: '-r'
   option :network, required: true, aliases: '-n'
   option :project
+  option :keyword, desc: "list by keyword"
   def create(server_name)
     projectid = find_project['id'] if options[:project]
     unless server = client.get_server(server_name, projectid)
