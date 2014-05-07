@@ -11,6 +11,7 @@ class Server < CloudstackCli::Base
     if options[:project]
       project_id = find_project['id']
       options[:project_id] = project_id
+      options[:project] = nil
     end
     servers = client.list_servers(options)
     if servers.size < 1

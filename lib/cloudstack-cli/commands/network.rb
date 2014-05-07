@@ -34,7 +34,7 @@ class Network < CloudstackCli::Base
     if networks.size < 1
       puts "No networks found."
     else
-      table = [["Name", "Displaytext", "Account/Project", "Zone", "Domain", "State", "Type"]]
+      table = [%w(Name Displaytext Account/Project Zone Domain State Type Offering)]
       table[0] << "ID" if options[:showid]
       table[0] << "VLAN" if options[:showvlan]
       networks.each do |network|
@@ -45,7 +45,8 @@ class Network < CloudstackCli::Base
           network["zonename"],
           network["domain"],
           network["state"],
-          network["type"]
+          network["type"],
+          network["networkofferingname"]
         ]
         table[-1] << network["id"] if options[:showid]
         table[-1] << network["vlan"] if options[:showvlan]

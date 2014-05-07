@@ -146,6 +146,9 @@ module CloudstackCli
     subcommand :region, Region
 
     desc "affinity_group SUBCOMMAND ...ARGS", "Manage affinity_groups"
-    subcommand :affinity_group, AffinityGroup  
+    subcommand :affinity_group, AffinityGroup
+
+    desc "configuration SUBCOMMAND ...ARGS", "List cloudstack configuration values"
+    subcommand :configuration, Configuration
   end
 end

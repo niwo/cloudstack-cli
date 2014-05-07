@@ -29,4 +29,10 @@ class Iso < CloudstackCli::Base
     end
   end
 
+  desc 'detach <vm-id>', "detaches any ISO file (if any) currently attached to a virtual machine"
+  def detach(vm_id)
+    client.detach_iso(vm_id, {async: true})
+    say "OK", :green
+  end
+
 end
