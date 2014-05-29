@@ -142,7 +142,12 @@ class Server < CloudstackCli::Base
         ask = "Destroy #{name} (#{server['state']})? [y/N]:"
         if options[:force] || yes?(ask, :yellow)
           say "destroying #{name} "
-          client.destroy_server(server["id"], false, options[:expunge])
+          client.destroy_server(
+            server["id"], {
+              sync: true,
+              expunge: options[:expunge]
+            }
+          )
           puts  
         end
       end
