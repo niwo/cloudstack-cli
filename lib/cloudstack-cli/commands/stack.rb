@@ -9,7 +9,7 @@ class Stack < CloudstackCli::Base
     client.verbose = false
     stack["servers"].each do |instance|
       instance["name"].gsub(', ', ',').split(',').each do |name|
-        server = client.get_server(name: name, project_id: projectid)
+        server = client.get_server(name, {project_id: projectid})
         if server
           say "Server #{name} (#{server["state"]}) already exists.", :yellow
           jobs << {
