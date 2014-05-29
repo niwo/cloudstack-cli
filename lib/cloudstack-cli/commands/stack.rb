@@ -68,6 +68,11 @@ class Stack < CloudstackCli::Base
     type: :boolean,
     default: false,
     aliases: '-f'
+  option :expunge,
+    description: "expunge servers immediately",
+    type: :boolean,
+    default: false,
+    aliases: '-e'
   def destroy(stackfile)
     stack = parse_stackfile(stackfile)
     projectid = find_project(stack["project"])['id'] if stack["project"]
@@ -84,7 +89,7 @@ class Stack < CloudstackCli::Base
         if server
           jobs << {
             id: client.destroy_server(
-              server['id'], false
+              server['id'], false, options[:expunge]
             )['jobid'],
             name: "Destroy server #{name}"
           }

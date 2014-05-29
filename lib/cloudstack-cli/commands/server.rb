@@ -131,6 +131,7 @@ class Server < CloudstackCli::Base
   desc "destroy NAME [NAME2 ..]", "destroy server(s)"
   option :project
   option :force, description: "destroy without asking", type: :boolean, aliases: '-f'
+  option :expunge, description: "expunge server immediately", type: :boolean, default: false, aliases: '-e'
   def destroy(*names)
     projectid = find_project['id'] if options[:project]
     names.each do |name|
@@ -141,7 +142,7 @@ class Server < CloudstackCli::Base
         ask = "Destroy #{name} (#{server['state']})? [y/N]:"
         if options[:force] || yes?(ask, :yellow)
           say "destroying #{name} "
-          client.destroy_server(server["id"])
+          client.destroy_server(server["id"], false, options[:expunge])
           puts  
         end
       end
