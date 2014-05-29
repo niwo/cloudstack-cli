@@ -9,7 +9,7 @@ class Stack < CloudstackCli::Base
     client.verbose = false
     stack["servers"].each do |instance|
       instance["name"].gsub(', ', ',').split(',').each do |name|
-        server = client.get_server(name, {project_id: projectid})
+        server = client.get_server(name, project_id: projectid)
         if server
           say "Server #{name} (#{server["state"]}) already exists.", :yellow
           jobs << {
@@ -72,7 +72,7 @@ class Stack < CloudstackCli::Base
     description: "expunge servers immediately",
     type: :boolean,
     default: false,
-    aliases: '-e'
+    aliases: '-E'
   def destroy(stackfile)
     stack = parse_stackfile(stackfile)
     projectid = find_project(stack["project"])['id'] if stack["project"]

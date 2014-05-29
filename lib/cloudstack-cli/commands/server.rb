@@ -84,7 +84,7 @@ class Server < CloudstackCli::Base
   option :port_rules, aliases: '-pr', type: :array,
     default: [],
     desc: "Port Forwarding Rules [public_ip]:port ..."
-  option :disk_offering, desc: "disk offering - data disk for template, root disk for iso"
+  option :disk_offering, desc: "disk offering (data disk for template, root disk for iso)"
   option :disk_size, desc: "disk size in GB"
   option :hypervisor, desc: "only used for iso deployments, default: vmware"
   option :keypair, desc: "the name of the ssh keypair to use"
@@ -130,8 +130,8 @@ class Server < CloudstackCli::Base
 
   desc "destroy NAME [NAME2 ..]", "destroy server(s)"
   option :project
-  option :force, description: "destroy without asking", type: :boolean, aliases: '-f'
-  option :expunge, description: "expunge server immediately", type: :boolean, default: false, aliases: '-e'
+  option :force, desc: "destroy without asking", type: :boolean, aliases: '-f'
+  option :expunge, desc: "expunge server immediately", type: :boolean, default: false, aliases: '-E'
   def destroy(*names)
     projectid = find_project['id'] if options[:project]
     names.each do |name|
@@ -144,7 +144,7 @@ class Server < CloudstackCli::Base
           say "destroying #{name} "
           client.destroy_server(
             server["id"], {
-              sync: true,
+              sync: false,
               expunge: options[:expunge]
             }
           )
