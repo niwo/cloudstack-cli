@@ -64,12 +64,12 @@ class Stack < CloudstackCli::Base
 
   desc "destroy STACKFILE", "destroy a stack of servers"
   option :force,
-    description: "destroy without asking",
+    desc: "destroy without asking",
     type: :boolean,
     default: false,
     aliases: '-f'
   option :expunge,
-    description: "expunge servers immediately",
+    desc: "expunge servers immediately",
     type: :boolean,
     default: false,
     aliases: '-E'
