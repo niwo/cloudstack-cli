@@ -6,10 +6,10 @@ class Project < CloudstackCli::Base
     unless project = client.get_project(name)
       puts "No project with name #{name} found."
     else
-      project.each do |key, value|
-        say "#{key}: ", :yellow
-        say "#{value}"
+      table = project.map do |key, value|
+        [ set_color("#{key}", :yellow), "#{value}" ]
       end
+      print_table table
     end
   end
 

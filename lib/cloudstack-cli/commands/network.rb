@@ -90,10 +90,10 @@ class Network < CloudstackCli::Base
     unless server = client.get_network(name, options[:project_id])
       puts "No network found."
     else
-      server.each do |key, value|
-        say "#{key}: ", :yellow
-        say "#{value}"
+      table = server.map do |key, value|
+        [ set_color("#{key}:", :yellow), "#{value}" ]
       end
+      print_table table
     end
   end
 

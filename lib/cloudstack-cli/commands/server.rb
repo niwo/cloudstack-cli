@@ -63,14 +63,14 @@ class Server < CloudstackCli::Base
   desc "show NAME", "show detailed infos about a server"
   option :project
   def show(name)
-    options[:project_id] = find_project['id']
+    options[:project_id] = find_project['id'] if options[:project]
     unless server = client.get_server(name, options)
       puts "No server found."
     else
-      server.each do |key, value|
-        say "#{key}: ", :yellow
-        say "#{value}"
+      table = server.map do |key, value|
+        [ set_color("#{key}:", :yellow), "#{value}" ]
       end
+      print_table table
     end
   end
 
