@@ -38,7 +38,7 @@ class LoadBalancer < CloudstackCli::Base
   end
 
   desc "add NAME", "assign servers to balancer rule"
-  option :servers, required: true, type: :array, description: 'server names'
+  option :servers, required: true, type: :array, desc: 'server names'
   def add(name)
     say "Add #{names.join(', ')} to rule #{id}...", :yellow
     rule = client.assign_to_load_balancer_rule(
