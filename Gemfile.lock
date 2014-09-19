@@ -1,22 +1,22 @@
 GIT
   remote: git@github.com:erikhuda/thor.git
-  revision: 942bbfec86d00a925938d6f47b8fc9b6b18a7576
+  revision: 81dadf41b1d0422d1be1a7b2655603b47e8ff46a
   branch: master
   specs:
     thor (0.19.1)
 
 GIT
   remote: git@github.com:niwo/cloudstack_client.git
-  revision: 03555aca3862ecd75b8a4228afb7da753d42dfeb
+  revision: 0a9144ea5bad49ef8c0227151caa4e1574589b2a
   branch: master
   specs:
-    cloudstack_client (0.6.4)
+    cloudstack_client (0.7.1)
 
 PATH
   remote: .
   specs:
-    cloudstack-cli (0.10.2)
-      cloudstack_client (~> 0.6, >= 0.6.4)
+    cloudstack-cli (0.11.0)
+      cloudstack_client (~> 0.7, >= 0.7.1)
       thor (~> 0.19)
 
 GEM
@@ -24,7 +24,7 @@ GEM
   specs:
     json (1.8.1)
     rake (10.3.2)
-    rdoc (4.1.1)
+    rdoc (4.1.2)
       json (~> 1.4)
 
 PLATFORMS

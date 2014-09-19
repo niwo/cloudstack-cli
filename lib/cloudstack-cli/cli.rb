@@ -2,7 +2,7 @@ module CloudstackCli
   class Cli < CloudstackCli::Base
     include Thor::Actions
 
-    package_name "cloudstack-cli" 
+    package_name "cloudstack-cli"
 
     class_option :config_file,
       default: File.join(Dir.home, '.cloudstack-cli.yml'),
@@ -48,21 +48,21 @@ module CloudstackCli
       params = {'command' => command}
       args.each do |arg|
         arg = arg.split('=')
-        params[arg[0]] = arg[1] 
+        params[arg[0]] = arg[1]
       end
       data = client.send_request(params)
       puts JSON.pretty_generate(data)
     end
 
     # require subcommands
-    Dir[File.dirname(__FILE__) + '/commands/*.rb'].each do |command| 
+    Dir[File.dirname(__FILE__) + '/commands/*.rb'].each do |command|
       require command
     end
 
     desc "environment SUBCOMMAND ...ARGS", "Manage cloudstack-cli environments"
     subcommand :environment, Environment
     map 'env' => :environment
-    
+
     desc "zone SUBCOMMAND ...ARGS", "Manage zones"
     subcommand :zone, Zone
 
@@ -105,6 +105,9 @@ module CloudstackCli
 
     desc "router SUBCOMMAND ...ARGS", "Manage virtual routers"
     subcommand :router, Router
+
+    desc "system_vm SUBCOMMAND ...ARGS", "Manage system vms"
+    subcommand :system_vm, SystemVm
 
     desc "volume SUBCOMMAND ...ARGS", "Manage volumes"
     subcommand :volume, Volume
