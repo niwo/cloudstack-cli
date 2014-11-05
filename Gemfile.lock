@@ -1,6 +1,6 @@
 GIT
   remote: git@github.com:erikhuda/thor.git
-  revision: 81dadf41b1d0422d1be1a7b2655603b47e8ff46a
+  revision: e5e77c499b3c408c47da46285f5248c0365b2429
   branch: master
   specs:
     thor (0.19.1)
@@ -17,7 +17,7 @@ PATH
   specs:
     cloudstack-cli (0.11.0)
       cloudstack_client (~> 0.7, >= 0.7.1)
-      thor (~> 0.19)
+      thor (~> 0.19.1)
 
 GEM
   remote: https://rubygems.org/

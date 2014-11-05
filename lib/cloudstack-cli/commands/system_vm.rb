@@ -18,4 +18,20 @@ class SystemVm < CloudstackCli::Base
     end
   end
 
+  desc 'show [name]', 'show system vm'
+  option :zone
+  def show(name)
+    vms = client.list_system_vms(options)
+    vms = filter_by(vms, 'name', name)
+    vm = vms.first
+    unless vm
+      say "No system vm found."
+    else
+      table = vm.map do |key, value|
+        [ set_color("#{key}:", :yellow), "#{value}" ]
+      end
+      print_table table
+    end
+  end
+
 end

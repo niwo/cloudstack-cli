@@ -24,6 +24,6 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency('rdoc', '~> 4.1')
   gem.add_development_dependency('rake', '~> 10.3')
 
-  gem.add_dependency('thor', '~> 0.19')
+  gem.add_dependency('thor', '~> 0.19.1')
   gem.add_dependency('cloudstack_client', '~> 0.7', '>= 0.7.1')
 end
