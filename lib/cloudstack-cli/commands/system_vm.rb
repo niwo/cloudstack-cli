@@ -25,7 +25,7 @@ class SystemVm < CloudstackCli::Base
     vms = filter_by(vms, 'name', name)
     vm = vms.first
     unless vm
-      say "No system vm found."
+      say "No system vm with name #{name} found."
     else
       table = vm.map do |key, value|
         [ set_color("#{key}:", :yellow), "#{value}" ]
