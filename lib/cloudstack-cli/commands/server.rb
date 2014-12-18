@@ -148,7 +148,7 @@ class Server < CloudstackCli::Base
               expunge: options[:expunge]
             }
           )
-          puts  
+          puts
         end
       end
     end
@@ -164,7 +164,7 @@ class Server < CloudstackCli::Base
   option :account
   option :force
   def stop(name)
-    options[project_id] = find_project['id'] if options[:project]
+    options[:project_id] = find_project['id'] if options[:project]
     exit unless options[:force] || yes?("Stop server #{name}? [y/N]:", :magenta)
     client.stop_server(name, options)
     puts
@@ -174,7 +174,7 @@ class Server < CloudstackCli::Base
   option :project
   option :account
   def start(name)
-    options[project_id] = find_project['id'] if options[:project]
+    options[:project_id] = find_project['id'] if options[:project]
     say("Start server #{name}", :magenta)
     client.start_server(name, options)
     puts
@@ -185,7 +185,7 @@ class Server < CloudstackCli::Base
   option :account
   option :force
   def restart(name)
-    options[project_id] = find_project['id'] if options[:project]
+    options[:project_id] = find_project['id'] if options[:project]
     exit unless options[:force] || yes?("Reboot server #{name}? [y/N]:", :magenta)
     client.reboot_server(name, options)
     puts
