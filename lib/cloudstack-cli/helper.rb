@@ -3,7 +3,7 @@ module CloudstackCli
     def print_options(options, attr = 'name')
       options.to_enum.with_index(1).each do |option, i|
          puts "#{i}: #{option[attr]}"
-      end   
+      end
     end
 
     def ask_number(question)
@@ -60,7 +60,8 @@ module CloudstackCli
         puts job[:status] == 0 ? spinner.first : ""
       end
       t_elapsed = opts[:t_start] ? (Time.now - opts[:t_start]).round(1) : 0
-      puts "Runtime: #{t_elapsed}s"
+      completed = jobs.select{|j| j[:status] == 1}.size
+      say "Completed: #{completed}/#{jobs.size} (#{t_elapsed}s)", :magenta
       sleep opts[:sleeptime] || 0.1
       spinner.push spinner.shift
       spinner
@@ -119,7 +120,7 @@ module CloudstackCli
           )
         end
         port = pf_rule.split(":")[1]
-        if async 
+        if async
           say "Create port forwarding rule #{ip_addr['ipaddress']}:#{port} for server #{server["name"]}.", :yellow
           client.create_port_forwarding_rule(ip_addr["id"], port, 'TCP', port, server["id"])
           return

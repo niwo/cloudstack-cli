@@ -7,29 +7,29 @@ module CloudstackCli
     class_option :config_file,
       default: File.join(Dir.home, '.cloudstack-cli.yml'),
       aliases: '-c',
-      desc: 'location of your cloudstack-cli configuration file'
+      desc: 'Location of your cloudstack-cli configuration file'
 
     class_option :env,
       aliases: '-e',
-      desc: 'environment to use'
+      desc: 'Environment to use'
 
     class_option :debug,
-      desc: 'enable debug output',
+      desc: 'Enable debug output',
       type: :boolean
 
-    desc "version", "print cloudstack-cli version number"
+    desc "version", "Print cloudstack-cli version number"
     def version
       say "cloudstack-cli version #{CloudstackCli::VERSION}"
     end
     map %w(-v --version) => :version
 
-    desc "setup", "initial configuration of Cloudstack connection settings"
+    desc "setup", "Initial configuration of Cloudstack connection settings"
     def setup(env = options[:environment])
       invoke "environment:add", [env],
         :config_file => options[:config_file]
     end
 
-    desc "completion", "loads the shell scripts for <tab> auto-completion"
+    desc "completion", "Load the shell scripts for <tab> auto-completion"
     option :shell, default: 'bash'
     def completion
       shell_script = File.join(
@@ -43,7 +43,7 @@ module CloudstackCli
       puts File.read shell_script
     end
 
-    desc "command COMMAND [arg1=val1 arg2=val2...]", "run a custom api command"
+    desc "command COMMAND [arg1=val1 arg2=val2...]", "Run a custom api command"
     def command(command, *args)
       params = {'command' => command}
       args.each do |arg|
@@ -153,5 +153,8 @@ module CloudstackCli
 
     desc "configuration SUBCOMMAND ...ARGS", "List cloudstack configuration values"
     subcommand :configuration, Configuration
+
+    desc "resource_limit SUBCOMMAND ...ARGS", "Show cloudstack resource limits"
+    subcommand :resource_limit, ResourceLimit
   end
 end

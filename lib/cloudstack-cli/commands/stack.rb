@@ -1,8 +1,8 @@
 class Stack < CloudstackCli::Base
 
-	desc "create STACKFILE", "create a stack of servers"
+  desc "create STACKFILE", "create a stack of servers"
   def create(stackfile)
-  	stack = parse_stackfile(stackfile)
+    stack = parse_stackfile(stackfile)
     say "Create stack #{stack["name"]}...", :green
     projectid = find_project(stack["project"])['id'] if stack["project"]
     jobs = []
@@ -42,7 +42,7 @@ class Stack < CloudstackCli::Base
       end
     end
     watch_jobs(jobs)
-    
+
     say "Check for port forwarding rules...", :green
     jobs = []
     stack["servers"].each do |instance|
@@ -105,13 +105,24 @@ class Stack < CloudstackCli::Base
 
   no_commands do
     def parse_stackfile(stackfile)
-      begin
-        return JSON.parse File.read(stackfile)
-      rescue SystemCallError
-        $stderr.puts "Can't find the stack file #{stackfile}."
-      rescue JSON::ParserError => e
-        $stderr.puts "Error parsing json file.\n#{e.message}."
+      handler = case File.extname(stackfile)
+      when ".json"
+        Object.const_get "JSON"
+      when ".yaml", ".yml"
+        Object.const_get "YAML"
+      else
+        say "File extension #{File.extname(stackfile)} not supported. Supported extensions are .json, .yaml or .yml", :red
         exit
+      end
+      begin
+        return handler.load File.read(stackfile)
+      rescue SystemCallError
+        say "Can't find the stack file #{stackfile}.", :red
+        exit 1
+      rescue => e
+        say "Error parsing #{File.extname(stackfile)} file:", :red
+        say e.message
+        exit 1
       end
     end
 

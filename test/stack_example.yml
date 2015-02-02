@@ -1,0 +1,23 @@
+---
+  name: "web_stack_a"
+  description: "Web Application Stack"
+  version: "1.0"
+  zone: "BIEL_CU01"
+  project: "Playground"
+  group: "my_web_stack"
+  servers:
+    -
+      name: "web-001, web-002"
+      description: "Web nodes"
+      template: "CentOS-6.5-x64-v1.3"
+      offering: "1cpu_1gb"
+      networks: "M_PLAY"
+      port_rules: ":80, :443"
+    -
+      name: "db-001"
+      description: "PostgreSQL Master"
+      iso: "CentOS-7.0 x64"
+      disk_offering: "Perf Storage"
+      disk_size: "5"
+      offering: "2cpu_4gb"
+      networks: "M_PLAY"

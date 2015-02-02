@@ -1,7 +1,6 @@
 class Project < CloudstackCli::Base
 
   desc "show NAME", "show detailed infos about a project"
-  option :project
   def show(name)
     unless project = client.get_project(name)
       puts "No project with name #{name} found."
@@ -27,5 +26,5 @@ class Project < CloudstackCli::Base
       say "Total number of projects: #{projects.count}"
     end
   end
-  
+
 end

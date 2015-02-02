@@ -6,6 +6,21 @@ class Account < CloudstackCli::Base
     2 => 'admin'
   }
 
+  desc "show NAME", "show detailed infos about an account"
+  def show(name)
+    unless account = client.list_accounts({name: name})
+      puts "No account with name #{name} found."
+    else
+      account = account.first
+      account.delete 'user'
+      account['accounttype'] = "#{account['accounttype']} (#{TYPES[account['accounttype']]})"
+      table = account.map do |key, value|
+        [ set_color("#{key}", :yellow), "#{value}" ]
+      end
+      print_table table
+    end
+  end
+
   desc 'list [NAME]', 'list accounts (by name)'
   def list(name = nil)
     accounts = client.list_accounts({name: name})
@@ -20,5 +35,5 @@ class Account < CloudstackCli::Base
       say "Total number of accounts: #{accounts.size}"
     end
   end
-  
+
 end
