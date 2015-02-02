@@ -27,7 +27,7 @@ cloudstack-cli expects to find a configuartion file with the API URL and your Cl
 
 cloudstack-cli supports multiple environments using the --environment option.
 
-see `cs help environment` for more options. 
+see `cs help environment` for more options.
 
 Example content of the configuration file:
 
@@ -81,45 +81,41 @@ $ cs command listAlerts type=8
 
 ### Example: Creating a complete stack of servers
 
-An example stackfile looks like this (my_stackfile.json)
+Cloudstack-CLI does support stack files in YAML or JSON.
+An example stackfile could look like this (my_stackfile.yml):
 
-```json
-{
-    "name": "web_stack-a",
-    "description": "Web Application Stack",
-    "version": "1.0",
-    "zone": "DC-BIE-1",
-    "group": "my_web_stack",
-    "keypair": "mykeypair",
-    "servers": [
-        {
-            "name": "web-d1, web-d2",
-            "description": "Web nodes",
-            "template": "CentOS-6.4-x64-v1.2",
-            "offering": "1cpu_1gb",
-            "networks": "server_network",
-            "port_rules": ":80, :443"
-        },
-        {
-            "name": "db-01",
-            "description": "PostgreSQL Master",
-            "iso": "CentOS-6.4-x86_64-swisstxt-v15",
-            "disk_offering": "Perf Storage",
-            "disk_size": "5",
-            "offering": "2cpu_4gb",
-            "networks": [
-                "server_network",
-                "storage_network"
-            ]
-        }
-    ]
-}
+```yaml
+---
+  name: "web_stack-a"
+  description: "Web Application Stack"
+  version: "1.0"
+  zone: "DC-ZRH-1"
+  group: "my_web_stack"
+  keypair: "mykeypair"
+  servers:
+    -
+      name: "web-d1, web-d2"
+      description: "Web nodes"
+      template: "CentOS-7-x64"
+      offering: "1cpu_1gb"
+      networks: "server_network"
+      port_rules: ":80, :443"
+    -
+      name: "db-01"
+      description: "PostgreSQL Master"
+      iso: "CentOS-7-x64"
+      disk_offering: "Perf Storage"
+      disk_size: "5"
+      offering: "2cpu_4gb"
+      networks:
+        - "server_network"
+        - "storage_network"
 ```
 
 Create the stack of servers from above:
 
 ```sh
-$ cs stack create my_stackfile.json
+$ cs stack create my_stackfile.yml
 ```
 
 ### Example: Sort computing offerings
