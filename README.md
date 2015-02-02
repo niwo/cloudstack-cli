@@ -81,7 +81,7 @@ $ cs command listAlerts type=8
 
 ### Example: Creating a complete stack of servers
 
-Cloudstack-CLI does support stack files in YAML or JSON.
+Cloudstack CLI does support stack files in YAML or JSON.
 
 An example stackfile could look like this (my_stackfile.yml):
 
