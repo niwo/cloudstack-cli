@@ -118,7 +118,8 @@ Create the stack of servers from above:
 ```bash
 $ cloudstack-cli stack create my_stackfile.yml
 ```
-Hint: You can also parse a stackfile from a URI.
+
+**Hint:** You can also parse a stackfile from a URI.
 
 The following command destroys a stack using a definition gathered from a stackfile lying on a Github repository:
 
