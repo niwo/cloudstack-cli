@@ -9,7 +9,7 @@ cloudstack-cli uses the [cloudstack_client](https://github.com/niwo/cloudstack_c
 
 Install the cloudstack-cli gem:
 
-```sh
+```bash
 $ gem install cloudstack-cli
 ```
 
@@ -19,7 +19,7 @@ $ gem install cloudstack-cli
 
 Create your first environment, which defines your connection options:
 
-```sh
+```bash
 $ cloudstack-cli environment add [environment-name]
 ```
 
@@ -46,7 +46,7 @@ test:
 
 To enable tab auto-completion for cloudstack-cli, add the following lines to your ~/.bash_profile file.
 
-```sh
+```bash
 # Bash, ~/.bash_profile
 eval "$(cloudstack-cli completion --shell=bash)"
 ```
@@ -59,7 +59,7 @@ For additional documentation find the RubyDoc [here](http://rubydoc.info/gems/cl
 
 See the help screen:
 
-```sh
+```bash
 $ cloudstack-cli
 ```
 
@@ -67,7 +67,7 @@ $ cloudstack-cli
 
 Bootsraps a server using a template and creating port-forwarding rules for port 22 and 80.
 
-```sh
+```bash
 $ cloudstack-cli server create server-01 --template CentOS-6.4-x64-v1.4 --zone DC1 --offering 1cpu_1gb --port-rules :22 :80
 ```
 
@@ -75,7 +75,7 @@ $ cloudstack-cli server create server-01 --template CentOS-6.4-x64-v1.4 --zone D
 
 Run the "listAlerts" command against the Cloudstack API with an argument of type=8:
 
-```sh
+```bash
 $ cloudstack-cli command listAlerts type=8
 ```
 
@@ -115,14 +115,14 @@ An example stackfile could look like this (my_stackfile.yml):
 
 Create the stack of servers from above:
 
-```sh
+```bash
 $ cloudstack-cli stack create my_stackfile.yml
 ```
 Hint: You can also parse a stackfile from a URI.
 
 The following command destroys a stack using a definition gathered from a stackfile lying on a Github repository:
 
-```sh
+```bash
 $ cloudstack-cli stack destroy https://raw.githubusercontent.com/niwo/cloudstack-cli/master/test/stack_example.json
 Destroy the following servers web-001, web-002, db-001? [y/N]: y
 Destroy server web-001 : job completed
@@ -135,7 +135,7 @@ Completed: 2/3 (15.4s)
 
 Sort all computing offerings by CPU and Memory grouped my Domain:
 
-```sh
+```bash
 $ cloudstack-cli offering sort
 ```
 
@@ -144,13 +144,13 @@ $ cloudstack-cli offering sort
 Stop all virtual routers of project Demo (you could filter by zone too):
 (This command is helpful if you have to deploy new versions of Cloudstack when using redundant routers)
 
-```sh
+```bash
 $ cloudstack-cli router list --project Demo --status running --redundant-state BACKUP --command stop
 ````
 
-Hint: You can watch the status of the command with watch.
+**Hint:** You can watch the status of the command with watch.
 
-```sh
+```bash
 $ watch -n cloudstack-cli router list --project Demo
 ```
 
