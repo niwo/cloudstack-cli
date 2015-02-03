@@ -20,14 +20,14 @@ $ gem install cloudstack-cli
 Create your first environment, which defines your connection options:
 
 ```sh
-$ cs environment add [environment-name]
+$ cloudstack-cli environment add [environment-name]
 ```
 
 cloudstack-cli expects to find a configuartion file with the API URL and your CloudStack credentials in your home directory named .cloudstack-cli.yml. If the file is located elsewhere you can specify the loaction using the --config option.
 
 cloudstack-cli supports multiple environments using the --environment option.
 
-see `cs help environment` for more options.
+see `cloudstack-cli help environment` for more options.
 
 Example content of the configuration file:
 
@@ -48,7 +48,7 @@ To enable tab auto-completion for cloudstack-cli, add the following lines to you
 
 ```sh
 # Bash, ~/.bash_profile
-eval "$(cs completion --shell=bash)"
+eval "$(cloudstack-cli completion --shell=bash)"
 ```
 
 __Note__: use `~/.bashrc` on Ubuntu
@@ -60,7 +60,7 @@ For additional documentation find the RubyDoc [here](http://rubydoc.info/gems/cl
 See the help screen:
 
 ```sh
-$ cs
+$ cloudstack-cli
 ```
 
 ### Example: Bootsrapping a server
@@ -68,7 +68,7 @@ $ cs
 Bootsraps a server using a template and creating port-forwarding rules for port 22 and 80.
 
 ```sh
-$ cs server create server-01 --template CentOS-6.4-x64-v1.4 --zone DC1 --offering 1cpu_1gb --port-rules :22 :80
+$ cloudstack-cli server create server-01 --template CentOS-6.4-x64-v1.4 --zone DC1 --offering 1cpu_1gb --port-rules :22 :80
 ```
 
 ### Example: Run a any custom API command
@@ -76,7 +76,7 @@ $ cs server create server-01 --template CentOS-6.4-x64-v1.4 --zone DC1 --offerin
 Run the "listAlerts" command against the Cloudstack API with an argument of type=8:
 
 ```sh
-$ cs command listAlerts type=8
+$ cloudstack-cli command listAlerts type=8
 ```
 
 ### Example: Creating a complete stack of servers
@@ -116,20 +116,19 @@ An example stackfile could look like this (my_stackfile.yml):
 Create the stack of servers from above:
 
 ```sh
-$ cs stack create my_stackfile.yml
+$ cloudstack-cli stack create my_stackfile.yml
 ```
 Hint: You can also parse a stackfile from a URI.
 
 The following command destroys a stack using a definition gathered from a stackfile lying on a Github repository:
 
 ```sh
-bundle exec cs stack destroy https://raw.githubusercontent.com/niwo/cloudstack-cli/master/test/stack_example.json
+$ cloudstack-cli stack destroy https://raw.githubusercontent.com/niwo/cloudstack-cli/master/test/stack_example.json
 Destroy the following servers web-001, web-002, db-001? [y/N]: y
 Destroy server web-001 : job completed
 Destroy server web-002 : job completed
-Destroy server db-001 : job completed
-Completed: 3/3 (41.4s)
-Finished.
+Destroy server db-001 : /
+Completed: 2/3 (15.4s)
 ```
 
 ### Example: Sort computing offerings
@@ -137,7 +136,7 @@ Finished.
 Sort all computing offerings by CPU and Memory grouped my Domain:
 
 ```sh
-$ cs offering sort
+$ cloudstack-cli offering sort
 ```
 
 ### Example: Stop all backup routers of a given project
@@ -146,13 +145,13 @@ Stop all virtual routers of project Demo (you could filter by zone too):
 (This command is helpful if you have to deploy new versions of Cloudstack when using redundant routers)
 
 ```sh
-$ cs router list --project Demo --status running --redundant-state BACKUP --command stop
+$ cloudstack-cli router list --project Demo --status running --redundant-state BACKUP --command stop
 ````
 
 Hint: You can watch the status of the command with watch.
 
 ```sh
-$ watch -n cs router list --project Demo
+$ watch -n cloudstack-cli router list --project Demo
 ```
 
 
