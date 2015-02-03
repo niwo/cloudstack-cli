@@ -1,3 +1,5 @@
+require 'open-uri'
+
 class Stack < CloudstackCli::Base
 
   desc "create STACKFILE", "create a stack of servers"
@@ -8,7 +10,7 @@ class Stack < CloudstackCli::Base
     jobs = []
     client.verbose = false
     stack["servers"].each do |instance|
-      instance["name"].gsub(', ', ',').split(',').each do |name|
+      string_to_array(instance["name"]).each do |name|
         server = client.get_server(name, project_id: projectid)
         if server
           say "Server #{name} (#{server["state"]}) already exists.", :yellow
@@ -46,13 +48,13 @@ class Stack < CloudstackCli::Base
     say "Check for port forwarding rules...", :green
     jobs = []
     stack["servers"].each do |instance|
-      instance["name"].gsub(', ', ',').split(',').each do |name|
+      string_to_array(instance["name"]).each do |name|
         if port_rules = string_to_array(instance["port_rules"])
           server = client(quiet: true).get_server(name, project_id: projectid)
           create_port_rules(server, port_rules, false).each_with_index do |job_id, index|
             jobs << {
               id: job_id,
-              name: "Create port forwarding ##{index + 1} rules for server #{name}"
+              name: "Create port forwarding rules (#{port_rules[index]}) for server #{name}"
             }
           end
         end
@@ -79,7 +81,7 @@ class Stack < CloudstackCli::Base
     client.verbose = false
     servers = []
     stack["servers"].each do |server|
-      server["name"].gsub(', ', ',').split(',').each {|name| servers << name}
+      string_to_array(server["name"]).each {|name| servers << name}
     end
 
     if options[:force] || yes?("Destroy the following servers #{servers.join(', ')}? [y/N]:", :yellow)
@@ -115,7 +117,7 @@ class Stack < CloudstackCli::Base
         exit
       end
       begin
-        return handler.load File.read(stackfile)
+        return handler.load open(stackfile){|f| f.read}
       rescue SystemCallError
         say "Can't find the stack file #{stackfile}.", :red
         exit 1

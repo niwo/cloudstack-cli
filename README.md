@@ -118,6 +118,19 @@ Create the stack of servers from above:
 ```sh
 $ cs stack create my_stackfile.yml
 ```
+Hint: You can also parse a stackfile from a URI.
+
+The following command destroys a stack using a definition gathered from a stackfile lying on a Github repository:
+
+```sh
+bundle exec cs stack destroy https://raw.githubusercontent.com/niwo/cloudstack-cli/master/test/stack_example.json
+Destroy the following servers web-001, web-002, db-001? [y/N]: y
+Destroy server web-001 : job completed
+Destroy server web-002 : job completed
+Destroy server db-001 : job completed
+Completed: 3/3 (41.4s)
+Finished.
+```
 
 ### Example: Sort computing offerings
 
