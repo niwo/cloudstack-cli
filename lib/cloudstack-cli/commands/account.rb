@@ -8,10 +8,11 @@ class Account < CloudstackCli::Base
 
   desc "show NAME", "show detailed infos about an account"
   def show(name)
-    unless account = client.list_accounts({name: name})
-      puts "No account with name #{name} found."
+    accounts = client.list_accounts(name: name)
+    if accounts.size < 1
+      say "No account named \"#{name}\" found.", :red
     else
-      account = account.first
+      account = accounts.first
       account.delete 'user'
       account['accounttype'] = "#{account['accounttype']} (#{TYPES[account['accounttype']]})"
       table = account.map do |key, value|
@@ -23,7 +24,7 @@ class Account < CloudstackCli::Base
 
   desc 'list [NAME]', 'list accounts (by name)'
   def list(name = nil)
-    accounts = client.list_accounts({name: name})
+    accounts = client.list_accounts(name: name)
     if accounts.size < 1
       puts "No accounts found."
     else
