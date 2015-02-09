@@ -110,6 +110,7 @@ class ResourceLimit < CloudstackCli::Base
       domains = client.list_domains(options[:domain])
       if domains.size < 1
         say "Domain #{options[:domain]} not found.", :red
+        exit -1
       else
         options[:domain_id] = domains.first['id']
       end
