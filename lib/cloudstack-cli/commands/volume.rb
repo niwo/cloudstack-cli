@@ -28,4 +28,22 @@ class Volume < CloudstackCli::Base
     end
   end
 
+  desc "show NAME", "show volume details"
+  option :project, desc: 'project of volume'
+  def show(name)
+    options[:name] = name
+    options[:project_id] = find_project['id'] if options[:project]
+    volumes = client.list_volumes(options)
+    if volumes.size < 1
+      say "No volume with name \"#{name}\" found."
+    else
+      volume = volumes.first
+      table = volume.map do |key, value|
+        [ set_color("#{key}:", :yellow), "#{value}" ]
+      end
+      print_table table
+    end
+  end
+
+
 end
