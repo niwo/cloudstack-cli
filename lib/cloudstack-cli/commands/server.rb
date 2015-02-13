@@ -7,6 +7,7 @@ class Server < CloudstackCli::Base
   option :command, desc: "command to execute for each server: START, STOP or RESTART"
   option :state
   option :listall
+  option :storage_id
   option :keyword, desc: "filter by keyword"
   def list
     if options[:project]
@@ -14,6 +15,8 @@ class Server < CloudstackCli::Base
       options[:project_id] = project_id
       options[:project] = nil
     end
+    options[:custom] = { 'storageid' => options[:storage_id] } if options[:storage_id]
+    client.verbose = true
     servers = client.list_servers(options)
     if servers.size < 1
       puts "No servers found."

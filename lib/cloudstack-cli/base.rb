@@ -1,11 +1,11 @@
 require "thor"
 require "yaml"
 
-module CloudstackCli  
+module CloudstackCli
   class Base < Thor
     include Thor::Actions
     include CloudstackCli::Helper
-    
+
     attr_reader :config
 
     # catch control-c and exit
@@ -19,7 +19,7 @@ module CloudstackCli
       true
     end
 
-    no_commands do  
+    no_commands do
       def client(opts = {})
         @config ||= load_configuration
         @client ||= CloudstackClient::Connection.new(
@@ -43,7 +43,7 @@ module CloudstackCli
           say "Can't load configuration from file #{config_file}.", :red
           exit 1
         end
-        
+
         env ||= config[:default]
         if env
           unless config = config[env]
@@ -63,7 +63,7 @@ module CloudstackCli
       def find_project(name = options[:project], allow_all = true)
         return nil unless name
         if allow_all && %w(ALL -1).include?(name)
-          return {'id' => '-1'} 
+          return {'id' => '-1'}
         end
         unless project = client.get_project(name)
           say "Project '#{name}' not found", :red
