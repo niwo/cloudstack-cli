@@ -1,14 +1,18 @@
 class Server < CloudstackCli::Base
 
   desc "list", "list servers"
-  option :project
-  option :account
-  option :zone
-  option :command, desc: "command to execute for each server: START, STOP or RESTART"
-  option :state
-  option :listall
-  option :storage_id
+  option :account, desc: "name of the account"
+  option :project, desc: "name of the project"
+  option :zone, desc: "the name of the availability zone"
+  option :state, desc: "state of the virtual machine"
+  option :listall, desc: "list all servers"
+  option :storage_id, desc: "the storage ID where vm's volumes belong to"
   option :keyword, desc: "filter by keyword"
+  option :command,
+    desc: "command to execute for each server",
+    enum: %w(START STOP REBOOT)
+  option :concurrency, type: :numeric, default: 10, aliases: '-C',
+    desc: "number of concurrent command to execute"
   def list
     if options[:project]
       project_id = find_project['id']
@@ -37,30 +41,21 @@ class Server < CloudstackCli::Base
 
       if options[:command]
         args = { project_id: project_id, sync: true, account: options[:account] }
-        case options[:command].downcase
-          when "start"
-            exit unless yes?("\nStart the server(s) above? [y/N]:", :magenta)
-            jobs = servers.map do |server|
-              {id: client.start_server(server['name'], args)['jobid'], name: "Start server #{server['name']}"}
-            end
-          when "stop"
-            exit unless yes?("\nStop the server(s) above? [y/N]:", :magenta)
-            jobs = servers.map do |server|
-              {id: client.stop_server(server['name'], args)['jobid'], name: "Stop server #{server['name']}"}
-            end
-          when "restart"
-            exit unless yes?("\nRestart the server(s) above? [y/N]:", :magenta)
-            jobs = servers.map do |server|
-              {id: client.reboot_server(server['name'], args)['jobid'], name: "Restart server #{server['name']}"}
-            end
-          else
-            say "\nCommand #{options[:command]} not supported.", :red
-            exit 1
+        command = options[:command].downcase
+        unless %w(start stop reboot).include?(command)
+          say "\nCommand #{options[:command]} not supported.", :red
+          exit 1
+        end
+        exit unless yes?("\n#{command.capitalize} the server(s) above? [y/N]:", :magenta)
+        servers.each_slice(options[:concurrency]) do | batch |
+          jobs = batch.map do |server|
+            {id: client.send("#{command}_server", server['name'], args)['jobid'], name: "#{command.capitalize} server #{server['name']}"}
           end
           puts
           watch_jobs(jobs)
         end
       end
+    end
   end
 
   desc "show NAME", "show detailed infos about a server"
@@ -183,7 +178,7 @@ class Server < CloudstackCli::Base
     puts
   end
 
-  desc "reboot NAME", "reboot a server"
+  desc "restart NAME", "restart a server"
   option :project
   option :account
   option :force

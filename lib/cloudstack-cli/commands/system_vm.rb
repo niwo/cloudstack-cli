@@ -1,7 +1,8 @@
 class SystemVm < CloudstackCli::Base
 
-  desc 'list', 'list system vms'
-  option :zone
+  desc 'list', 'list system VMs'
+  option :zone, desc: "the name of the availability zone"
+  option :state, desc: "state of the system VM"
   def list
     vms = client.list_system_vms(options)
     if vms.size < 1

@@ -3,6 +3,7 @@ class Volume < CloudstackCli::Base
   desc "list", "list volumes"
   option :project, desc: 'list resources by project'
   option :account, desc: 'list resources by account'
+  option :zone, desc: "the name of the availability zone"
   option :keyword, desc: 'list by keyword'
   option :name, desc: 'name of the disk volume'
   option :type, desc: 'type of disk volume (ROOT or DATADISK)'
@@ -12,7 +13,7 @@ class Volume < CloudstackCli::Base
     if volumes.size < 1
       say "No volumes found."
     else
-      table = [%w(Name Type Size VM Storage Offeringname Status)]
+      table = [%w(Name Type Size VM Storage Offeringname Zone Status)]
       volumes.each do |volume|
         table << [
           volume['name'], volume['type'],
@@ -20,6 +21,7 @@ class Volume < CloudstackCli::Base
           volume['vmname'],
           volume['storage'],
           volume['diskofferingname'],
+          volume['zonename'],
           volume['state']
         ]
       end
