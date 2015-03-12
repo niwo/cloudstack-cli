@@ -10,10 +10,10 @@ class SystemVm < CloudstackCli::Base
     if vms.size < 1
       say "No system VM's found."
     else
-      table = [["Zone", "State", "Type", "Name"]]
+      table = [%w(Name Zone State Type)]
       vms.each do |vm|
         table << [
-          vm['zonename'], vm['state'], vm['systemvmtype'], vm['name']
+          vm['name'], vm['zonename'], vm['state'], vm['systemvmtype']
         ]
       end
       print_table table
