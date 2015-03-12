@@ -40,7 +40,6 @@ class Server < CloudstackCli::Base
       say "Total number of servers: #{servers.count}"
 
       if options[:command]
-        args = { project_id: project_id, sync: true, account: options[:account] }
         command = options[:command].downcase
         unless %w(start stop reboot).include?(command)
           say "\nCommand #{options[:command]} not supported.", :red
@@ -49,7 +48,12 @@ class Server < CloudstackCli::Base
         exit unless yes?("\n#{command.capitalize} the server(s) above? [y/N]:", :magenta)
         servers.each_slice(options[:concurrency]) do | batch |
           jobs = batch.map do |server|
-            {id: client.send("#{command}_server", server['name'], args)['jobid'], name: "#{command.capitalize} server #{server['name']}"}
+            args = { sync: true, account: server['account'] }
+            args[:project_id] = server['projectid'] if server['projectid']
+            {
+              id: client.send("#{command}_server", server['name'], args)['jobid'],
+              name: "#{command.capitalize} server #{server['name']}"
+            }
           end
           puts
           watch_jobs(jobs)
@@ -173,16 +177,16 @@ class Server < CloudstackCli::Base
   option :account
   def start(name)
     options[:project_id] = find_project['id'] if options[:project]
-    say("Start server #{name}", :magenta)
+    say("Starting server #{name}", :magenta)
     client.start_server(name, options)
     puts
   end
 
-  desc "restart NAME", "restart a server"
+  desc "reboot NAME", "reboot a server"
   option :project
   option :account
   option :force
-  def restart(name)
+  def reboot(name)
     options[:project_id] = find_project['id'] if options[:project]
     exit unless options[:force] || yes?("Reboot server #{name}? [y/N]:", :magenta)
     client.reboot_server(name, options)

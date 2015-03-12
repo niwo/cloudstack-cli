@@ -20,6 +20,7 @@ module CloudstackCli
     desc "version", "Print cloudstack-cli version number"
     def version
       say "cloudstack-cli version #{CloudstackCli::VERSION}"
+      say " (cloudstack_client version #{CloudstackClient::VERSION})"
     end
     map %w(-v --version) => :version
 

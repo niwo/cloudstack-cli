@@ -1,15 +1,15 @@
 GIT
   remote: git@github.com:niwo/cloudstack_client.git
-  revision: 56f489ce1649c6d2f6809382787de2ee48968655
+  revision: f4aa35073e82129aa27600cef0987254d2453259
   branch: master
   specs:
-    cloudstack_client (0.9.3)
+    cloudstack_client (0.9.7)
 
 PATH
   remote: .
   specs:
-    cloudstack-cli (0.14.0)
-      cloudstack_client (~> 0.9.3)
+    cloudstack-cli (0.14.1)
+      cloudstack_client (~> 0.9.6)
       thor (~> 0.19.1)
 
 GEM
