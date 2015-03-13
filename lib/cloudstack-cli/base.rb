@@ -1,5 +1,6 @@
 require "thor"
 require "yaml"
+require "open-uri"
 
 module CloudstackCli
   class Base < Thor
@@ -74,6 +75,28 @@ module CloudstackCli
 
       def filter_by(objects, key, value)
         objects.select {|r| r[key].downcase == value.downcase}
+      end
+
+      def parse_file(file, extensions = %w(.json .yaml .yml))
+        handler = case File.extname(file)
+        when ".json"
+          Object.const_get "JSON"
+        when ".yaml", ".yml"
+          Object.const_get "YAML"
+        else
+          say "File extension #{File.extname(file)} not supported. Supported extensions are #{extensions.join(', ')}", :red
+          exit
+        end
+        begin
+          return handler.load open(file){|f| f.read}
+        rescue SystemCallError
+          say "Can't find the file #{file}.", :red
+          exit 1
+        rescue => e
+          say "Error parsing #{File.extname(file)} file:", :red
+          say e.message
+          exit 1
+        end
       end
     end
   end

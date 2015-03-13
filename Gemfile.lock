@@ -1,6 +1,6 @@
 GIT
   remote: git@github.com:niwo/cloudstack_client.git
-  revision: f4aa35073e82129aa27600cef0987254d2453259
+  revision: cc23ab7c336f0933d41ae3976fcac71e357b8b0d
   branch: master
   specs:
     cloudstack_client (0.9.7)

@@ -9,14 +9,15 @@ class Server < CloudstackCli::Base
   option :storage_id, desc: "the storage ID where vm's volumes belong to"
   option :keyword, desc: "filter by keyword"
   option :command,
-    desc: "command to execute for each server",
+    desc: "command to execute for the given servers",
     enum: %w(START STOP REBOOT)
   option :concurrency, type: :numeric, default: 10, aliases: '-C',
     desc: "number of concurrent command to execute"
+  option :format, default: "table",
+    enum: %w(table json yaml)
   def list
     if options[:project]
-      project_id = find_project['id']
-      options[:project_id] = project_id
+      options[:project_id] = find_project['id']
       options[:project] = nil
     end
     options[:custom] = { 'storageid' => options[:storage_id] } if options[:storage_id]
@@ -25,40 +26,25 @@ class Server < CloudstackCli::Base
     if servers.size < 1
       puts "No servers found."
     else
-      table = [["Name", "State", "Offering", "Zone", project_id ? "Project" : "Account", "IP's"]]
-      servers.each do |server|
-        table << [
-          server['name'],
-          server['state'],
-          server['serviceofferingname'],
-          server['zonename'],
-          project_id ? server['project'] : server['account'],
-          server['nic'].map { |nic| nic['ipaddress']}.join(' ')
-        ]
-      end
-      print_table table
-      say "Total number of servers: #{servers.count}"
+      print_servers(servers)
+      execute_server_commands(servers) if options[:command]
+    end
+  end
 
-      if options[:command]
-        command = options[:command].downcase
-        unless %w(start stop reboot).include?(command)
-          say "\nCommand #{options[:command]} not supported.", :red
-          exit 1
-        end
-        exit unless yes?("\n#{command.capitalize} the server(s) above? [y/N]:", :magenta)
-        servers.each_slice(options[:concurrency]) do | batch |
-          jobs = batch.map do |server|
-            args = { sync: true, account: server['account'] }
-            args[:project_id] = server['projectid'] if server['projectid']
-            {
-              id: client.send("#{command}_server", server['name'], args)['jobid'],
-              name: "#{command.capitalize} server #{server['name']}"
-            }
-          end
-          puts
-          watch_jobs(jobs)
-        end
-      end
+  desc "list_from_file FILE", "list servers from file"
+  option :command,
+  desc: "command to execute for the given servers",
+  enum: %w(START STOP REBOOT)
+  option :concurrency, type: :numeric, default: 10, aliases: '-C',
+  desc: "number of concurrent command to execute"
+  option :format, default: :table, enum: %w(table json yaml)
+  def list_from_file(file)
+    servers = parse_file(file)["servers"]
+    if servers.size < 1
+      puts "No servers found."
+    else
+      print_servers(servers)
+      execute_server_commands(servers) if options[:command]
     end
   end
 
@@ -192,5 +178,53 @@ class Server < CloudstackCli::Base
     client.reboot_server(name, options)
     puts
   end
+
+  no_commands do
+
+    def print_servers(servers)
+      case options[:format].to_sym
+      when :yaml
+        puts({'servers' => servers}.to_yaml)
+      when :json
+        say JSON.pretty_generate(servers: servers)
+      else
+        table = [["Name", "State", "Offering", "Zone", options[:project_id] ? "Project" : "Account", "IP's"]]
+        servers.each do |server|
+          table << [
+            server['name'],
+            server['state'],
+            server['serviceofferingname'],
+            server['zonename'],
+            options[:project_id] ? server['project'] : server['account'],
+            server['nic'].map { |nic| nic['ipaddress']}.join(' ')
+          ]
+        end
+        print_table table
+        say "Total number of servers: #{servers.count}"
+      end
+    end
+
+    def execute_server_commands(servers)
+      command = options[:command].downcase
+      unless %w(start stop reboot).include?(command)
+        say "\nCommand #{options[:command]} not supported.", :red
+        exit 1
+      end
+      exit unless yes?("\n#{command.capitalize} the server(s) above? [y/N]:", :magenta)
+      servers.each_slice(options[:concurrency]) do | batch |
+        jobs = batch.map do |server|
+          args = { sync: true, account: server['account'] }
+          args[:project_id] = server['projectid'] if server['projectid']
+          {
+            id: client.send("#{command}_server", server['name'], args)['jobid'],
+            name: "#{command.capitalize} server #{server['name']}"
+          }
+        end
+        puts
+        watch_jobs(jobs)
+      end
+    end
+
+  end # no_commands
 
 end

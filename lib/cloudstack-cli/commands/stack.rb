@@ -1,10 +1,8 @@
-require 'open-uri'
-
 class Stack < CloudstackCli::Base
 
   desc "create STACKFILE", "create a stack of servers"
   def create(stackfile)
-    stack = parse_stackfile(stackfile)
+    stack = parse_file(stackfile)
     say "Create stack #{stack["name"]}...", :green
     projectid = find_project(stack["project"])['id'] if stack["project"]
     jobs = []
@@ -106,28 +104,6 @@ class Stack < CloudstackCli::Base
   end
 
   no_commands do
-    def parse_stackfile(stackfile)
-      handler = case File.extname(stackfile)
-      when ".json"
-        Object.const_get "JSON"
-      when ".yaml", ".yml"
-        Object.const_get "YAML"
-      else
-        say "File extension #{File.extname(stackfile)} not supported. Supported extensions are .json, .yaml or .yml", :red
-        exit
-      end
-      begin
-        return handler.load open(stackfile){|f| f.read}
-      rescue SystemCallError
-        say "Can't find the stack file #{stackfile}.", :red
-        exit 1
-      rescue => e
-        say "Error parsing #{File.extname(stackfile)} file:", :red
-        say e.message
-        exit 1
-      end
-    end
-
     def load_string_or_array(item)
      item.is_a?(Array) ? item : [item]
     end
