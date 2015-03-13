@@ -146,7 +146,7 @@ Stop all virtual routers of project Demo (you could filter by zone too):
 (This command is helpful if you have to deploy new versions of Cloudstack when using redundant routers)
 
 ```bash
-$ cloudstack-cli router list --project Demo --status running --redundant-state BACKUP --command stop
+$ cloudstack-cli router list --project Demo --status running --redundant-state BACKUP --command STOP
 ````
 
 **Hint:** You can watch the status of the command with watch.
