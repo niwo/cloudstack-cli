@@ -64,7 +64,7 @@ class Server < CloudstackCli::Base
 
   desc "create NAME [NAME2 ...]", "create server(s)"
   option :template, aliases: '-t', desc: "name of the template"
-  option :iso, desc: "name of the iso", desc: "name of the iso template"
+  option :iso, desc: "name of the iso template"
   option :offering, aliases: '-o', required: true, desc: "computing offering name"
   option :zone, aliases: '-z', required: true, desc: "availability zone name"
   option :networks, aliases: '-n', type: :array, desc: "network names"
