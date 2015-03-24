@@ -142,7 +142,7 @@ $ cloudstack-cli offering sort
 
 ### Example: Stop all backup routers of a given project
 
-Stop all virtual routers of project Demo (you could filter by zone too):
+Stop all virtual routers of project named Demo (you could filter by zone too):
 (This command is helpful if you have to deploy new versions of Cloudstack when using redundant routers)
 
 ```bash
