@@ -23,7 +23,7 @@ module CloudstackCli
     no_commands do
       def client(opts = {})
         @config ||= load_configuration
-        @client ||= CloudstackClient::Connection.new(
+        @client ||= CloudstackClient::Client.new(
           @config[:url],
           @config[:api_key],
           @config[:secret_key],
@@ -66,11 +66,18 @@ module CloudstackCli
         if allow_all && %w(ALL -1).include?(name)
           return {'id' => '-1'}
         end
-        unless project = client.get_project(name)
+        unless project = client.list_projects(name: name)
           say "Project '#{name}' not found", :red
           exit 1
         end
-        project
+      end
+
+      def find_account(name = options[:account])
+        return nil unless name
+        unless account = client.list_accounts(name: name).first
+          say "Account '#{name}' not found", :red
+          exit 1
+        end
       end
 
       def filter_by(objects, key, value)

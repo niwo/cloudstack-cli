@@ -47,7 +47,7 @@ module CloudstackCli
     def update_job_status(jobs)
       jobs.each do |job|
         unless job[:status] && job[:status] > 0
-          job[:status] = client.query_job(job[:id])['jobstatus']
+          job[:status] = client.query_async_job_result(job_id: job[:id])['jobstatus']
         end
       end
       jobs
@@ -68,17 +68,14 @@ module CloudstackCli
     end
 
     def bootstrap_server(args = {})
-      if args[:project] && project = client(quiet: true).get_project(args[:project])
+      if args[:project] && project = find_project(args[:project])
         project_id = project["id"]
         project_name = project['name']
       end
-      server = client(quiet: true).get_server(args[:name], project_id)
-      unless server
+      unless server = client.list_virtual_machines(name: args[:name], project_id: project_id)
         say "Create server #{args[:name]}...", :yellow
-        server = client.create_server(args)
+        server = client.deploy_virtual_machine(args)
         say "Server #{server["name"]} has been created.", :green
-        client.wait_for_server_state(server["id"], "Running")
-        say "Server #{server["name"]} is running.", :green
       else
         say "Server #{args[:name]} already exists (#{server['state']}).", :yellow
       end
@@ -90,13 +87,12 @@ module CloudstackCli
     end
 
     def create_server(args = {})
-      if args[:project] && project = client(quiet: true).get_project(args[:project])
+      if args[:project] && project = find_project(args[:project])
         project_id = project["id"]
         project_name = project['name']
       end
-      server = client(quiet: true).get_server(args[:name], project_id)
-      unless server
-        server = client.create_server(args)
+      unless server = client.list_virtual_machines(name: args[:name], project_id: project_id)
+        server = client.deploy_virtual_machine(args)
       end
       server
     end
@@ -105,7 +101,7 @@ module CloudstackCli
       frontendip = nil
       jobs = []
       client.verbose = async
-      project_id = server['project'] ? client.get_project(server['project'])['id'] : nil
+      project_id = server['project'] ? find_project(args[:project])['id'] : nil
       port_rules.each do |pf_rule|
         ip = pf_rule.split(":")[0]
         if ip != ''
@@ -120,16 +116,19 @@ module CloudstackCli
           )
         end
         port = pf_rule.split(":")[1]
+        args = {
+          ipaddressid: ip_addr["id"],
+          publicport: port,
+          privateport: port,
+          protocol: 'TCP',
+          virtualmachineid: server["id"]
+        }
         if async
           say "Create port forwarding rule #{ip_addr['ipaddress']}:#{port} for server #{server["name"]}.", :yellow
-          client.create_port_forwarding_rule(ip_addr["id"], port, 'TCP', port, server["id"])
+          client.create_port_forwarding_rule(args)
           return
         else
-          jobs << client.create_port_forwarding_rule(
-            ip_addr["id"],
-            port, 'TCP', port, server["id"],
-            false
-          )['jobid']
+          jobs << client.create_port_forwarding_rule(args, {sync: true})['jobid']
         end
       end
       jobs
@@ -196,6 +195,58 @@ module CloudstackCli
           [networks[network]["name"]], nil,
           project ? projects[project]["name"] : nil
         )
+      end
+    end
+
+    ##
+    # Finds the public ip for a server
+
+    def get_server_public_ip(server, cached_rules=nil)
+      return nil unless server
+
+      # find the public ip
+      nic = get_server_default_nic(server) || {}
+      if nic['type'] == 'Virtual'
+        ssh_rule = get_ssh_port_forwarding_rule(server, cached_rules)
+        ssh_rule ? ssh_rule['ipaddress'] : nil
+      else
+        nic['ipaddress']
+      end
+    end
+
+    ##
+    # Gets the SSH port forwarding rule for the specified server.
+
+    def get_ssh_port_forwarding_rule(server, cached_rules=nil)
+      rules = cached_rules || client.list_port_forwarding_rules(project_id: server["projectid"]) || []
+      rules.find_all { |r|
+        r['virtualmachineid'] == server['id'] &&
+            r['privateport'] == '22'&&
+            r['publicport'] == '22'
+      }.first
+    end
+
+    ##
+    # Returns the fully qualified domain name for a server.
+
+    def get_server_fqdn(server)
+      return nil unless server
+
+      nic = get_server_default_nic(server) || {}
+      networks = client.list_networks(project_id: server['projectid']) || {}
+
+      id = nic['networkid']
+      network = networks.select { |net|
+        net['id'] == id
+      }.first
+      return nil unless network
+
+      "#{server['name']}.#{network['networkdomain']}"
+    end
+
+    def get_server_default_nic(server)
+      server['nic'].each do |nic|
+        return nic if nic['isdefault']
       end
     end
 

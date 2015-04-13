@@ -45,6 +45,10 @@ module CloudstackCli
     end
 
     desc "command COMMAND [arg1=val1 arg2=val2...]", "Run a custom api command"
+    option :format, default: 'json',
+      enum: %w(json yaml), desc: "output format"
+    option :pretty_print, default: true, type: :boolean,
+      desc: "pretty print json output"
     def command(command, *args)
       params = {'command' => command}
       args.each do |arg|
@@ -52,7 +56,12 @@ module CloudstackCli
         params[arg[0]] = arg[1]
       end
       data = client.send_request(params)
-      puts JSON.pretty_generate(data)
+      output = if options[:format] == 'json'
+        options[:pretty_print] ? JSON.pretty_generate(data) : data.to_json
+      else
+        data.to_yaml
+      end
+      puts output
     end
 
     # require subcommands
@@ -79,8 +88,9 @@ module CloudstackCli
     desc "project SUBCOMMAND ...ARGS", "Manage servers"
     subcommand :project, Project
 
-    desc "server SUBCOMMAND ...ARGS", "Manage servers"
-    subcommand :server, Server
+    desc "virtual_machine SUBCOMMAND ...ARGS", "Manage virtual machines"
+    subcommand :virtual_machine, VirtualMachine
+    map 'server' => :virtual_machine
 
     desc "compute_offer SUBCOMMAND ...ARGS", "Manage offerings"
     subcommand :compute_offer, ComputeOffer

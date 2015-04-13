@@ -88,12 +88,7 @@ class Stack < CloudstackCli::Base
         server = client(quiet: true).get_server(name, project_id: projectid)
         if server
           jobs << {
-            id: client.destroy_server(
-              server['id'], {
-                sync: true,
-                expunge: options[:expunge]
-              }
-            )['jobid'],
+            id: client.destroy_server(server['id'], {sync: true, expunge: options[:expunge]})['jobid'],
             name: "Destroy server #{name}"
           }
         end
