@@ -50,7 +50,7 @@ class VirtualMachine < CloudstackCli::Base
   option :project
   def show(name)
     project_id = options[:project] ? find_project['id'] : nil
-    unless virtual_machine = client.list_virtual_machines(name: name, project_id: project_id)
+    unless virtual_machine = client.list_virtual_machines(name: name, project_id: project_id).first
       puts "No virtual machine found."
     else
       table = virtual_machine.map do |key, value|
@@ -78,6 +78,30 @@ class VirtualMachine < CloudstackCli::Base
   option :account, desc: "account name"
   def create(*names)
     project_id = find_project['id'] if options[:project]
+
+    if zone = client.list_zones(name: options[:zone]).first
+      options[:zone_id] = zone['id']
+    else
+      say "Error: Zone #{options[:zone]} not found.", :red
+      exit 1
+    end
+
+    if offering = client.list_service_offerings(name: options[:offering]).first
+      options[:service_offering_id] = offering['id']
+    else
+      say "Error: Offering #{options[:offering]} not found.", :red
+      exit 1
+    end
+
+    if options[:template]
+      if template = client.list_templates(name: options[:template], template_filter: "all").first
+        options[:template_id] = template['id']
+      else
+        say "Error: Template #{options[:template]} not found.", :red
+        exit 1
+      end
+    end
+
     say "Start deploying virtual machine#{ "s" if names.size > 1 }...", :green
     jobs = names.map do |name|
       if virtual_machine = client.list_virtual_machines(name: name, project_id: project_id).first
@@ -90,7 +114,7 @@ class VirtualMachine < CloudstackCli::Base
       else
         job = {
           id: client.deploy_virtual_machine(
-            options.merge({name: name}),
+            options.merge({display_name: name}),
             {sync: true}
           )['jobid'],
           name: "Create virtual_machine #{name}"

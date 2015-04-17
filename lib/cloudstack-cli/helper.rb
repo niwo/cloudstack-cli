@@ -72,12 +72,21 @@ module CloudstackCli
         project_id = project["id"]
         project_name = project['name']
       end
-      unless server = client.list_virtual_machines(name: args[:name], project_id: project_id)
-        say "Create server #{args[:name]}...", :yellow
+
+      if args[:name]
+        args['displayname'] = args[:name]
+        name = args[:name]
+      elsif args[:displayname]
+        name = args[:displayname]
+      end
+
+      unless server = client.list_virtual_machines(name: args[:name], project_id: project_id).first
+        say "Create VM #{name}...", :yellow
         server = client.deploy_virtual_machine(args)
-        say "Server #{server["name"]} has been created.", :green
+        puts
+        say "VM #{name} has been created.", :green
       else
-        say "Server #{args[:name]} already exists (#{server['state']}).", :yellow
+        say "VM #{name} already exists (#{server["state"]}).", :yellow
       end
 
       if args[:port_rules] && args[:port_rules].size > 0
@@ -145,16 +154,17 @@ module CloudstackCli
       end
 
       projects = client.list_projects
-      if yes?("Do you want to deploy your server within a project?") && projects.size > 0
-        if projects.size > 0
+      project_id = nil
+      if projects.size > 0
+        if yes?("Do you want to deploy your VM within a project? (y/N)") && projects.size > 0
           say "Select a project", :yellow
           print_options(projects)
           project = ask_number("Project Nr.: ")
+          project_id = projects[project]['id'] rescue nil
         end
-        project_id = projects[project]['id'] rescue nil
       end
 
-      say "Please provide a name for the new server", :yellow
+      say "Please provide a name for the new VM", :yellow
       say "(spaces or special characters are NOT allowed)"
       server_name = ask("Server name: ")
 
@@ -163,7 +173,7 @@ module CloudstackCli
       print_options(server_offerings)
       service_offering = ask_number("Offering Nr.: ")
 
-      templates = client.list_templates(project_id: project_id, zone_id: zones[zone]["id"])
+      templates = client.list_templates(project_id: project_id, zone_id: zones[zone]["id"], template_filter: "all")
       say "Select a template:", :yellow
       print_options(templates)
       template = ask_number("Template Nr.: ")
@@ -179,21 +189,21 @@ module CloudstackCli
 
       say "You entered the following configuration:", :yellow
       table =  [["Zone", zones[zone]["name"]]]
-      table << ["Server Name", server_name]
+      table << ["VM Name", server_name]
       table << ["Template", templates[template]["name"]]
       table << ["Offering", server_offerings[service_offering]["name"]]
       table << ["Network", networks[network]["name"]]
       table << ["Project", projects[project]["name"]] if project
       print_table table
 
-      if yes? "Do you want to deploy this server?"
+      if yes? "Do you want to deploy this VM? (y/N)"
         bootstrap_server(
-          server_name,
-          zones[zone]["name"],
-          templates[template]["name"],
-          server_offerings[service_offering]["name"],
-          [networks[network]["name"]], nil,
-          project ? projects[project]["name"] : nil
+          name: server_name,
+          zone_id: zones[zone]["id"],
+          template_id: templates[template]["id"],
+          serviceoffering_id: server_offerings[service_offering]["id"],
+          network_ids: network ? networks[network]["id"] : nil,
+          project_id: project_id
         )
       end
     end

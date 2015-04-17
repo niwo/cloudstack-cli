@@ -154,7 +154,7 @@ class Router < CloudstackCli::Base
         say "No routers found."
       else
         table = [[
-          'Name', 'Zone', 'Account', 'Project', 'Redundant-State', 'IP', 'Linklocal IP', 'Status', 'Redundant', 'ID'
+          'Name', 'Zone', 'Account', 'Project', 'Redundant-State', 'IP', 'Linklocal IP', 'Status', 'Redundant', 'OfferingID', 'Offering', 'ID'
         ]]
         table[0].delete('ID') unless options[:showid]
         routers.each do |router|
@@ -168,6 +168,8 @@ class Router < CloudstackCli::Base
             router["linklocalip"],
             router["state"],
             router["isredundantrouter"],
+            router["serviceofferingid"],
+            router["serviceofferingname"],
             router["id"]
           ]
           table[-1].delete_at(-1) unless table[0].index "ID"

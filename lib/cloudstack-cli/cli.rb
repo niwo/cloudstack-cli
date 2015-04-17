@@ -90,6 +90,7 @@ module CloudstackCli
 
     desc "virtual_machine SUBCOMMAND ...ARGS", "Manage virtual machines"
     subcommand :virtual_machine, VirtualMachine
+    map 'vm' => :virtual_machine
     map 'server' => :virtual_machine
 
     desc "compute_offer SUBCOMMAND ...ARGS", "Manage offerings"
