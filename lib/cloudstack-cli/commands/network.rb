@@ -59,7 +59,8 @@ class Network < CloudstackCli::Base
   desc "default", "get the default network"
   option :zone
   def default
-    network = client.get_default_network(options[:zone])
+    zone_id = client.list_zones(name: options[:zone]).first if options[:zone]
+    network = client.list_networks(zone: zone_id).first
     unless network
       puts "No default network found."
     else
@@ -87,10 +88,10 @@ class Network < CloudstackCli::Base
         options[:project_id] = project['id']
       end
     end
-    unless server = client.get_network(name, options[:project_id])
+    unless network = client.list_networks(name: name, project_id: options[:project_id]).first
       puts "No network found."
     else
-      table = server.map do |key, value|
+      table = network.map do |key, value|
         [ set_color("#{key}:", :yellow), "#{value}" ]
       end
       print_table table

@@ -77,34 +77,11 @@ class VirtualMachine < CloudstackCli::Base
   option :group, desc: "group name"
   option :account, desc: "account name"
   def create(*names)
-    project_id = find_project['id'] if options[:project]
-
-    if zone = client.list_zones(name: options[:zone]).first
-      options[:zone_id] = zone['id']
-    else
-      say "Error: Zone #{options[:zone]} not found.", :red
-      exit 1
-    end
-
-    if offering = client.list_service_offerings(name: options[:offering]).first
-      options[:service_offering_id] = offering['id']
-    else
-      say "Error: Offering #{options[:offering]} not found.", :red
-      exit 1
-    end
-
-    if options[:template]
-      if template = client.list_templates(name: options[:template], template_filter: "all").first
-        options[:template_id] = template['id']
-      else
-        say "Error: Template #{options[:template]} not found.", :red
-        exit 1
-      end
-    end
+    options.merge! vm_options_to_params(options)
 
     say "Start deploying virtual machine#{ "s" if names.size > 1 }...", :green
     jobs = names.map do |name|
-      if virtual_machine = client.list_virtual_machines(name: name, project_id: project_id).first
+      if virtual_machine = client.list_virtual_machines(name: name, project_id: options[:project_id]).first
         say "virtual_machine #{name} (#{virtual_machine["state"]}) already exists.", :yellow
         job = {
           id: 0,
@@ -113,10 +90,7 @@ class VirtualMachine < CloudstackCli::Base
         }
       else
         job = {
-          id: client.deploy_virtual_machine(
-            options.merge({display_name: name}),
-            {sync: true}
-          )['jobid'],
+          id: client.deploy_virtual_machine(options, {sync: true})['jobid'],
           name: "Create virtual_machine #{name}"
         }
       end
@@ -127,7 +101,7 @@ class VirtualMachine < CloudstackCli::Base
       say "Create port forwarding rules...", :green
       jobs = []
       names.each do |name|
-        virtual_machine = client.list_virtual_machine(name: name, project_id: projectid).first
+        virtual_machine = client.list_virtual_machine(name: name, project_id: options[:project_id]).first
         create_port_rules(virtual_machine, options[:port_rules], false).each_with_index do |job_id, index|
           jobs << {
             id: job_id,

@@ -66,10 +66,11 @@ module CloudstackCli
         if allow_all && %w(ALL -1).include?(name)
           return {'id' => '-1'}
         end
-        unless project = client.list_projects(name: name)
+        unless project = client.list_projects(name: name).first
           say "Project '#{name}' not found", :red
           exit 1
         end
+        project
       end
 
       def find_account(name = options[:account])
