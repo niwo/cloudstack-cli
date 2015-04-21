@@ -1,6 +1,6 @@
 class PortRule < CloudstackCli::Base
 
-  desc "create SERVER", "create portforwarding rules for a given server"
+  desc "create VM-NAME", "create portforwarding rules for a given VM"
   option :rules, type: :array,
     required: true,
     desc: "Port Forwarding Rules [public_ip]:port ...",
@@ -9,38 +9,44 @@ class PortRule < CloudstackCli::Base
   option :project
   option :keyword, desc: "list by keyword"
   def create(server_name)
-    projectid = find_project['id'] if options[:project]
-    unless server = client.get_server(server_name, projectid)
+    resolve_project
+    unless server = client.list_virtual_machines(name: server_name, project_id: options[:project_id]).first
       error "Server #{server_name} not found."
       exit 1
     end
-    frontendip = nil
     options[:rules].each do |pf_rule|
       ip = pf_rule.split(":")[0]
-      if ip != ''
-        ip_addr = client.get_public_ip_address(ip, projectid)
-        unless ip_addr
-          say "Error: IP #{ip} not found.", :red
+      unless ip == ''
+        unless ip_addr = client.list_public_ip_addresses(ipaddress: ip, project_id: options[:project_id]).first
+          say "Error: IP #{ip} not found.", :yellow
           next
         end
       else
-        ip_addr = frontendip ||= client.associate_ip_address(
-          client.get_network(options[:network], projectid)
+        say "Assign a new IP address ", :yellow
+        say(" OK", :green) if ip_addr = client.associate_ip_address(
+          networkid: client.list_networks(
+            project_id: options[:project_id]
+          ).find {|n| n['name'] == options[:network]}['id'],
+          project_id: options[:project_id]
         )
       end
       port = pf_rule.split(":")[1]
-      puts
-      say "Create port forwarding rule #{ip_addr["ipaddress"]}:#{port} for server #{server_name}.", :yellow
-      client.create_port_forwarding_rule(ip_addr["id"], port, 'TCP', port, server["id"])
-      puts
+      say "Create port forwarding rule #{ip_addr["ipaddress"]}:#{port} for server #{server_name} ", :yellow
+      say(" OK.", :green) if client.create_port_forwarding_rule(
+        ipaddress_id: ip_addr["id"],
+        public_port: port,
+        private_port: port,
+        virtualmachine_id: server["id"],
+        protocol: "TCP"
+      )
     end
   end
 
   desc "list", "list portforwarding rules"
   option :project
   def list
-    project_id = find_project['id'] if options[:project]
-    rules = client.list_port_forwarding_rules(ip_address_id=nil, project_id)
+    resolve_project
+    rules = client.list_port_forwarding_rules(options)
     if rules.size < 1
       puts "No rules found."
     else

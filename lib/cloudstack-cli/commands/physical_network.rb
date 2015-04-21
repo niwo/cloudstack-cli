@@ -3,8 +3,8 @@ class PhysicalNetwork < CloudstackCli::Base
   desc "list", "list physical networks"
   option :project
   def list
-    project = find_project if options[:project]
-    networks = client.list_physical_networks
+    resolve_project
+    networks = client.list_physical_networks(options)
     zones = client.list_zones
     if networks.size < 1
       puts "No networks found"
@@ -14,7 +14,7 @@ class PhysicalNetwork < CloudstackCli::Base
         table << [
           network["name"],
           network["state"],
-          zones.select{|zone| zone['id'] == network["zoneid"]}.first["name"], 
+          zones.select{|zone| zone['id'] == network["zoneid"]}.first["name"],
           network["id"]
         ]
       end

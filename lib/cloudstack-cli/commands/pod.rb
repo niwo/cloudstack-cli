@@ -1,7 +1,9 @@
 class Pod < CloudstackCli::Base
 
   desc 'list', 'list pods'
+  option :zone
   def list
+    resolve_zone
     pods = client.list_pods(options)
     if pods.size < 1
       say "No pods found."

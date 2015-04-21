@@ -2,8 +2,8 @@ class Project < CloudstackCli::Base
 
   desc "show NAME", "show detailed infos about a project"
   def show(name)
-    unless project = client.get_project(name)
-      puts "No project with name #{name} found."
+    unless project = client.list_projects(name: name).first
+      say "Error: No project with name '#{name}' found.", :red
     else
       table = project.map do |key, value|
         [ set_color("#{key}", :yellow), "#{value}" ]
@@ -29,25 +29,24 @@ class Project < CloudstackCli::Base
 
   desc "list_accounts PROJECT_NAME", "show accounts belonging to a project"
   def list_accounts(name)
-    unless project = client.get_project(name)
-      say "No project with name #{name} found."
+    unless project = client.list_projects(name: name).first
+      say "Error: No project with name '#{name}' found.", :red
     else
-      accounts = client.list_project_accounts(project['id'], options)
+      accounts = client.list_project_accounts(project_id: project['id'])
       if accounts.size < 1
         say "No project accounts found."
       else
-        table = [%w(Name Type Domain State)]
+        table = [%w(Account-Name Account-Type Role Domain)]
         accounts.each do |account|
           table << [
-            account['name'],
-            TYPES[account['accounttype']],
-            account['domain'],
-            account['state']
+            account['account'],
+            Account::TYPES[account['accounttype']],
+            account['role'],
+            account['domain']
           ]
         end
         print_table table
         say "Total number of project accounts: #{accounts.size}"
-        print_table table
       end
     end
   end
