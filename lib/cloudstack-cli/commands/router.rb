@@ -9,33 +9,24 @@ class Router < CloudstackCli::Base
     enum: %w(master backup fault unknown)
   option :listall, type: :boolean, desc: "list all routers"
   option :showid, type: :boolean, desc: "display the router ID"
-	option :reverse, type: :boolean, default: false, desc: "reverse listing of routers"
+  option :reverse, type: :boolean, default: false, desc: "reverse listing of routers"
   option :command,
     desc: "command to execute for each router",
     enum: %w(START STOP REBOOT)
-	option :concurrency, type: :numeric, default: 10, aliases: '-C',
-		desc: "number of concurrent command to execute"
+  option :concurrency, type: :numeric, default: 10, aliases: '-C',
+    desc: "number of concurrent command to execute"
   def list
-    projectid = find_project['id'] if options[:project]
-    routers = client.list_routers(
-      {
-        account: options[:account],
-        projectid: projectid,
-        status: options[:status],
-        zone: options[:zone]
-      }
-    )
+    resolve_project
+    resolve_zone
+    resolve_account
+
+    routers = client.list_routers(options)
 
     if options[:listall]
       projects = client.list_projects
       projects.each do |project|
         routers = routers + client.list_routers(
-          {
-            account: options[:account],
-            projectid: project['id'],
-            status: options[:status],
-            zone: options[:zone]
-          }
+          options.merge(projectid: project['id'])
         )
       end
     end
@@ -54,13 +45,13 @@ class Router < CloudstackCli::Base
         exit 1
       end
       exit unless yes?("\n#{command.capitalize} the router(s) above? [y/N]:", :magenta)
-			routers.each_slice(options[:concurrency]) do | batch |
-	      jobs = batch.map do |router|
-	        {id: client.send("#{command}_router", router['id'], async: false)['jobid'], name: "#{command.capitalize} router #{router['name']}"}
-	      end
-	      puts
-	      watch_jobs(jobs)
-			end
+      routers.each_slice(options[:concurrency]) do | batch |
+        jobs = batch.map do |router|
+          {id: client.send("#{command}_router", router['id'], async: false)['jobid'], name: "#{command.capitalize} router #{router['name']}"}
+        end
+        puts
+        watch_jobs(jobs)
+      end
     end
   end
 
@@ -71,7 +62,7 @@ class Router < CloudstackCli::Base
     print_routers(routers)
     exit unless options[:force] || yes?("\nStop router(s) above? [y/N]:", :magenta)
     jobs = routers.map do |router|
-      {id: client.stop_router(router['id'], async: false)['jobid'], name: "Stop router #{router['name']}"}
+      {id: client.stop_router({id: router['id']}, {sync: true})['jobid'], name: "Stop router #{router['name']}"}
     end
     puts
     watch_jobs(jobs)
@@ -84,7 +75,7 @@ class Router < CloudstackCli::Base
     print_routers(routers)
     exit unless options[:force] || yes?("\nStart router(s) above? [y/N]:", :magenta)
     jobs = routers.map do |router|
-      {id: client.start_router(router['id'], async: false)['jobid'], name: "Start router #{router['name']}"}
+      {id: client.start_router({id: router['id']}, {sync: true})['jobid'], name: "Start router #{router['name']}"}
     end
     puts
     watch_jobs(jobs)
@@ -93,11 +84,11 @@ class Router < CloudstackCli::Base
   desc "reboot NAME [NAME2 ..]", "reboot virtual router(s)"
   option :force, desc: "start without asking", type: :boolean, aliases: '-f'
   def reboot(*names)
-    routers = names.map {|name| get_router(name)}
+    routers = names.map {|name| client.list_routers(name: name).first}
     print_routers(routers)
     exit unless options[:force] || yes?("\nReboot router(s) above? [y/N]:", :magenta)
     jobs = routers.map do |router|
-      {id: client.reboot_router(router['id'], async: false)['jobid'], name: "Reboot router #{router['name']}"}
+      {id: client.reboot_router({id: router['id']}, {sync: true})['jobid'], name: "Reboot router #{router['name']}"}
     end
     puts
     watch_jobs(jobs)
@@ -110,13 +101,13 @@ class Router < CloudstackCli::Base
     print_routers(routers)
     exit unless options[:force] || yes?("\nRestart router(s) above? [y/N]:", :magenta)
     jobs = routers.map do |router|
-      {id: client.stop_router(router['id'], async: false)['jobid'], name: "Stop router #{router['name']}"}
+      {id: client.stop_router({id: router['id']}, {sync: true})['jobid'], name: "Stop router #{router['name']}"}
     end
     puts
     watch_jobs(jobs)
 
     jobs = routers.map do |router|
-      {id: client.start_router(router['id'], async: false)['jobid'], name: "Start router #{router['name']}"}
+      {id: client.start_router({id: router['id']}, {sync: true})['jobid'], name: "Start router #{router['name']}"}
     end
     puts
     watch_jobs(jobs)
@@ -131,7 +122,7 @@ class Router < CloudstackCli::Base
     print_routers(routers)
     exit unless options[:force] || yes?("\nDestroy router(s) above? [y/N]:", :magenta)
     jobs = routers.map do |router|
-      {id: client.destroy_router(router['id'], async: false)['jobid'], name: "Destroy router #{router['name']}"}
+      {id: client.destroy_router({id: router['id']}, {sync: true})['jobid'], name: "Destroy router #{router['name']}"}
     end
     puts
     watch_jobs(jobs)
@@ -140,8 +131,8 @@ class Router < CloudstackCli::Base
   no_commands do
 
     def get_router(name)
-      unless router = client.get_router(name)
-        unless router = client.get_router(name, -1)
+      unless router = client.list_routers(name: name).first
+        unless router = client.list_routers(name: name, project_id: -1).first
          say "Can't find router with name #{name}.", :red
          exit 1
         end

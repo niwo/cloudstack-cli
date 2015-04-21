@@ -1,9 +1,10 @@
 class DiskOffer < CloudstackCli::Base
 
   desc 'list', 'list disk offerings'
-  option :domain
+  option :domain, desc: "the domain of the disk offering"
   def list
-    offerings = client.list_disk_offerings(options[:domain])
+    resolve_domain
+    offerings = client.list_disk_offerings(options)
     if offerings.size < 1
       puts "No offerings found."
     else

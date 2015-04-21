@@ -6,6 +6,7 @@ module CloudstackCli
   class Base < Thor
     include Thor::Actions
     include CloudstackCli::Helper
+    include CloudstackCli::OptionResolver
 
     attr_reader :config
 
@@ -21,14 +22,15 @@ module CloudstackCli
     end
 
     no_commands do
-      def client(opts = {})
+      def client
         @config ||= load_configuration
         @client ||= CloudstackClient::Client.new(
           @config[:url],
           @config[:api_key],
           @config[:secret_key],
-          opts.merge({debug: options[:debug]})
         )
+        @client.debug = true if options[:debug]
+        @client
       end
 
       def load_configuration(config_file = options[:config_file], env = options[:env])

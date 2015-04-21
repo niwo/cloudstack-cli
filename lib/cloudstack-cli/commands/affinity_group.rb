@@ -7,6 +7,7 @@ class AffinityGroup < CloudstackCli::Base
   option :listall
   option :keyword
   def list
+    resolve_account
     affinity_groups = client.list_affinity_groups(options)
     if affinity_groups.size < 1
       say "No affinity groups found."

@@ -15,7 +15,8 @@ module CloudstackCli
 
     class_option :debug,
       desc: 'Enable debug output',
-      type: :boolean
+      type: :boolean,
+      default: false
 
     desc "version", "Print cloudstack-cli version number"
     def version

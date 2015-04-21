@@ -137,8 +137,8 @@ class VirtualMachine < CloudstackCli::Base
     end
   end
 
-  desc "bootstrap", "interactive creation of a virtual_machine with network access"
-  def bootstrap
+  desc "create_interactive", "interactive creation of a virtual_machine with network access"
+  def create_interactive
     bootstrap_server_interactive
   end
 

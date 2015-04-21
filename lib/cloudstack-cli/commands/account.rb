@@ -8,11 +8,9 @@ class Account < CloudstackCli::Base
 
   desc "show NAME", "show detailed infos about an account"
   def show(name)
-    accounts = client.list_accounts(name: name)
-    if accounts.size < 1
+    unless account = client.list_accounts(name: name).first
       say "No account named \"#{name}\" found.", :red
     else
-      account = accounts.first
       account.delete 'user'
       account['accounttype'] = "#{account['accounttype']} (#{TYPES[account['accounttype']]})"
       table = account.map do |key, value|

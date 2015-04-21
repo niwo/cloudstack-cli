@@ -1,8 +1,8 @@
 class Domain < CloudstackCli::Base
 
-  desc 'list [NAME]', 'list domains'
-  def list(name = nil)
-    domains = client.list_domains(name)
+  desc 'list', 'list domains'
+  def list
+    domains = client.list_domains
     if domains.size < 1
       puts "No domains found."
     else
@@ -14,5 +14,5 @@ class Domain < CloudstackCli::Base
       say "Total number of domains: #{domains.size}"
     end
   end
-  
+
 end
