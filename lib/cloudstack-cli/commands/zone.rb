@@ -6,9 +6,13 @@ class Zone < CloudstackCli::Base
     if zones.size < 1
       puts "No projects found"
     else
-      table = [%w(Name Description)]
+      table = [%w(Name Network-Type Description)]
       zones.each do |zone|
-        table << [zone['name'] ,zone['description']]
+        table << [
+          zone['name'],
+          zone['networktype'],
+          zone['description']
+        ]
       end
     end
     print_table(table)

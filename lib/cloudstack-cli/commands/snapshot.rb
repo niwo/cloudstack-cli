@@ -4,8 +4,11 @@ class Snapshot < CloudstackCli::Base
   option :account
   option :project
   option :domain
-  option :listall
+  option :listall, default: true
   def list
+    resolve_account
+    resolve_project
+    resolve_domain
     snapshots = client.list_snapshots(options)
     if snapshots.size < 1
       say "No snapshots found."

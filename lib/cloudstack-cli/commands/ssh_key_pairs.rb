@@ -1,10 +1,12 @@
 class SshKeyPair < CloudstackCli::Base
 
   desc "list", 'list ssh key pairs'
-  option :listall
+  option :listall, default: true
   option :account
   option :project
   def list
+    resolve_account
+    resolve_project
     pairs = client.list_ssh_key_pairs(options)
     if pairs.size < 1
       say "No ssh key pairs found."
@@ -21,7 +23,10 @@ class SshKeyPair < CloudstackCli::Base
   option :account
   option :project
   def create(name)
-    pair = client.create_ssh_key_pair(name, options)
+    resolve_account
+    resolve_project
+    options[:name] = name
+    pair = client.create_ssh_key_pair(options)
     say "Name : #{pair['name']}"
     say "Fingerprint : #{pair['fingerprint']}"
     say "Privatekey:"
@@ -33,17 +38,23 @@ class SshKeyPair < CloudstackCli::Base
   option :project
   option :public_key, required: true, desc: "path to public_key file"
   def register(name)
+    resolve_account
+    resolve_project
+    options[:name] = name
     if File.exist?(options[:public_key])
       public_key = IO.read(options[:public_key])
     else
       say("Can't open public key #{options[:public_key]}", :red)
       exit 1
     end
-    pair = client.register_ssh_key_pair(name, public_key, options)
+    pair = client.register_ssh_key_pair(options)
     say "Name : #{pair['name']}"
     say "Fingerprint : #{pair['fingerprint']}"
     say "Privatekey:"
     say pair['privatekey']
+  rescue => e
+    say "Failed to register key: #{e.message}", :red
+    exit 1
   end
 
   desc 'delete NAME', 'delete ssh key pair'
@@ -51,8 +62,11 @@ class SshKeyPair < CloudstackCli::Base
   option :project
   option :force, aliases: '-f', desc: "delete without asking"
   def delete(name)
+    resolve_account
+    resolve_project
+    options[:name] = name
     if options[:force] || yes?("Delete ssh key pair #{name}?", :yellow)
-      if client.delete_ssh_key_pair(name, options)['success'] == "true"
+      if client.delete_ssh_key_pair(options)['success'] == "true"
         say("OK", :green)
       else
         say("Failed", :red)
@@ -60,5 +74,5 @@ class SshKeyPair < CloudstackCli::Base
       end
     end
   end
-  
+
 end

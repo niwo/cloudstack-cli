@@ -5,7 +5,7 @@ class VirtualMachine < CloudstackCli::Base
   option :project, desc: "name of the project"
   option :zone, desc: "the name of the availability zone"
   option :state, desc: "state of the virtual machine"
-  option :listall, desc: "list all virtual machines"
+  option :listall, desc: "list all virtual machines", default: true
   option :storage_id, desc: "the storage ID where vm's volumes belong to"
   option :keyword, desc: "filter by keyword"
   option :command,
@@ -16,16 +16,17 @@ class VirtualMachine < CloudstackCli::Base
   option :format, default: "table",
     enum: %w(table json yaml)
   def list
-    if options[:project]
-      options[:project_id] = find_project['id']
-      options[:project] = nil
-    end
+    resolve_account
+    resolve_project
+    resolve_zone
+    command = options[:command].downcase if options[:command]
+    options.delete(:command)
     virtual_machines = client.list_virtual_machines(options)
     if virtual_machines.size < 1
       puts "No virtual_machines found."
     else
       print_virtual_machines(virtual_machines)
-      execute_virtual_machines_commands(virtual_machines) if options[:command]
+      execute_virtual_machines_commands(command, virtual_machines) if command
     end
   end
 
@@ -49,8 +50,9 @@ class VirtualMachine < CloudstackCli::Base
   desc "show NAME", "show detailed infos about a virtual machine"
   option :project
   def show(name)
-    project_id = options[:project] ? find_project['id'] : nil
-    unless virtual_machine = client.list_virtual_machines(name: name, project_id: project_id).first
+    resolve_project
+    options[:name] = name
+    unless virtual_machine = client.list_virtual_machines(options).first
       puts "No virtual machine found."
     else
       table = virtual_machine.map do |key, value|
@@ -77,7 +79,7 @@ class VirtualMachine < CloudstackCli::Base
   option :group, desc: "group name"
   option :account, desc: "account name"
   def create(*names)
-    options.merge! vm_options_to_params(options)
+    vm_options_to_params
 
     say "Start deploying virtual machine#{ "s" if names.size > 1 }...", :green
     jobs = names.map do |name|
@@ -119,9 +121,9 @@ class VirtualMachine < CloudstackCli::Base
   option :force, desc: "destroy without asking", type: :boolean, aliases: '-f'
   option :expunge, desc: "expunge virtual_machine immediately", type: :boolean, default: false, aliases: '-E'
   def destroy(*names)
-    projectid = find_project['id'] if options[:project]
+    resolve_project
     names.each do |name|
-      unless virtual_machine = client.list_virtual_machines(name: name, project_id: projectid).first
+      unless virtual_machine = client.list_virtual_machines(options.merge(name: name, listall: true)).first
         say "Virtual machine #{name} not found.", :red
       else
         ask = "Destroy #{name} (#{virtual_machine['state']})? [y/N]:"
@@ -146,9 +148,11 @@ class VirtualMachine < CloudstackCli::Base
   option :project
   option :force
   def stop(name)
-    project_id = find_project['id'] if options[:project]
+    resolve_project
+    options[:name] = name
+    options[:listall] = true
     exit unless options[:force] || yes?("Stop virtual machine #{name}? [y/N]:", :magenta)
-    unless virtual_machine = client.list_virtual_machines(name: name, project_id: project_id).first
+    unless virtual_machine = client.list_virtual_machines(options).first
       say "Virtual machine #{name} not found.", :red
       exit 1
     end
@@ -159,8 +163,10 @@ class VirtualMachine < CloudstackCli::Base
   desc "start NAME", "start a virtual_machine"
   option :project
   def start(name)
-    project_id = find_project['id'] if options[:project]
-    unless virtual_machine = client.list_virtual_machines(name: name, project_id: project_id).first
+    resolve_project
+    options[:name] = name
+    options[:listall] = true
+    unless virtual_machine = client.list_virtual_machines(options).first
       say "Virtual machine #{name} not found.", :red
       exit 1
     end
@@ -173,8 +179,10 @@ class VirtualMachine < CloudstackCli::Base
   option :project
   option :force
   def reboot(name)
-    project_id = find_project['id'] if options[:project]
-    unless virtual_machine = client.list_virtual_machines(name: name, project_id: project_id).first
+    resolve_project
+    options[:name] = name
+    options[:listall] = true
+    unless virtual_machine = client.list_virtual_machines(options).first
       say "Virtual machine #{name} not found.", :red
       exit 1
     end
@@ -208,8 +216,7 @@ class VirtualMachine < CloudstackCli::Base
       end
     end
 
-    def execute_virtual_machines_commands(virtual_machines)
-      command = options[:command].downcase
+    def execute_virtual_machines_commands(command, virtual_machines)
       unless %w(start stop reboot).include?(command)
         say "\nCommand #{options[:command]} not supported.", :red
         exit 1
@@ -217,10 +224,12 @@ class VirtualMachine < CloudstackCli::Base
       exit unless yes?("\n#{command.capitalize} the virtual_machine(s) above? [y/N]:", :magenta)
       virtual_machines.each_slice(options[:concurrency]) do | batch |
         jobs = batch.map do |virtual_machine|
-          args = { sync: true, account: virtual_machine['account'] }
-          args[:project_id] = virtual_machine['projectid'] if virtual_machine['projectid']
           {
-            id: client.send("#{command}_virtual_machine", virtual_machine['name'], args)['jobid'],
+            id: client.send(
+              "#{command}_virtual_machine",
+              { id: virtual_machine['id'] },
+              { sync: true }
+            )['jobid'],
             name: "#{command.capitalize} virtual_machine #{virtual_machine['name']}"
           }
         end

@@ -6,6 +6,7 @@ class SystemVm < CloudstackCli::Base
   option :type, desc: "the system VM type.",
     enum: %w(consoleproxy secondarystoragevm)
   def list
+    resolve_zone
     vms = client.list_system_vms(options)
     if vms.size < 1
       say "No system VM's found."
@@ -23,8 +24,7 @@ class SystemVm < CloudstackCli::Base
 
   desc 'show NAME', 'show system VM'
   def show(name)
-    vms = client.list_system_vms
-    unless vm = filter_by(vms, 'name', name).first
+    unless vm = client.list_system_vms(name: name).first
       say "No system vm with name #{name} found."
     else
       table = vm.map do |key, value|
@@ -36,37 +36,34 @@ class SystemVm < CloudstackCli::Base
 
   desc "start NAME", "start a system VM"
   def start(name)
-    vms = client.list_system_vms
-    unless vm = filter_by(vms, 'name', name).first
+    unless vm = client.list_system_vms(name: name).first
       say "No system vm with name #{name} found."
     else
       say("Starting system VM #{name}", :magenta)
-      client.start_system_vm(vm['id'])
-      puts
+      client.start_system_vm(id: vm['id'])
+      say " OK.", :green
     end
   end
 
   desc "stop NAME", "stop a system VM"
   def stop(name)
-    vms = client.list_system_vms(options)
-    unless vm = filter_by(vms, 'name', name).first
+    unless vm = client.list_system_vms(name: name).first
       say "No system vm with name #{name} found."
     else
       exit unless options[:force] || yes?("Stop system VM #{name}? [y/N]:", :magenta)
-      client.stop_system_vm(vm['id'])
-      puts
+      client.stop_system_vm(id: vm['id'])
+      say " OK.", :green
     end
   end
 
   desc "reboot NAME", "reboot a system VM"
   def reboot(name)
-    vms = client.list_system_vms(options)
-    unless vm = filter_by(vms, 'name', name).first
+    unless vm = client.list_system_vms(name: name).first
       say "No system vm with name #{name} found."
     else
       exit unless options[:force] || yes?("Reboot system VM #{name}? [y/N]:", :magenta)
-      client.reboot_system_vm(vm['id'])
-      puts
+      client.reboot_system_vm(id: vm['id'])
+      say " OK.", :green
     end
   end
 

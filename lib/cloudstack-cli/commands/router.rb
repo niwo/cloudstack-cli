@@ -7,7 +7,7 @@ class Router < CloudstackCli::Base
   option :status, desc: "the status of the router"
   option :redundant_state, desc: "the state of redundant virtual router",
     enum: %w(master backup fault unknown)
-  option :listall, type: :boolean, desc: "list all routers"
+  option :listall, type: :boolean, desc: "list all routers", default: true
   option :showid, type: :boolean, desc: "display the router ID"
   option :reverse, type: :boolean, default: false, desc: "reverse listing of routers"
   option :command,
@@ -56,7 +56,7 @@ class Router < CloudstackCli::Base
   end
 
   desc "stop NAME [NAME2 ..]", "stop virtual router(s)"
-  option :force, desc: "stop without asking", type: :boolean, aliases: '-f'
+  option :force, desc: "stop without confirmation", type: :boolean, aliases: '-f'
   def stop(*names)
     routers = names.map {|name| get_router(name)}
     print_routers(routers)
@@ -69,7 +69,7 @@ class Router < CloudstackCli::Base
   end
 
   desc "start NAME [NAME2 ..]", "start virtual router(s)"
-  option :force, desc: "start without asking", type: :boolean, aliases: '-f'
+  option :force, desc: "start without confirmation", type: :boolean, aliases: '-f'
   def start(*names)
     routers = names.map {|name| get_router(name)}
     print_routers(routers)
@@ -82,7 +82,7 @@ class Router < CloudstackCli::Base
   end
 
   desc "reboot NAME [NAME2 ..]", "reboot virtual router(s)"
-  option :force, desc: "start without asking", type: :boolean, aliases: '-f'
+  option :force, desc: "start without confirmation", type: :boolean, aliases: '-f'
   def reboot(*names)
     routers = names.map {|name| client.list_routers(name: name).first}
     print_routers(routers)
@@ -94,9 +94,9 @@ class Router < CloudstackCli::Base
     watch_jobs(jobs)
   end
 
-  desc "restart NAME [NAME2 ..]", "restart virtual router(s) (stop and start)"
-  option :force, desc: "restart without asking", type: :boolean, aliases: '-f'
-  def restart(*names)
+  desc "stop_start NAME [NAME2 ..]", "stops and starts virtual router(s)"
+  option :force, desc: "stop_start without confirmation", type: :boolean, aliases: '-f'
+  def stop_start(*names)
     routers = names.map {|name| get_router(name)}
     print_routers(routers)
     exit unless options[:force] || yes?("\nRestart router(s) above? [y/N]:", :magenta)
@@ -131,7 +131,7 @@ class Router < CloudstackCli::Base
   no_commands do
 
     def get_router(name)
-      unless router = client.list_routers(name: name).first
+      unless router = client.list_routers(name: name, listall: true).first
         unless router = client.list_routers(name: name, project_id: -1).first
          say "Can't find router with name #{name}.", :red
          exit 1

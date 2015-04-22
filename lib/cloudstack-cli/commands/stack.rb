@@ -3,13 +3,13 @@ class Stack < CloudstackCli::Base
   desc "create STACKFILE", "create a stack of VMs"
   def create(stackfile)
     stack = parse_file(stackfile)
+    project_id = find_project_by_name(stack["project"])
+
     say "Create stack #{stack["name"]}...", :green
-    projectid = find_project(stack["project"])['id'] if stack["project"]
     jobs = []
-    client.verbose = false
     stack["servers"].each do |instance|
       string_to_array(instance["name"]).each do |name|
-        server = client.list_virtual_machines(name: name, project_id: projectid).first
+        server = client.list_virtual_machines(name: name, project_id: project_id).first
         if server
           say "VM #{name} (#{server["state"]}) already exists.", :yellow
           jobs << {
@@ -33,7 +33,7 @@ class Stack < CloudstackCli::Base
             keypair: instance["keypair"] || stack["keypair"],
             sync: true
           }
-          params = options.merge(vm_options_to_params(options))
+          puts params = vm_options_to_params(options).reject { |k,v| v == nil }
           jobs << {
             id: client.deploy_virtual_machine(params, {sync: true}
             )['jobid'],
@@ -49,7 +49,7 @@ class Stack < CloudstackCli::Base
     stack["servers"].each do |instance|
       string_to_array(instance["name"]).each do |name|
         if port_rules = string_to_array(instance["port_rules"])
-          server = client.list_virtual_machines(name: name, project_id: projectid).first
+          server = client.list_virtual_machines(name: name, project_id: project_id).first
           create_port_rules(server, port_rules, false).each_with_index do |job_id, index|
             jobs << {
               id: job_id,
@@ -76,8 +76,7 @@ class Stack < CloudstackCli::Base
     aliases: '-E'
   def destroy(stackfile)
     stack = parse_file(stackfile)
-    projectid = find_project(stack["project"])['id'] if stack["project"]
-    client.verbose = false
+    project_id = find_project_by_name(stack["project"])
     servers = []
     stack["servers"].each do |server|
       string_to_array(server["name"]).each {|name| servers << name}
@@ -86,7 +85,7 @@ class Stack < CloudstackCli::Base
     if options[:force] || yes?("Destroy the following VM #{servers.join(', ')}? [y/N]:", :yellow)
       jobs = []
       servers.each do |name|
-        if server = client(quiet: true).list_virtual_machines(name: name, project_id: projectid).first
+        if server = client.list_virtual_machines(name: name, project_id: project_id).first
           jobs << {
             id: client.destroy_virtual_machine(
               { id: server['id'], expunge: options[:expunge] },
@@ -102,6 +101,18 @@ class Stack < CloudstackCli::Base
   end
 
   no_commands do
+    def find_project_by_name(name)
+      if name
+        unless project_id = client.list_projects(name: name).first['id']
+          say "Error: Project '#{name}' not found.", :red
+          exit 1
+        end
+      else
+        project_id = nil
+      end
+      project_id
+    end
+
     def load_string_or_array(item)
      item.is_a?(Array) ? item : [item]
     end

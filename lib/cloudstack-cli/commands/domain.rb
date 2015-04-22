@@ -6,7 +6,7 @@ class Domain < CloudstackCli::Base
     if domains.size < 1
       puts "No domains found."
     else
-      table = [["Name", "Path"]]
+      table = [%w(Name Path)]
       domains.each do |domain|
         table << [domain['name'], domain['path']]
       end

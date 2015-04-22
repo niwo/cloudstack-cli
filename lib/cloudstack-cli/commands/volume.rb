@@ -8,7 +8,9 @@ class Volume < CloudstackCli::Base
   option :name, desc: 'name of the disk volume'
   option :type, desc: 'type of disk volume (ROOT or DATADISK)'
   def list
-    options[:project_id] = find_project['id'] if options[:project]
+    resolve_project
+    resolve_account
+    resolve_zone
     volumes = client.list_volumes(options)
     if volumes.size < 1
       say "No volumes found."
@@ -33,8 +35,9 @@ class Volume < CloudstackCli::Base
   desc "show NAME", "show volume details"
   option :project, desc: 'project of volume'
   def show(name)
+    resolve_project
+    options[:listall] = true
     options[:name] = name
-    options[:project_id] = find_project['id'] if options[:project]
     volumes = client.list_volumes(options)
     if volumes.size < 1
       say "No volume with name \"#{name}\" found."

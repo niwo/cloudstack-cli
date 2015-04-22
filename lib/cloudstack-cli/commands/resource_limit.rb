@@ -19,6 +19,8 @@ class ResourceLimit < CloudstackCli::Base
   option :project
   option :type, desc: "specify type, see types for a list of types"
   def list
+    resolve_account
+    resolve_project
     limits = client.list_resource_limits(options)
     table = []
     header = options[:project] ? ["Project"] : ["Account"]
@@ -42,7 +44,9 @@ class ResourceLimit < CloudstackCli::Base
   option :project, desc: "refresh resource for a specified project"
   option :type, desc: "specify type, see types for a list of types"
   def refresh
-    set_domain_id if options[:domain]
+    resolve_domain
+    resolve_account
+    resolve_project
     options[:resource_type] = options[:type] if options[:type]
 
     unless ['domain_id', 'account', 'project'].any? {|k| options.key?(k)}
@@ -69,7 +73,9 @@ class ResourceLimit < CloudstackCli::Base
     desc: "Maximum resource limit.",
     required: true
   def update
-    set_domain_id if options[:domain]
+    resolve_domain
+    resolve_account
+    resolve_project
     options[:resource_type] = options[:type]
 
     unless ['domain_id', 'account', 'project'].any? {|k| options.key?(k)}
@@ -104,16 +110,6 @@ class ResourceLimit < CloudstackCli::Base
       RESOURCE_TYPES[limit['resourcetype']][:unit] ?
       "#{value} #{RESOURCE_TYPES[limit['resourcetype']][:unit]}" :
       value.to_s
-    end
-
-    def set_domain_id
-      domains = client.list_domains(options[:domain])
-      if domains.size < 1
-        say "Domain #{options[:domain]} not found.", :red
-        exit -1
-      else
-        options[:domain_id] = domains.first['id']
-      end
     end
 
   end

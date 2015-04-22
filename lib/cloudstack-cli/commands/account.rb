@@ -22,7 +22,7 @@ class Account < CloudstackCli::Base
 
   desc 'list', 'list accounts'
   def list
-    accounts = client.list_accounts
+    accounts = client.list_accounts(listall: true)
     if accounts.size < 1
       puts "No accounts found."
     else

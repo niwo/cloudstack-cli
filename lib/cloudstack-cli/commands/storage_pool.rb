@@ -1,11 +1,12 @@
 class StoragePool < CloudstackCli::Base
 
-  desc 'list', 'list storage_pool'
+  desc 'list', 'list storage_pools'
   option :zone, desc: "zone name for the storage pool"
   option :name, desc: "name of the storage pool"
   option :keyword, desc: "list by keyword"
-  option :state, desc: "filter by state (Up, Maintenance)" 
+  option :state, desc: "filter by state (Up, Maintenance)"
   def list
+    resolve_zone
     storage_pools = client.list_storage_pools(options)
     if storage_pools.size < 1
       say "No storage pools found."

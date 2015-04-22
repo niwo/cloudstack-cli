@@ -1,33 +1,35 @@
 module CloudstackCli
   module OptionResolver
 
-    def vm_options_to_params
-      resolve_zone
-      resolve_project
-      resolve_compute_offering
-      resolve_template
-      resolve_disk_offering
-      resolve_disk_iso
+    def vm_options_to_params(options = options)
+      resolve_zone(options)
+      resolve_project(options)
+      resolve_compute_offering(options)
+      resolve_template(options)
+      resolve_disk_offering(options)
+      resolve_iso(options)
       unless options[:template_id]
         say "Error: Template or ISO is required.", :red
         exit 1
       end
-      resolve_networks
+      resolve_networks(options)
     end
 
-    def resolve_zone
-      zones = client.list_zones
-      zone = options[:zone] ? zones.find {|z| z['name'] == options[:zone] } : zones.first
-      if !zone
-        msg = options[:zone] ? "Zone '#{options[:zone]}' is invalid." : "No zone found."
-        say "Error: #{msg}", :red
-        exit 1
+    def resolve_zone(options = options)
+      if options[:zone]
+        zones = client.list_zones
+        zone = zones.find {|z| z['name'] == options[:zone] }
+        if !zone
+          msg = options[:zone] ? "Zone '#{options[:zone]}' is invalid." : "No zone found."
+          say "Error: #{msg}", :red
+          exit 1
+        end
+        options[:zone_id] = zone['id']
       end
-      options[:zone_id] = zone['id']
       options
     end
 
-    def resolve_domain
+    def resolve_domain(options = options)
       if options[:domain]
         if domain = client.list_domains(name: options[:domain]).first
           options[:domain_id] = domain['id']
@@ -39,11 +41,11 @@ module CloudstackCli
       options
     end
 
-    def resolve_project
+    def resolve_project(options = options)
       if options[:project]
         if %w(ALL -1).include? options[:project]
           options[:project_id] = "-1"
-        elsif project = client.list_projects(name: options[:project]).first
+        elsif project = client.list_projects(name: options[:project], listall: true).first
           options[:project_id] = project['id']
         else
           say "Error: Project #{options[:project]} not found.", :red
@@ -53,10 +55,11 @@ module CloudstackCli
       options
     end
 
-    def resolve_account
+    def resolve_account(options = options)
       if options[:account]
-        if account = client.list_accounts(name: options[:account]).first
+        if account = client.list_accounts(name: options[:account], listall: true).first
           options[:account_id] = account['id']
+          options[:domain_id] = account['domainid']
         else
           say "Error: Account #{options[:account]} not found.", :red
           exit 1
@@ -65,7 +68,7 @@ module CloudstackCli
       options
     end
 
-    def resolve_networks
+    def resolve_networks(options = options)
       networks = []
       if options[:networks]
         options[:networks].each do |name|
@@ -94,7 +97,7 @@ module CloudstackCli
       options
     end
 
-    def resolve_iso
+    def resolve_iso(options = options)
       if options[:iso]
         unless iso = client.list_isos(name: options[:iso]).first
           say "Error: Iso '#{args[:iso]}' is invalid.", :red
@@ -110,7 +113,7 @@ module CloudstackCli
       options
     end
 
-    def resolve_template
+    def resolve_template(options = options)
       if options[:template]
         if template = client.list_templates(name: options[:template], template_filter: "all").first
           options[:template_id] = template['id']
@@ -122,7 +125,7 @@ module CloudstackCli
       options
     end
 
-    def resolve_compute_offering
+    def resolve_compute_offering(options = options)
       if offering = client.list_service_offerings(name: options[:offering]).first
         options[:service_offering_id] = offering['id']
       else
@@ -132,7 +135,7 @@ module CloudstackCli
       options
     end
 
-    def resolve_disk_offering
+    def resolve_disk_offering(options = options)
       if options[:disk_offering]
         unless disk_offering = client.list_disk_offerings(name: options[:disk_offering]).first
           say "Error: Disk offering '#{options[:disk_offering]}' is invalid.", :red
