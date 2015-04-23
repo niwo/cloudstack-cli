@@ -33,9 +33,10 @@ class Stack < CloudstackCli::Base
             keypair: instance["keypair"] || stack["keypair"],
             sync: true
           }
-          puts params = vm_options_to_params(options).reject { |k,v| v == nil }
           jobs << {
-            id: client.deploy_virtual_machine(params, {sync: true}
+            id: client.deploy_virtual_machine(
+              vm_options_to_params(options),
+              {sync: true}
             )['jobid'],
             name: "Create VM #{name}"
           }

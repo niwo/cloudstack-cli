@@ -4,13 +4,15 @@ class Iso < CloudstackCli::Base
   option :project
   option :zone
   option :account
-  option :isofilter,
-    enum: %w(all featured self self-executable executable community)
+  option :type,
+    enum: %w(featured self self-executable executable community all)
   def list
     resolve_project
     resolve_zone
     resolve_account
-    isos = client.list_isos(options)
+    options[:isofilter] = options[:type]
+    options.delete :type
+    isos = client.list_isos(clean_options)
     if isos.size < 1
       puts "No iso's found"
     else

@@ -10,6 +10,8 @@ module CloudstackCli
 
     attr_reader :config
 
+    INT_OPTIONS = %w(config_file debug env)
+
     # catch control-c and exit
     trap("SIGINT") {
       puts " bye"
@@ -27,10 +29,14 @@ module CloudstackCli
         @client ||= CloudstackClient::Client.new(
           @config[:url],
           @config[:api_key],
-          @config[:secret_key],
+          @config[:secret_key]
         )
         @client.debug = true if options[:debug]
         @client
+      end
+
+      def clean_options
+        options.reject { |key, _| INT_OPTIONS.include? key }
       end
 
       def load_configuration(config_file = options[:config_file], env = options[:env])
