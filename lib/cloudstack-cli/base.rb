@@ -63,26 +63,6 @@ module CloudstackCli
         config
       end
 
-      def find_project(name = options[:project], allow_all = true)
-        return nil unless name
-        if allow_all && %w(ALL -1).include?(name)
-          return {'id' => '-1'}
-        end
-        unless project = client.list_projects(name: name).first
-          say "Project '#{name}' not found", :red
-          exit 1
-        end
-        project
-      end
-
-      def find_account(name = options[:account])
-        return nil unless name
-        unless account = client.list_accounts(name: name).first
-          say "Account '#{name}' not found", :red
-          exit 1
-        end
-      end
-
       def filter_by(objects, key, value)
         objects.select {|r| r[key].downcase == value.downcase}
       end
