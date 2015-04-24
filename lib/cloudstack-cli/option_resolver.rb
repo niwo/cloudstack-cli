@@ -138,10 +138,36 @@ module CloudstackCli
     def resolve_disk_offering(options = options)
       if options[:disk_offering]
         unless disk_offering = client.list_disk_offerings(name: options[:disk_offering]).first
-          say "Error: Disk offering '#{options[:disk_offering]}' is invalid.", :red
+          say "Error: Disk offering '#{options[:disk_offering]}' not found.", :red
           exit 1
         end
-        options[:diskoffering_id] = disk_offering['id']
+        options[:disk_offering_id] = disk_offering['id']
+      end
+      options
+    end
+
+    def resolve_virtual_machine(options = options)
+      if options[:virtual_machine]
+        args = { name: options[:virtual_machine], listall: true }
+        args[:project_id] = options[:project_id]
+        unless vm = client.list_virtual_machines(args).first
+          say "Error: VM '#{options[:virtual_machine]}' not found.", :red
+          exit 1
+        end
+        options[:virtual_machine_id] = vm['id']
+      end
+      options
+    end
+
+    def resolve_snapshot(options = options)
+      if options[:snapshot]
+        args = { name: options[:snapshot], listall: true }
+        args[:project_id] = options[:project_id]
+        unless snapshot = client.list_snapshots(args).first
+          say "Error: Snapshot '#{options[:snapshot]}' not found.", :red
+          exit 1
+        end
+        options[:snapshot_id] = snapshot['id']
       end
       options
     end

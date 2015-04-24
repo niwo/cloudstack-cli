@@ -12,9 +12,9 @@ class Iso < CloudstackCli::Base
     resolve_account
     options[:isofilter] = options[:type]
     options.delete :type
-    isos = client.list_isos(clean_options)
+    isos = client.list_isos(options)
     if isos.size < 1
-      puts "No iso's found"
+      puts "No iso's found."
     else
       table = [%w(Name Zone Bootable Public Featured)]
       isos.each do |iso|

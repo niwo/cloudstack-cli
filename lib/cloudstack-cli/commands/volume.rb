@@ -50,5 +50,117 @@ class Volume < CloudstackCli::Base
     end
   end
 
+  desc "create NAME", "create volume"
+  option :project,
+    desc: "project of volume"
+  option :disk_offering,
+    desc: "disk offering for the disk volume. Either disk_offering or snapshot must be passed in"
+  option :snapshot,
+    desc: "snapshot for the disk volume. Either disk_offering or snapshot must be passed in"
+  option :virtual_machine,
+    desc: "Used together with the snapshot option: VM to which the volume gets attached after creation."
+  option :zone,
+    desc: "name of the availability zone"
+  option :size,
+    desc: "size of the volume in GB"
+  def create(name)
+    options[:name] = name
+    resolve_project
+    resolve_zone
+    resolve_disk_offering
+    resolve_snapshot
+    resolve_virtual_machine
+
+    if !options[:disk_offering_id] && !options[:snapshot_id]
+      say "Either disk_offering or snapshot must be passed in.", :yellow
+      exit 1
+    elsif options[:disk_offering_id] && !options[:zone_id]
+      say "Zone is required when deploying with disk-offering.", :yellow
+      exit 1
+    end
+
+    say "Creating volume #{name} "
+    client.create_volume(options)
+    say " OK.", :green
+    sleep 2
+    invoke "volume:show", [name], options
+  end
+
+  desc "attach NAME", "attach volume to VM"
+  option :project, desc: 'project of volume'
+  option :virtual_machine, desc: 'project of volume'
+  def attach(name)
+    resolve_project
+    resolve_virtual_machine
+
+    volume = client.list_volumes(
+      name: name,
+      listall: true,
+      project_id: options[:project_id]
+    ).first
+
+    if !volume
+      say "Error: Volume #{name} not found.", :red
+      exit 1
+    elsif volume.has_key?("virtualmachineid")
+      say "Error: Volume #{name} already attached to VM #{volume["vmname"]}.", :red
+      exit 1
+    end
+
+    say "Attach volume #{name} to VM #{options[:virtual_machine]} "
+    client.attach_volume(
+      id: volume['id'],
+      virtualmachine_id: options[:virtual_machine_id]
+    )
+    say " OK.", :green
+  end
+
+  desc "detach NAME", "attach volume to VM"
+  option :project, desc: 'project of volume'
+  def detach(name)
+    resolve_project
+
+    volume = client.list_volumes(
+      name: name,
+      listall: true,
+      project_id: options[:project_id]
+    ).first
+
+    if !volume
+      say "Error: Volume #{name} not found.", :red
+      exit 1
+    elsif !volume.has_key?("virtualmachineid")
+      say "Error: Volume #{name} currently not attached to any VM.", :red
+      exit 1
+    end
+
+    say "Detach volume #{name} from VM #{volume["vmname"]} "
+    client.detach_volume id: volume['id']
+    say " OK.", :green
+  end
+
+  desc "delete NAME", "attach volume to VM"
+  option :project, desc: 'project of volume'
+  def delete(name)
+    resolve_project
+
+    volume = client.list_volumes(
+      name: name,
+      listall: true,
+      project_id: options[:project_id]
+    ).first
+
+    if !volume
+      say "Error: Volume #{name} not found.", :red
+      exit 1
+    elsif volume.has_key?("virtualmachineid")
+      say "Error: Volume #{name} must be detached before deletion.", :red
+      exit 1
+    end
+
+    say "Delete volume #{name} "
+    client.delete_volume id: volume['id']
+    say " OK.", :green
+  end
 
 end
