@@ -10,6 +10,18 @@ module CloudstackCli
 
     attr_reader :config
 
+    # rescue error globally
+    def self.start(given_args=ARGV, config={})
+      super
+    rescue => e
+      error_class = e.class.name.split('::')
+      if error_class.size == 2 && error_class.first == "CloudstackClient"
+        puts "\e[31mERROR\e[0m: #{error_class.last} - #{e.message}"
+      else
+        raise
+      end
+    end
+
     # catch control-c and exit
     trap("SIGINT") {
       puts " bye"
