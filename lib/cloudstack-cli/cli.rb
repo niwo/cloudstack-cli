@@ -23,7 +23,6 @@ module CloudstackCli
       say "cloudstack-cli version #{CloudstackCli::VERSION}"
       say " (cloudstack_client version #{CloudstackClient::VERSION})"
     end
-    map %w(-v --version) => :version
 
     desc "setup", "Initial configuration of Cloudstack connection settings"
     def setup(env = options[:environment])
@@ -65,109 +64,21 @@ module CloudstackCli
       puts output
     end
 
-    # require subcommands
-    Dir[File.dirname(__FILE__) + '/commands/*.rb'].each do |command|
-      require command
+    # Require and describe subcommands
+    Dir[File.dirname(__FILE__) + '/commands/*.rb'].each do |command_path|
+      require command_path
+      command = File.basename(command_path, ".rb")
+
+      desc "#{command} SUBCOMMAND ...ARGS",
+        "#{command.split('_').collect(&:capitalize).join(' ')} commands"
+      subcommand command.to_sym,
+        Object.const_get(command.split('_').collect(&:capitalize).join)
     end
 
-    desc "environment SUBCOMMAND ...ARGS", "Manage cloudstack-cli environments"
-    subcommand :environment, Environment
+    # Additional command maps (aliases)
+    map %w(-v --version) => :version
     map 'env' => :environment
-
-    desc "zone SUBCOMMAND ...ARGS", "Manage zones"
-    subcommand :zone, Zone
-
-    desc "pod SUBCOMMAND ...ARGS", "List pods"
-    subcommand :pod, Pod
-
-    desc "cluster SUBCOMMAND ...ARGS", "List clusters"
-    subcommand :cluster, Cluster
-
-    desc "host SUBCOMMAND ...ARGS", "List hosts"
-    subcommand :host, Host
-
-    desc "project SUBCOMMAND ...ARGS", "Manage servers"
-    subcommand :project, Project
-
-    desc "virtual_machine SUBCOMMAND ...ARGS", "Manage virtual machines"
-    subcommand :virtual_machine, VirtualMachine
     map 'vm' => :virtual_machine
     map 'server' => :virtual_machine
-
-    desc "compute_offer SUBCOMMAND ...ARGS", "Manage offerings"
-    subcommand :compute_offer, ComputeOffer
-
-    desc "disk_offer SUBCOMMAND ...ARGS", "Manage disk offerings"
-    subcommand :disk_offering, DiskOffer
-
-    desc "network SUBCOMMAND ...ARGS", "Manage networks"
-    subcommand :network, Network
-    map 'networks' => 'network'
-
-    desc "physical_network SUBCOMMAND ...ARGS", "Manage physical networks"
-    subcommand :physical_network, PhysicalNetwork
-
-    desc "load_balancer SUBCOMMAND ...ARGS", "Manage load balancing rules"
-    subcommand :load_balancer, LoadBalancer
-
-    desc "template SUBCOMMAND ...ARGS", "Manage templates"
-    subcommand :template, Template
-
-    desc "iso SUBCOMMAND ...ARGS", "Manage iso's"
-    subcommand :iso, Iso
-
-    desc "router SUBCOMMAND ...ARGS", "Manage virtual routers"
-    subcommand :router, Router
-
-    desc "system_vm SUBCOMMAND ...ARGS", "Manage system vms"
-    subcommand :system_vm, SystemVm
-
-    desc "volume SUBCOMMAND ...ARGS", "Manage volumes"
-    subcommand :volume, Volume
-
-    desc "snapshot SUBCOMMAND ...ARGS", "Manage snapshots"
-    subcommand :snapshot, Snapshot
-
-    desc "stack SUBCOMMAND ...ARGS", "Manage stacks"
-    subcommand :stack, Stack
-
-    desc "account SUBCOMMAND ...ARGS", "Manage accounts"
-    subcommand :account, Account
-
-    desc "user SUBCOMMAND ...ARGS", "Manage users"
-    subcommand :user, User
-
-    desc "domain SUBCOMMAND ...ARGS", "Manage domains"
-    subcommand :domain, Domain
-
-    desc "ip_address SUBCOMMAND ...ARGS", "Manage ip addresses"
-    subcommand :ip_address, IpAddress
-
-    desc "capacity SUBCOMMAND ...ARGS", "Lists all the system wide capacities"
-    subcommand :capacity, Capacity
-
-    desc "port_rule SUBCOMMAND ...ARGS", "Manage portforwarding rules"
-    subcommand :port_rule, PortRule
-
-    desc "job SUBCOMMAND ...ARGS", "Display async jobs"
-    subcommand :job, Job
-
-    desc "ssh_key_pair SUBCOMMAND ...ARGS", "Manage ssh key pairs"
-    subcommand :ssh_key_pair, SshKeyPair
-
-    desc "storage_pool SUBCOMMAND ...ARGS", "Manage storage pools"
-    subcommand :storage_pool, StoragePool
-
-    desc "region SUBCOMMAND ...ARGS", "Manage regions"
-    subcommand :region, Region
-
-    desc "affinity_group SUBCOMMAND ...ARGS", "Manage affinity_groups"
-    subcommand :affinity_group, AffinityGroup
-
-    desc "configuration SUBCOMMAND ...ARGS", "List cloudstack configuration values"
-    subcommand :configuration, Configuration
-
-    desc "resource_limit SUBCOMMAND ...ARGS", "Show cloudstack resource limits"
-    subcommand :resource_limit, ResourceLimit
   end
 end

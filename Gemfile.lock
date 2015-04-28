@@ -1,20 +1,17 @@
-GIT
-  remote: git@github.com:niwo/cloudstack_client.git
-  revision: b388af01e7403f65fc1ad5cd4c905a1f005afea3
-  specs:
-    cloudstack_client (1.0.0.rc1)
-
 PATH
   remote: .
   specs:
     cloudstack-cli (1.0.0.rc1)
-      cloudstack_client (~> 1.0.0.rc1)
+      cloudstack_client (~> 1.0.0.rc2)
       thor (~> 0.19.1)
 
 GEM
   remote: https://rubygems.org/
   specs:
+    cloudstack_client (1.0.0.rc2)
+      msgpack
     json (1.8.2)
+    msgpack (0.5.11)
     rake (10.4.2)
     rdoc (4.2.0)
       json (~> 1.4)
@@ -25,6 +22,5 @@ PLATFORMS
 
 DEPENDENCIES
   cloudstack-cli!
-  cloudstack_client!
   rake (~> 10.4)
   rdoc (~> 4.2)
