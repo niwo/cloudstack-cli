@@ -17,6 +17,7 @@ module CloudstackCli
       error_class = e.class.name.split('::')
       if error_class.size == 2 && error_class.first == "CloudstackClient"
         puts "\e[31mERROR\e[0m: #{error_class.last} - #{e.message}"
+        puts e.backtrace if ARGV.include? "--debug"
       else
         raise
       end
