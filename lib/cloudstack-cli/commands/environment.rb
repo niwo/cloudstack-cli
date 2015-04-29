@@ -22,25 +22,29 @@ class Environment < CloudstackCli::Base
     config = {}
     unless options[:url]
       say "Add a new environment...", :green
-      say "Environment name: #{env}" if env
+      if env
+        say "Environment name: #{env}"
+      else
+        env = ask("Environment name:", :magenta)
+      end
       say "What's the URL of your Cloudstack API?", :yellow
       say "Example: https://my-cloudstack-service/client/api/", :green
       config[:url] = ask("URL:", :magenta)
     end
-    
+
     unless options[:api_key]
       config[:api_key] = ask("API Key:", :magenta)
     end
-    
+
     unless options[:secret_key]
       config[:secret_key] = ask("Secret Key:", :magenta)
     end
-    
+
     if env
       config = {env => config}
       config[:default] = env if options[:default]
     end
-    
+
     if File.exists? options[:config_file]
       old_config = parse_config_file
       if !env || old_config.has_key?(env)
@@ -72,10 +76,10 @@ class Environment < CloudstackCli::Base
       if config.keys.select { |key| !key.is_a? Symbol}.size == 0
         exit unless yes?("Do you really want to delete environment #{env}? [y/N]", :yellow)
         File.delete(options[:config_file])
-        say "OK.", :green    
+        say "OK.", :green
         exit
       end
-    elsif config.delete(env)  
+    elsif config.delete(env)
     else
       say "Environment #{env} does not exist.", :red
       exit 1
@@ -89,7 +93,7 @@ class Environment < CloudstackCli::Base
   desc "default [ENV]", "show or set the default environment"
   def default(env = nil)
     config = parse_config_file
-    
+
     unless env
       default_env = config[:default] || '-'
       say "The current default environment is \"#{default_env}\""

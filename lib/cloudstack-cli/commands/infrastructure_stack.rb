@@ -1,4 +1,4 @@
-class Infrastack < CloudstackCli::Base
+class InfrastructureStack < CloudstackCli::Base
 
   desc "create STACKFILE", "create a infrastructure stack"
   def create(stackfile)

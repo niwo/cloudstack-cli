@@ -45,34 +45,46 @@ module CloudstackCli
     end
 
     desc "command COMMAND [arg1=val1 arg2=val2...]", "Run a custom api command"
-    option :format, default: 'json',
+    option :format, default: 'yaml',
       enum: %w(json yaml), desc: "output format"
     option :pretty_print, default: true, type: :boolean,
       desc: "pretty print json output"
     def command(command, *args)
-      params = {'command' => command}
+      params = { 'command' => command }
       args.each do |arg|
         arg = arg.split('=')
         params[arg[0]] = arg[1]
       end
-      data = client.send_request(params)
-      output = if options[:format] == 'json'
-        options[:pretty_print] ? JSON.pretty_generate(data) : data.to_json
-      else
-        data.to_yaml
+
+      unless api_command = client.api.commands.find {|c| c.name == command}
+        say "ERROR: ", :red
+        say "Unknown API command '#{command}'."
+        exit!
       end
-      puts output
+
+      unless client.api.all_required_params?(api_command, params)
+        raise CloudstackClient::ParameterError, client.api.missing_params_msg(api_command)
+      end
+
+      data = client.send_request(params)
+      if options[:format] == 'json'
+        puts options[:pretty_print] ? JSON.pretty_generate(data) : data.to_json
+      else
+        puts data.to_yaml
+      end
     end
 
     # Require and describe subcommands
     Dir[File.dirname(__FILE__) + '/commands/*.rb'].each do |command_path|
       require command_path
+
       command = File.basename(command_path, ".rb")
+      class_names = command.split('_').collect(&:capitalize)
 
       desc "#{command} SUBCOMMAND ...ARGS",
-        "#{command.split('_').collect(&:capitalize).join(' ')} commands"
-      subcommand command.to_sym,
-        Object.const_get(command.split('_').collect(&:capitalize).join)
+        "#{class_names.join(' ')} commands"
+      subcommand command,
+        Object.const_get(class_names.join)
     end
 
     # Additional command maps (aliases)

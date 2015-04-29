@@ -24,10 +24,11 @@ module CloudstackCli
     end
 
     # catch control-c and exit
-    trap("SIGINT") {
-      puts " bye"
+    trap("SIGINT") do
+      puts
+      puts "bye.."
       exit!
-    }
+    end
 
     # exit with return code 1 in case of a error
     def self.exit_on_failure?

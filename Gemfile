@@ -1,6 +1,10 @@
 source 'https://rubygems.org'
 
-#gem 'cloudstack_client', git: 'git@github.com:niwo/cloudstack_client.git'
+group :development do
+  gem 'cloudstack_client',
+    path:    '../cloudstack_client/',
+    branch: 'master'
+end
 
 # Specify your gem's dependencies in cloudstack-cli.gemspec
 gemspec
