@@ -99,7 +99,10 @@ module CloudstackCli
 
     def resolve_iso(options = options)
       if options[:iso]
-        unless iso = client.list_isos(name: options[:iso]).first
+        unless iso = client.list_isos(
+            name: options[:iso],
+            project_id: options[:project_id]
+          ).first
           say "Error: Iso '#{args[:iso]}' is invalid.", :red
           exit 1
         end
@@ -115,7 +118,11 @@ module CloudstackCli
 
     def resolve_template(options = options)
       if options[:template]
-        if template = client.list_templates(name: options[:template], template_filter: "all").first
+        if template = client.list_templates(
+            name: options[:template],
+            template_filter: "executable",
+            project_id: options[:project_id]
+          ).first
           options[:template_id] = template['id']
         else
           say "Error: Template #{options[:template]} not found.", :red

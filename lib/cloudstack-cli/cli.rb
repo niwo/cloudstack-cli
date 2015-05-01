@@ -56,14 +56,14 @@ module CloudstackCli
         params[arg[0]] = arg[1]
       end
 
-      unless api_command = client.api.commands.find {|c| c.name == command}
+      unless client.api.commands.has_key? command
         say "ERROR: ", :red
         say "Unknown API command '#{command}'."
         exit!
       end
 
-      unless client.api.all_required_params?(api_command, params)
-        raise CloudstackClient::ParameterError, client.api.missing_params_msg(api_command)
+      unless client.api.all_required_params?(command, params)
+        raise CloudstackClient::ParameterError, client.api.missing_params_msg(command)
       end
 
       data = client.send_request(params)

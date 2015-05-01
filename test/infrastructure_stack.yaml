@@ -1,0 +1,36 @@
+name:  Test Infrastructure Stack
+description: "Web Application Stack"
+version: "1.0"
+domains:
+  - name: Testdomain
+    network_domain: test.io
+  - name: Subdomain
+    network_domain: sub.test.io
+    parent_domain: Testdomain
+accounts:
+  -
+  -
+users:
+  -
+  -
+projects:
+  -
+  -
+compute_offerings:
+  -
+  -
+network_offerings:
+  -
+  -
+networks:
+  -
+  -
+port_rules:
+  -
+  -
+load_balancing_rules:
+  -
+  -
+resource_limits:
+  -
+  -

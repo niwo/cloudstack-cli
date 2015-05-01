@@ -2,8 +2,11 @@ class InfrastructureStack < CloudstackCli::Base
 
   desc "create STACKFILE", "create a infrastructure stack"
   def create(stackfile)
-    stack = parse_file(stackfile)
-    say "Create stack #{stack["name"]}...", :green
+    puts stack = parse_file(stackfile)
+    say "Create '#{stack["name"]}' infrastructure stack...", :green
+
+    create_domains(stack['domains'])
+
     say "Finished.", :green
   end
 
@@ -13,6 +16,11 @@ class InfrastructureStack < CloudstackCli::Base
   end
 
   no_commands do
+    def create_domains(domains)
+      domains.each do |domain|
+        puts domain
+      end
+    end
 
   end
 
