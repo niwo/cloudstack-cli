@@ -104,10 +104,11 @@ class Stack < CloudstackCli::Base
   no_commands do
     def find_project_by_name(name)
       if name
-        unless project_id = client.list_projects(name: name).first['id']
+        unless project = client.list_projects(name: name, listall: true).first
           say "Error: Project '#{name}' not found.", :red
           exit 1
         end
+        project_id = project['id']
       else
         project_id = nil
       end

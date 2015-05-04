@@ -70,20 +70,20 @@ module CloudstackCli
 
     def resolve_networks(options = options)
       networks = []
+      available_networks = network = client.list_networks(
+        zone_id: options[:zone_id],
+        project_id: options[:project_id]
+      )
       if options[:networks]
         options[:networks].each do |name|
-          network = client.list_networks(
-            name: name,
-            zone_id: options[:zone_id],
-            project_id: options[:project_id]
-          ).first
-          if !network
+          unless network = available_networks.find { |n| n['name'] == name }
             say "Error: Network '#{name}' not found.", :red
             exit 1
           end
-          networks << network
+          networks << network['id'] rescue nil
         end
       end
+      networks.compact!
       if networks.empty?
         #unless default_network = client.list_networks(project_id: options[:project_id]).find {
         #  |n| n['isdefault'] == true }
@@ -91,9 +91,9 @@ module CloudstackCli
           say "Error: No default network found.", :red
           exit 1
         end
-        networks << default_network
+        networks << available_networks.first['id'] rescue nil
       end
-      options[:network_ids] = networks.map {|n| n['id']}.join(',')
+      options[:network_ids] = networks.join(',')
       options
     end
 
