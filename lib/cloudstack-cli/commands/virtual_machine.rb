@@ -43,7 +43,10 @@ class VirtualMachine < CloudstackCli::Base
       puts "No virtual machines found."
     else
       print_virtual_machines(virtual_machines)
-      execute_virtual_machines_commands(virtual_machines) if options[:command]
+      execute_virtual_machines_commands(
+        options[:command].downcase,
+        virtual_machines
+      ) if options[:command]
     end
   end
 
@@ -84,7 +87,7 @@ class VirtualMachine < CloudstackCli::Base
     say "Start deploying virtual machine#{ "s" if names.size > 1 }...", :green
     jobs = names.map do |name|
       if virtual_machine = client.list_virtual_machines(name: name, project_id: options[:project_id]).first
-        say "virtual_machine #{name} (#{virtual_machine["state"]}) already exists.", :yellow
+        say "virtual machine #{name} (#{virtual_machine["state"]}) already exists.", :yellow
         job = {
           id: 0,
           name: "Create virtual machine #{name}",
@@ -93,7 +96,7 @@ class VirtualMachine < CloudstackCli::Base
       else
         job = {
           id: client.deploy_virtual_machine(options, {sync: true})['jobid'],
-          name: "Create virtual_machine #{name}"
+          name: "Create virtual machine #{name}"
         }
       end
       job
@@ -116,17 +119,17 @@ class VirtualMachine < CloudstackCli::Base
     say "Finished.", :green
   end
 
-  desc "destroy NAME [NAME2 ..]", "destroy virtual_machine(s)"
+  desc "destroy NAME [NAME2 ..]", "destroy virtual machine(s)"
   option :project
   option :force, desc: "destroy without asking", type: :boolean, aliases: '-f'
-  option :expunge, desc: "expunge virtual_machine immediately", type: :boolean, default: false, aliases: '-E'
+  option :expunge, desc: "expunge virtual machine immediately", type: :boolean, default: false, aliases: '-E'
   def destroy(*names)
     resolve_project
     names.each do |name|
       unless virtual_machine = client.list_virtual_machines(options.merge(name: name, listall: true)).first
         say "Virtual machine #{name} not found.", :red
       else
-        ask = "Destroy #{name} (#{virtual_machine['state']})? [y/N]:"
+        ask = "Destroy #{name} (#{virtual machine['state']})? [y/N]:"
         if options[:force] || yes?(ask, :yellow)
           say "destroying #{name} "
           client.destroy_virtual_machine(
@@ -139,12 +142,12 @@ class VirtualMachine < CloudstackCli::Base
     end
   end
 
-  desc "create_interactive", "interactive creation of a virtual_machine with network access"
+  desc "create_interactive", "interactive creation of a virtual machine with network access"
   def create_interactive
     bootstrap_server_interactive
   end
 
-  desc "stop NAME", "stop a virtual_machine"
+  desc "stop NAME", "stop a virtual machine"
   option :project
   option :force
   def stop(name)
@@ -170,12 +173,12 @@ class VirtualMachine < CloudstackCli::Base
       say "Virtual machine #{name} not found.", :red
       exit 1
     end
-    say("Starting virtual_machine #{name}", :magenta)
+    say("Starting virtual machine #{name}", :magenta)
     client.start_virtual_machine(id: virtual_machine['id'])
     puts
   end
 
-  desc "reboot NAME", "reboot a virtual_machine"
+  desc "reboot NAME", "reboot a virtual machine"
   option :project
   option :force
   def reboot(name)
@@ -212,7 +215,7 @@ class VirtualMachine < CloudstackCli::Base
           ]
         end
         print_table table
-        say "Total number of virtual_machines: #{virtual_machines.count}"
+        say "Total number of virtual machines: #{virtual_machines.count}"
       end
     end
 
@@ -230,7 +233,7 @@ class VirtualMachine < CloudstackCli::Base
               { id: virtual_machine['id'] },
               { sync: true }
             )['jobid'],
-            name: "#{command.capitalize} virtual_machine #{virtual_machine['name']}"
+            name: "#{command.capitalize} virtual machine #{virtual_machine['name']}"
           }
         end
         puts

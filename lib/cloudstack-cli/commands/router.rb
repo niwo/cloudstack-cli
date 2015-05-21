@@ -4,7 +4,7 @@ class Router < CloudstackCli::Base
   option :project, desc: "name of the project"
   option :account, desc: "name of the account"
   option :zone, desc: "name of the zone"
-  option :status, desc: "the status of the router"
+  option :state, desc: "the status of the router"
   option :redundant_state, desc: "the state of redundant virtual router",
     enum: %w(master backup fault unknown)
   option :listall, type: :boolean, desc: "list all routers", default: true
@@ -15,6 +15,8 @@ class Router < CloudstackCli::Base
     enum: %w(START STOP REBOOT)
   option :concurrency, type: :numeric, default: 10, aliases: '-C',
     desc: "number of concurrent command to execute"
+  option :format, default: "table",
+    enum: %w(table json yaml)
   def list
     resolve_project
     resolve_zone
@@ -23,8 +25,7 @@ class Router < CloudstackCli::Base
     routers = client.list_routers(options)
 
     if options[:listall]
-      projects = client.list_projects
-      projects.each do |project|
+      client.list_projects(listall: true).each do |project|
         routers = routers + client.list_routers(
           options.merge(projectid: project['id'])
         )
@@ -37,22 +38,24 @@ class Router < CloudstackCli::Base
 
     routers.reverse! if options[:reverse]
     print_routers(routers, options)
+    execute_router_commands(options[:command].downcase, routers) if options[:command]
+  end
 
-    if options[:command]
-      command = options[:command].downcase
-      unless %w(start stop reboot).include?(command)
-        say "\nCommand #{options[:command]} not supported.", :red
-        exit 1
-      end
-      exit unless yes?("\n#{command.capitalize} the router(s) above? [y/N]:", :magenta)
-      routers.each_slice(options[:concurrency]) do | batch |
-        jobs = batch.map do |router|
-          {id: client.send("#{command}_router", router['id'], async: false)['jobid'], name: "#{command.capitalize} router #{router['name']}"}
-        end
-        puts
-        watch_jobs(jobs)
-      end
-    end
+  desc "list_from_file FILE", "list virtual routers from file"
+  option :reverse, type: :boolean, default: false, desc: "reverse listing of routers"
+  option :command,
+    desc: "command to execute for each router",
+    enum: %w(START STOP REBOOT)
+  option :concurrency, type: :numeric, default: 10, aliases: '-C',
+    desc: "number of concurrent command to execute"
+  option :format, default: "table",
+    enum: %w(table json yaml)
+  def list_from_file(file)
+    routers = parse_file(file)["routers"]
+
+    routers.reverse! if options[:reverse]
+    print_routers(routers, options)
+    execute_router_commands(options[:command].downcase, routers) if options[:command]
   end
 
   desc "stop NAME [NAME2 ..]", "stop virtual router(s)"
@@ -144,32 +147,55 @@ class Router < CloudstackCli::Base
       if routers.size < 1
         say "No routers found."
       else
-        table = [[
-          'Name', 'Zone', 'Account', 'Project', 'Redundant-State', 'IP', 'Linklocal IP', 'Status', 'Redundant', 'OfferingID', 'Offering', 'ID'
-        ]]
-        table[0].delete('ID') unless options[:showid]
-        routers.each do |router|
-          table << [
-            router["name"],
-            router["zonename"],
-            router["account"],
-            router["project"],
-            router["redundantstate"],
-            router["nic"] && router["nic"].first ? router["nic"].first['ipaddress'] : "",
-            router["linklocalip"],
-            router["state"],
-            router["isredundantrouter"],
-            router["serviceofferingid"],
-            router["serviceofferingname"],
-            router["id"]
-          ]
-          table[-1].delete_at(-1) unless table[0].index "ID"
+        case options[:format].to_sym
+        when :yaml
+          puts({'routers' => routers}.to_yaml)
+        when :json
+          say JSON.pretty_generate(routers: routers)
+        else
+          table = [[
+            'Name', 'Zone', 'Account', 'Project', 'Redundant-State', 'IP', 'Linklocal IP', 'Status', 'Redundant', 'OfferingID', 'Offering', 'ID'
+          ]]
+          table[0].delete('ID') unless options[:showid]
+          routers.each do |router|
+            table << [
+              router["name"],
+              router["zonename"],
+              router["account"],
+              router["project"],
+              router["redundantstate"],
+              router["nic"] && router["nic"].first ? router["nic"].first['ipaddress'] : "",
+              router["linklocalip"],
+              router["state"],
+              router["isredundantrouter"],
+              router["serviceofferingid"],
+              router["serviceofferingname"],
+              router["id"]
+            ]
+            table[-1].delete_at(-1) unless table[0].index "ID"
+          end
+          print_table table
+          puts
+          say "Total number of routers: #{routers.size}"
         end
-        print_table table
-        puts
-        say "Total number of routers: #{routers.size}"
       end
     end
+
+    def execute_router_commands(command, routers)
+      unless %w(start stop reboot).include?(command)
+        say "\nCommand #{options[:command]} not supported.", :red
+        exit 1
+      end
+      exit unless yes?("\n#{command.capitalize} the router(s) above? [y/N]:", :magenta)
+      routers.each_slice(options[:concurrency]) do | batch |
+        jobs = batch.map do |router|
+          {id: client.send("#{command}_router", { id: router['id'] }, { sync: true })['jobid'], name: "#{command.capitalize} router #{router['name']}"}
+        end
+        puts
+        watch_jobs(jobs)
+      end
+    end
+
   end
 
 end
