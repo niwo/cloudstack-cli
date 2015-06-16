@@ -149,14 +149,8 @@ Stop all virtual routers of project named Demo (you could filter by zone too):
 $ cloudstack-cli router list --project Demo --status running --redundant-state BACKUP --command STOP
 ````
 
-**Hint:** You can watch the status of the command with watch.
-
-```bash
-$ watch -n cloudstack-cli router list --project Demo
-```
-
-
 ## References
+
 -  [Cloudstack API documentation](http://cloudstack.apache.org/docs/api/)
 -  This tool was inspired by the Knife extension for Cloudstack: [knife-cloudstack](https://github.com/CloudStack-extras/knife-cloudstack)
 

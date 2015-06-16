@@ -12,9 +12,10 @@ module CloudstackCli
     end
 
     ASYNC_STATES = {
-      0 => "running",
-      1 => "completed",
-      2 => "error"
+      -1 => "waiting",
+      0  => "running",
+      1  => "completed",
+      2  => "error"
     }
 
     def watch_jobs(jobs)
@@ -22,7 +23,7 @@ module CloudstackCli
       call = 0
       opts = {t_start: Time.now}
       jobs = update_job_status(jobs)
-      while jobs.select{|job| job[:status] == 0}.size > 0 do
+      while jobs.select{|job| job[:status] < 1 }.size > 0 do
         if call.modulo(40) == 0
           t = Thread.new { jobs = update_job_status(jobs) }
           while t.alive?
@@ -46,7 +47,7 @@ module CloudstackCli
 
     def update_job_status(jobs)
       jobs.each do |job|
-        unless job[:status] && job[:status] > 0
+        if job[:status] && job[:status] == 0
           job[:status] = client.query_async_job_result(job_id: job[:id])['jobstatus']
         end
       end

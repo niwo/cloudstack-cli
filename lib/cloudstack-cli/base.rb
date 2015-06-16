@@ -78,7 +78,7 @@ module CloudstackCli
       end
 
       def filter_by(objects, key, value)
-        objects.select {|r| r[key].downcase == value.downcase}
+        objects.select {|r| r[key.to_s].downcase == value.downcase}
       end
 
       def parse_file(file, extensions = %w(.json .yaml .yml))
