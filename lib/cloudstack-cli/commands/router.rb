@@ -187,13 +187,17 @@ class Router < CloudstackCli::Base
         exit 1
       end
       exit unless yes?("\n#{command.capitalize} the router(s) above? [y/N]:", :magenta)
-      routers.each_slice(options[:concurrency]) do | batch |
-        jobs = batch.map do |router|
-          {id: client.send("#{command}_router", { id: router['id'] }, { sync: true })['jobid'], name: "#{command.capitalize} router #{router['name']}"}
-        end
-        puts
-        watch_jobs(jobs)
+
+      jobs = routers.map do |router|
+        {
+          job_id: nil,
+          object_id: router["id"],
+          name: "#{command.capitalize} router #{router['name']}",
+          status: -1
+        }
       end
+
+      run_background_jobs(jobs, "#{command}_router")
     end
 
   end

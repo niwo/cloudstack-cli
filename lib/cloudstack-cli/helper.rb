@@ -18,39 +18,60 @@ module CloudstackCli
       2  => "error"
     }
 
-    def watch_jobs(jobs)
-      chars = %w(| / - \\)
-      call = 0
-      opts = {t_start: Time.now}
-      jobs = update_job_status(jobs)
-      while jobs.select{|job| job[:status] < 1 }.size > 0 do
-        if call.modulo(40) == 0
-          t = Thread.new { jobs = update_job_status(jobs) }
-          while t.alive?
+    def run_background_jobs(jobs, command)
+      view_thread = Thread.new do
+        chars = %w(| / - \\)
+        call = 0
+        opts = {t_start: Time.now}
+
+        while jobs.select{|job| job[:status] < 1 }.size > 0 do
+          if call.modulo(40) == 0
+            t = Thread.new { jobs = update_jobs(jobs, command) }
+            while t.alive?
+              chars = print_job_status(jobs, chars,
+                call == 0 ? opts.merge(no_clear: true) : opts
+              )
+              call += 1
+            end
+            t.join
+          else
             chars = print_job_status(jobs, chars,
               call == 0 ? opts.merge(no_clear: true) : opts
             )
             call += 1
           end
-          t.join
-        else
-          chars = print_job_status(jobs, chars,
-            call == 0 ? opts.merge(no_clear: true) : opts
-          )
-          call += 1
         end
+        print_job_status(jobs, chars,
+          call == 0 ? opts.merge(no_clear: true) : opts
+        )
       end
-      print_job_status(jobs, chars,
-        call == 0 ? opts.merge(no_clear: true) : opts
-      )
+      view_thread.join
     end
 
-    def update_job_status(jobs)
-      jobs.each do |job|
-        if job[:status] && job[:status] == 0
-          job[:status] = client.query_async_job_result(job_id: job[:id])['jobstatus']
+    def update_jobs(jobs, command)
+      # update running job status
+      threads = jobs.select{|job| job[:status] == 0 }.map do |job|
+        Thread.new do
+          job[:status] = client.query_async_job_result(job_id: job[:job_id])['jobstatus']
         end
       end
+      threads.each(&:join)
+
+      # launch new jobs if required and possible
+      launch_capacity = options[:concurrency] - jobs.select{|job| job[:status] == 0 }.count
+      threads = []
+      jobs.select{|job| job[:status] == -1 }.each do |job|
+        if launch_capacity > 0
+          threads << Thread.new do
+            job[:job_id] = client.send(
+              command, { id: job[:object_id] }, { sync: true }
+            )['jobid']
+            job[:status] = 0
+          end
+          launch_capacity -= 1
+        end
+      end
+      threads.each(&:join)
       jobs
     end
 
