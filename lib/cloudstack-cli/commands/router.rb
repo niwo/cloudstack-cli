@@ -153,12 +153,13 @@ class Router < CloudstackCli::Base
         when :json
           say JSON.pretty_generate(routers: routers)
         else
-          table = [[
-            'Name', 'Zone', 'Account', 'Project', 'Redundant-State', 'IP', 'Linklocal IP', 'Status', 'Redundant', 'OfferingID', 'Offering', 'ID'
-          ]]
+          table = [%w(
+            ID Name Zone Account Project Redundant-State IP Linklocal-IP Status Redundant Offering
+          )]
           table[0].delete('ID') unless options[:showid]
           routers.each do |router|
             table << [
+              router["id"],
               router["name"],
               router["zonename"],
               router["account"],
@@ -168,11 +169,9 @@ class Router < CloudstackCli::Base
               router["linklocalip"],
               router["state"],
               router["isredundantrouter"],
-              router["serviceofferingid"],
-              router["serviceofferingname"],
-              router["id"]
+              router["serviceofferingname"]
             ]
-            table[-1].delete_at(-1) unless table[0].index "ID"
+            table[-1].delete_at(0) unless table[0].index "ID"
           end
           print_table table
           puts
