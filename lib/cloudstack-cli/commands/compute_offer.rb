@@ -8,17 +8,7 @@ class ComputeOffer < CloudstackCli::Base
     if offerings.size < 1
       puts "No offerings found."
     else
-      table = [["Name", "Displaytext", "Domain", "ID"]]
-      offerings.each do |offering|
-        table << [
-          offering["name"],
-          offering["displaytext"],
-          offering["domain"],
-          offering["id"]
-        ]
-      end
-      print_table table
-      say "Total number of offerings: #{offerings.size}"
+      print_compute_offerings(offerings)
     end
   end
 
@@ -33,12 +23,21 @@ class ComputeOffer < CloudstackCli::Base
   def create(name)
     resolve_domain
     options[:name] = name
-    puts "OK" if client.create_offering(options)
+    say("OK", :green) if client.create_service_offering(options)
   end
 
   desc 'delete ID', 'delete compute offering'
   def delete(id)
-    puts "OK" if client.delete_service_offering(id: id)
+    offerings = client.list_service_offerings(id: id)
+    if offerings && offerings.size == 1
+      say "Are you sure you want to delete compute offering below?", :yellow
+      print_compute_offerings(offerings, false)
+      if yes?("[y/N]:", :yellow)
+        say("OK", :green) if client.delete_service_offering(id: id)
+      end
+    else
+      say "No offering with ID #{id} found.", :yellow
+    end
   end
 
   desc 'sort', 'sort by cpu and memory grouped by domain'
@@ -56,6 +55,22 @@ class ComputeOffer < CloudstackCli::Base
         )
         sortkey -= 1
       end
+    end
+  end
+
+  no_commands do
+    def print_compute_offerings(offerings, totals = true)
+      table = [%w(Name Displaytext Domain ID)]
+      offerings.each do |offering|
+        table << [
+          offering["name"],
+          offering["displaytext"],
+          offering["domain"],
+          offering["id"]
+        ]
+      end
+      print_table table
+      say "Total number of offerings: #{offerings.size}" if totals
     end
   end
 
