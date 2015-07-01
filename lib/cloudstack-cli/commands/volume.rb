@@ -16,6 +16,7 @@ class Volume < CloudstackCli::Base
       say "No volumes found."
     else
       table = [%w(Name Type Size VM Storage Offeringname Zone Status)]
+      table.first << 'Project' if options[:project]
       volumes.each do |volume|
         table << [
           volume['name'], volume['type'],
@@ -26,6 +27,7 @@ class Volume < CloudstackCli::Base
           volume['zonename'],
           volume['state']
         ]
+        table.last << volume['project'] if options[:project]
       end
       print_table(table)
       say "Total number of volumes: #{volumes.size}"
