@@ -57,7 +57,7 @@ class VirtualMachine < CloudstackCli::Base
   def show(name)
     resolve_project
     options[:name] = name
-    unless virtual_machine = client.list_virtual_machines(options).first
+    unless virtual_machine = client.list_virtual_machines({list_all: true}.merge options).first
       puts "No virtual machine found."
     else
       table = virtual_machine.map do |key, value|
@@ -205,7 +205,9 @@ class VirtualMachine < CloudstackCli::Base
       when :json
         say JSON.pretty_generate(virtual_machines: virtual_machines)
       else
+        with_i_name = virtual_machines.first['instancename']
         table = [["Name", "State", "Offering", "Zone", options[:project_id] ? "Project" : "Account", "IP's"]]
+        table.first.insert(1, "Instance-Name") if with_i_name
         virtual_machines.each do |virtual_machine|
           table << [
             virtual_machine['name'],
@@ -215,6 +217,7 @@ class VirtualMachine < CloudstackCli::Base
             options[:project_id] ? virtual_machine['project'] : virtual_machine['account'],
             virtual_machine['nic'].map { |nic| nic['ipaddress']}.join(' ')
           ]
+          table.last.insert(1, virtual_machine['instancename']) if with_i_name
         end
         print_table table
         say "Total number of virtual machines: #{virtual_machines.count}"
