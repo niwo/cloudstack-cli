@@ -103,7 +103,7 @@ module CloudstackCli
             name: options[:iso],
             project_id: options[:project_id]
           ).first
-          say "Error: Iso '#{args[:iso]}' is invalid.", :red
+          say "Error: Iso '#{options[:iso]}' is invalid.", :red
           exit 1
         end
         unless options[:diskoffering_id]

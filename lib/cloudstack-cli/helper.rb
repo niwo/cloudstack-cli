@@ -18,6 +18,43 @@ module CloudstackCli
       2  => "error"
     }
 
+    def watch_jobs(jobs)
+      chars = %w(| / - \\)
+      call = 0
+      opts = {t_start: Time.now}
+      jobs = update_job_status(jobs)
+      while jobs.select{|job| job[:status].to_i < 1 }.size > 0 do
+        if call.modulo(40) == 0
+          t = Thread.new { jobs = update_job_status(jobs) }
+          while t.alive?
+            chars = print_job_status(jobs, chars,
+              call == 0 ? opts.merge(no_clear: true) : opts
+            )
+            call += 1
+          end
+          t.join
+        else
+          chars = print_job_status(jobs, chars,
+            call == 0 ? opts.merge(no_clear: true) : opts
+          )
+          call += 1
+        end
+      end
+      print_job_status(jobs, chars,
+        call == 0 ? opts.merge(no_clear: true) : opts
+      )
+    end
+
+    def update_job_status(jobs)
+      jobs.each do |job|
+        job[:status] = 0 unless job[:status]
+        if job[:status] == 0
+          job[:status] = client.query_async_job_result(job_id: job[:id])['jobstatus']
+        end
+      end
+      jobs
+    end
+
     def run_background_jobs(jobs, command)
       view_thread = Thread.new do
         chars = %w(| / - \\)
@@ -144,7 +181,7 @@ module CloudstackCli
         else
           ip_addr = frontendip ||= client.associate_ip_address(
             network_id: server["nic"].first["networkid"]
-          )
+          )["ipaddress"]
         end
         port = pf_rule.split(":")[1]
         args = {
