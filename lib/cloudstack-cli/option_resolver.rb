@@ -1,7 +1,7 @@
 module CloudstackCli
   module OptionResolver
 
-    def vm_options_to_params(options = options)
+    def vm_options_to_params
       resolve_zone(options)
       resolve_project(options)
       resolve_compute_offering(options)
@@ -15,7 +15,7 @@ module CloudstackCli
       resolve_networks(options)
     end
 
-    def resolve_zone(options = options)
+    def resolve_zone
       if options[:zone]
         zones = client.list_zones
         zone = zones.find {|z| z['name'] == options[:zone] }
@@ -29,7 +29,7 @@ module CloudstackCli
       options
     end
 
-    def resolve_domain(options = options)
+    def resolve_domain
       if options[:domain]
         if domain = client.list_domains(name: options[:domain]).first
           options[:domain_id] = domain['id']
@@ -41,7 +41,7 @@ module CloudstackCli
       options
     end
 
-    def resolve_project(options = options)
+    def resolve_project
       if options[:project]
         if %w(ALL -1).include? options[:project]
           options[:project_id] = "-1"
@@ -55,7 +55,7 @@ module CloudstackCli
       options
     end
 
-    def resolve_account(options = options)
+    def resolve_account
       if options[:account]
         if account = client.list_accounts(name: options[:account], listall: true).first
           options[:account_id] = account['id']
@@ -68,7 +68,7 @@ module CloudstackCli
       options
     end
 
-    def resolve_networks(options = options)
+    def resolve_networks
       networks = []
       available_networks = network = client.list_networks(
         zone_id: options[:zone_id],
@@ -97,7 +97,7 @@ module CloudstackCli
       options
     end
 
-    def resolve_iso(options = options)
+    def resolve_iso
       if options[:iso]
         unless iso = client.list_isos(
             name: options[:iso],
@@ -116,7 +116,7 @@ module CloudstackCli
       options
     end
 
-    def resolve_template(options = options)
+    def resolve_template
       if options[:template]
         if template = client.list_templates(
             name: options[:template],
@@ -132,7 +132,7 @@ module CloudstackCli
       options
     end
 
-    def resolve_compute_offering(options = options)
+    def resolve_compute_offering
       if offering = client.list_service_offerings(name: options[:offering]).first
         options[:service_offering_id] = offering['id']
       else
@@ -142,7 +142,7 @@ module CloudstackCli
       options
     end
 
-    def resolve_disk_offering(options = options)
+    def resolve_disk_offering
       if options[:disk_offering]
         unless disk_offering = client.list_disk_offerings(name: options[:disk_offering]).first
           say "Error: Disk offering '#{options[:disk_offering]}' not found.", :red
@@ -153,7 +153,7 @@ module CloudstackCli
       options
     end
 
-    def resolve_virtual_machine(options = options)
+    def resolve_virtual_machine
       if options[:virtual_machine]
         args = { name: options[:virtual_machine], listall: true }
         args[:project_id] = options[:project_id]
@@ -166,7 +166,7 @@ module CloudstackCli
       options
     end
 
-    def resolve_snapshot(options = options)
+    def resolve_snapshot
       if options[:snapshot]
         args = { name: options[:snapshot], listall: true }
         args[:project_id] = options[:project_id]
