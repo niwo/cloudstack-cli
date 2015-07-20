@@ -24,7 +24,8 @@ class Router < CloudstackCli::Base
 
     routers = client.list_routers(options)
 
-    if options[:listall]
+    # show all routers unless project or account is set
+    if options[:listall] && !options[:project] && !options[:account]
       client.list_projects(listall: true).each do |project|
         routers = routers + client.list_routers(
           options.merge(projectid: project['id'])
@@ -33,7 +34,11 @@ class Router < CloudstackCli::Base
     end
 
     if options[:redundant_state]
-      routers = filter_by(routers, 'redundantstate', options[:redundant_state].downcase)
+      routers = filter_by(
+        routers,
+        'redundantstate',
+        options[:redundant_state].downcase
+      )
     end
 
     routers.reverse! if options[:reverse]
