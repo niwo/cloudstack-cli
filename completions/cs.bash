@@ -35,9 +35,11 @@ _cloudstack_cli() {
       local cp2=$(echo ${words[@]} | cut -d ' ' -f3)
       local cp3=$($cp1 help $cp2 2>/dev/null)
       COMPREPLY=( $(compgen -W "$(echo $cp3 | awk 'NR>1{print $1}' RS=[ FS='\=' 2>/dev/null)" -- "$word") )
+    else
+      COMPREPLY=()
     fi
+    return 0
   fi
 }
 
-complete -F _cloudstack_cli cs
-complete -F _cloudstack_cli cloudstack-cli
+complete -o bashdefault -o default -F _cloudstack_cli cloudstack-cli cs

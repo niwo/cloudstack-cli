@@ -29,3 +29,6 @@ DEPENDENCIES
   cloudstack_client!
   rake (~> 10.4)
   rdoc (~> 4.2)
+
+BUNDLED WITH
+   1.10.3
