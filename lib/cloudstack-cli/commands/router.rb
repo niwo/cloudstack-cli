@@ -18,13 +18,13 @@ class Router < CloudstackCli::Base
     enum: %w(table json yaml)
   option :showid, type: :boolean, desc: "display the router ID"
   option :verbose, aliases: '-V', desc: "display additional fields"
+  option :version, desc: "list virtual router elements by version"
   def list
     resolve_project
     resolve_zone
     resolve_account
 
     routers = client.list_routers(options)
-
     # show all routers unless project or account is set
     if options[:listall] && !options[:project] && !options[:account]
       client.list_projects(listall: true).each do |project|
@@ -33,16 +33,6 @@ class Router < CloudstackCli::Base
         )
       end
     end
-
-    if options[:redundant_state]
-      routers = filter_by(
-        routers,
-        'redundantstate',
-        options[:redundant_state].downcase
-      )
-    end
-
-    routers.reverse! if options[:reverse]
     print_routers(routers, options)
     execute_router_commands(options[:command].downcase, routers) if options[:command]
   end
@@ -58,7 +48,6 @@ class Router < CloudstackCli::Base
     enum: %w(table json yaml)
   def list_from_file(file)
     routers = parse_file(file)["routers"]
-    routers.reverse! if options[:reverse]
     print_routers(routers, options)
     execute_router_commands(options[:command].downcase, routers) if options[:command]
   end
@@ -152,6 +141,15 @@ class Router < CloudstackCli::Base
       if routers.size < 1
         say "No routers found."
       else
+        if options[:redundant_state]
+          routers = filter_by(
+            routers,
+            'redundantstate',
+            options[:redundant_state].downcase
+          )
+        end
+        routers.reverse! if options[:reverse]
+
         case options[:format].to_sym
         when :yaml
           puts({'routers' => routers}.to_yaml)
@@ -159,11 +157,11 @@ class Router < CloudstackCli::Base
           say JSON.pretty_generate(routers: routers)
         else
           table = [%w(
-            Name Zone Account/Project IP Linklocal-IP Status
+            Name Zone Account/Project IP Linklocal-IP Status Version
           )]
           table[0].unshift('ID') if options[:showid]
           if options[:verbose]
-            table[0].push('Redundant-State', 'Requ-Upgrade', 'Version', 'Offering')
+            table[0].push('Redundant-State', 'Requ-Upgrade', 'Offering')
           end
           routers.each do |router|
             table << [
@@ -172,14 +170,14 @@ class Router < CloudstackCli::Base
               router["project"] || router["account"],
               router["nic"] && router["nic"].first ? router["nic"].first['ipaddress'] : "-",
               router["linklocalip"] || "-",
-              router["state"]
+              router["state"],
+              router["version"] || "-"
             ]
             table[-1].unshift(router["id"]) if options[:showid]
             if options[:verbose]
               table[-1].push(
                 print_redundant_state(router),
                 router["requiresupgrade"] || "-",
-                router["version"] || "-",
                 router["serviceofferingname"]
               )
             end
