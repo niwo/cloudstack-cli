@@ -8,7 +8,6 @@ class Router < CloudstackCli::Base
   option :redundant_state, desc: "the state of redundant virtual router",
     enum: %w(master backup fault unknown)
   option :listall, type: :boolean, desc: "list all routers", default: true
-  option :showid, type: :boolean, desc: "display the router ID"
   option :reverse, type: :boolean, default: false, desc: "reverse listing of routers"
   option :command,
     desc: "command to execute for each router",
@@ -17,6 +16,8 @@ class Router < CloudstackCli::Base
     desc: "number of concurrent command to execute"
   option :format, default: "table",
     enum: %w(table json yaml)
+  option :showid, type: :boolean, desc: "display the router ID"
+  option :verbose, aliases: '-V', desc: "display additional fields"
   def list
     resolve_project
     resolve_zone
@@ -57,7 +58,6 @@ class Router < CloudstackCli::Base
     enum: %w(table json yaml)
   def list_from_file(file)
     routers = parse_file(file)["routers"]
-
     routers.reverse! if options[:reverse]
     print_routers(routers, options)
     execute_router_commands(options[:command].downcase, routers) if options[:command]
@@ -159,30 +159,40 @@ class Router < CloudstackCli::Base
           say JSON.pretty_generate(routers: routers)
         else
           table = [%w(
-            ID Name Zone Account Project Redundant-State IP Linklocal-IP Status Redundant Offering
+            Name Zone Account/Project IP Linklocal-IP Status
           )]
-          table[0].delete('ID') unless options[:showid]
+          table[0].unshift('ID') if options[:showid]
+          if options[:verbose]
+            table[0].push('Redundant-State', 'Requ-Upgrade', 'Version', 'Offering')
+          end
           routers.each do |router|
             table << [
-              router["id"],
               router["name"],
               router["zonename"],
-              router["account"],
-              router["project"],
-              router["redundantstate"],
-              router["nic"] && router["nic"].first ? router["nic"].first['ipaddress'] : "",
-              router["linklocalip"],
-              router["state"],
-              router["isredundantrouter"],
-              router["serviceofferingname"]
+              router["project"] || router["account"],
+              router["nic"] && router["nic"].first ? router["nic"].first['ipaddress'] : "-",
+              router["linklocalip"] || "-",
+              router["state"]
             ]
-            table[-1].delete_at(0) unless table[0].index "ID"
+            table[-1].unshift(router["id"]) if options[:showid]
+            if options[:verbose]
+              table[-1].push(
+                print_redundant_state(router),
+                router["requiresupgrade"] || "-",
+                router["version"] || "-",
+                router["serviceofferingname"]
+              )
+            end
           end
           print_table table
           puts
           say "Total number of routers: #{routers.size}"
         end
       end
+    end
+
+    def print_redundant_state(router)
+      router["isredundantrouter"] == "true" ? router["redundantstate"] : "non-redundant"
     end
 
     def execute_router_commands(command, routers)
