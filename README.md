@@ -71,7 +71,7 @@ Bootsraps a server using a template and creating port-forwarding rules for port 
 $ cloudstack-cli server create server-01 --template CentOS-6.4-x64-v1.4 --zone DC1 --offering 1cpu_1gb --port-rules :22 :80
 ```
 
-### Example: Run a any custom API command
+### Example: Run any custom API command
 
 Run the "listAlerts" command against the Cloudstack API with an argument of type=8:
 
