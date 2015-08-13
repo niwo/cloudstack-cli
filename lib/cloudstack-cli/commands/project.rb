@@ -13,14 +13,23 @@ class Project < CloudstackCli::Base
   end
 
   desc "list", "list projects"
+  option :domain, desc: "List only resources belonging to the domain specified"
   def list
-    projects = client.list_projects(listall: true)
+    resolve_domain
+    projects = client.list_projects(options.merge listall: true)
     if projects.size < 1
       puts "No projects found."
     else
-      table = [["Name", "Displaytext", "Domain"]]
+      table = [%w(Name Displaytext VMs CPU Memory Domain)]
       projects.each do |project|
-        table << [project['name'], project['displaytext'], project['domain']]
+        table << [
+          project['name'],
+          project['displaytext'],
+          project['vmtotal'],
+          project['cputotal'],
+          project['memorytotal'] / 1024,
+          project['domain']
+        ]
       end
       print_table(table)
       say "Total number of projects: #{projects.count}"
