@@ -11,7 +11,7 @@ class Router < CloudstackCli::Base
   option :reverse, type: :boolean, default: false, desc: "reverse listing of routers"
   option :command,
     desc: "command to execute for each router",
-    enum: %w(START STOP REBOOT)
+    enum: %w(START STOP REBOOT STOP_START)
   option :concurrency, type: :numeric, default: 10, aliases: '-C',
     desc: "number of concurrent command to execute"
   option :format, default: "table",
@@ -79,7 +79,7 @@ class Router < CloudstackCli::Base
   end
 
   desc "reboot NAME [NAME2 ..]", "reboot virtual router(s)"
-  option :force, desc: "start without confirmation", type: :boolean, aliases: '-f'
+  option :force, desc: "reboot without confirmation", type: :boolean, aliases: '-f'
   def reboot(*names)
     routers = names.map {|name| client.list_routers(name: name).first}
     print_routers(routers)
@@ -125,6 +125,20 @@ class Router < CloudstackCli::Base
     watch_jobs(jobs)
   end
 
+  desc "show NAME [NAME2 ..]", "show detailed infos about a virtual router(s)"
+  option :project
+  def show(*names)
+    routers = names.map {|name| get_router(name)}
+    table = []
+    routers.each do |router|
+      router.each do |key, value|
+        table << [ set_color("#{key}:", :yellow), "#{value}" ]
+      end
+      table << [ "-" * 20 ] unless router == routers[-1]
+    end
+    print_table table
+  end
+
   no_commands do
 
     def get_router(name)
@@ -150,6 +164,7 @@ class Router < CloudstackCli::Base
         end
         routers.reverse! if options[:reverse]
 
+        options[:format] ||= "table"
         case options[:format].to_sym
         when :yaml
           puts({'routers' => routers}.to_yaml)
@@ -194,22 +209,23 @@ class Router < CloudstackCli::Base
     end
 
     def execute_router_commands(command, routers)
-      unless %w(start stop reboot).include?(command)
+      unless %w(start stop reboot stop_start).include?(command)
         say "\nCommand #{options[:command]} not supported.", :red
         exit 1
       end
       exit unless yes?("\n#{command.capitalize} the router(s) above? [y/N]:", :magenta)
 
-      jobs = routers.map do |router|
-        {
-          job_id: nil,
-          object_id: router["id"],
-          name: "#{command.capitalize} router #{router['name']}",
-          status: -1
-        }
+      command.split("_").each do |cmd|
+        jobs = routers.map do |router|
+          {
+            job_id: nil,
+            object_id: router["id"],
+            name: "#{cmd.capitalize} router #{router['name']}",
+            status: -1
+          }
+        end
+        run_background_jobs(jobs, "#{cmd}_router")
       end
-
-      run_background_jobs(jobs, "#{command}_router")
     end
 
   end
