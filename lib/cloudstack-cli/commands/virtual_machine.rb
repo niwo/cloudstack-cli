@@ -9,6 +9,7 @@ class VirtualMachine < CloudstackCli::Base
   option :state, desc: "state of the virtual machine"
   option :listall, desc: "list all virtual machines", default: true
   option :storage_id, desc: "the storage ID where vm's volumes belong to"
+  option :host, desc: "the name of the hypervisor host the VM belong to"
   option :keyword, desc: "filter by keyword"
   option :command,
     desc: "command to execute for the given virtual machines",
@@ -21,6 +22,7 @@ class VirtualMachine < CloudstackCli::Base
     resolve_account
     resolve_project
     resolve_zone
+    resolve_host
     command = options[:command].downcase if options[:command]
     options.delete(:command)
     virtual_machines = client.list_virtual_machines(options)
@@ -206,8 +208,10 @@ class VirtualMachine < CloudstackCli::Base
         say JSON.pretty_generate(virtual_machines: virtual_machines)
       else
         with_i_name = virtual_machines.first['instancename']
+        with_h_name = virtual_machines.first['hostname']
         table = [["Name", "State", "Offering", "Zone", options[:project_id] ? "Project" : "Account", "IP's"]]
         table.first.insert(1, "Instance-Name") if with_i_name
+        table.first.insert(-1, "Host-Name") if with_h_name
         virtual_machines.each do |virtual_machine|
           table << [
             virtual_machine['name'],
@@ -218,6 +222,7 @@ class VirtualMachine < CloudstackCli::Base
             virtual_machine['nic'].map { |nic| nic['ipaddress']}.join(' ')
           ]
           table.last.insert(1, virtual_machine['instancename']) if with_i_name
+          table.last.insert(-1, virtual_machine['hostname']) if with_h_name
         end
         print_table table
         say "Total number of virtual machines: #{virtual_machines.count}"

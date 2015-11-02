@@ -179,5 +179,17 @@ module CloudstackCli
       options
     end
 
+    def resolve_host(type = "routing")
+      if options[:host]
+        args = { name: options[:host], type: type, listall: true }
+        unless host = client.list_hosts(args).first
+          say "Error: Host '#{options[:host]}' not found.", :red
+          exit 1
+        end
+        options[:host_id] = host['id']
+      end
+      options
+    end
+
   end
 end
