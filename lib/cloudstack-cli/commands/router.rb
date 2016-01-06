@@ -169,7 +169,7 @@ class Router < CloudstackCli::Base
         when :yaml
           puts({'routers' => routers}.to_yaml)
         when :json
-          say JSON.pretty_generate(routers: routers)
+          say MultiJson.dump({ routers: routers }, pretty: true)
         else
           table = [%w(
             Name Zone Account/Project IP Linklocal-IP Status Version

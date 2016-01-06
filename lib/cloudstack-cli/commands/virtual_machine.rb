@@ -205,7 +205,7 @@ class VirtualMachine < CloudstackCli::Base
       when :yaml
         puts({'virtual_machines' => virtual_machines}.to_yaml)
       when :json
-        say JSON.pretty_generate(virtual_machines: virtual_machines)
+        say MultiJson.dump({ virtual_machines: virtual_machines }, pretty: true)
       else
         with_i_name = virtual_machines.first['instancename']
         with_h_name = virtual_machines.first['hostname']
