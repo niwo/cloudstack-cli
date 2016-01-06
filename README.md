@@ -3,7 +3,7 @@
 [![Gem Version](https://badge.fury.io/rb/cloudstack-cli.png)](http://badge.fury.io/rb/cloudstack-cli)
 
 cloudstack-cli is a [CloudStack](http://cloudstack.apache.org/) API command line client written in Ruby.
-cloudstack-cli uses the [cloudstack_client](https://github.com/niwo/cloudstack_client) to talk to the Cloudstack API.
+cloudstack-cli uses the [cloudstack_client](https://github.com/niwo/cloudstack_client) to talk to the CloudStack API.
 
 ## Installation
 
@@ -15,17 +15,25 @@ $ gem install cloudstack-cli
 
 ## Setup
 
-### Create a cloudstack-cli environmet
+### Create a cloudstack-cli environment
 
-Create your first environment, which defines your connection options:
+*Create your initial environment, which defines your connection options:*
 
 ```bash
-$ cloudstack-cli environment add [environment-name]
+$ cloudstack-cli environment add production
 ```
 
-cloudstack-cli expects to find a configuartion file with the API URL and your CloudStack credentials in your home directory named .cloudstack-cli.yml. If the file is located elsewhere you can specify the loaction using the --config option.
+cloudstack-cli expects to find a configuration file with the API URL and your CloudStack credentials in your home directory named .cloudstack-cli.yml. If the file is located elsewhere you can specify the location using the --config option.
 
 cloudstack-cli supports multiple environments using the --environment option.
+
+The first environment added is always the default. You can change the default as soon as you have multiple environments:
+
+```bash
+$ cloudstack-cli environment default [environment-name]
+```
+
+*List all environments:*
 
 see `cloudstack-cli help environment` for more options.
 
@@ -55,17 +63,25 @@ __Note__: use `~/.bashrc` on Ubuntu
 
 ## Usage
 
-For additional documentation find the RubyDoc [here](http://rubydoc.info/gems/cloudstack-cli/).
-
-See the help screen:
+*Display the cli help:*
 
 ```bash
-$ cloudstack-cli
+$ cloudstack-cli help
 ```
 
-### Example: Bootsrapping a server
+*Help for a specific subcommand and command:*
 
-Bootsraps a server using a template and creating port-forwarding rules for port 22 and 80.
+```bash
+$ cloudstack-cli vm help
+```
+
+```bash
+$ cloudstack-cli vm help list
+```
+
+### Example: Bootstrapping a server
+
+*Bootstraps a server using a template and creating port-forwarding rules for port 22 and 80:*
 
 ```bash
 $ cloudstack-cli server create server-01 --template CentOS-6.4-x64-v1.4 --zone DC1 --offering 1cpu_1gb --port-rules :22 :80
@@ -73,7 +89,7 @@ $ cloudstack-cli server create server-01 --template CentOS-6.4-x64-v1.4 --zone D
 
 ### Example: Run any custom API command
 
-Run the "listAlerts" command against the Cloudstack API with an argument of type=8:
+*Run the "listAlerts" command against the CloudStack API with an argument of type=8:*
 
 ```bash
 $ cloudstack-cli command listAlerts type=8
@@ -81,9 +97,9 @@ $ cloudstack-cli command listAlerts type=8
 
 ### Example: Creating a complete stack of servers
 
-Cloudstack CLI does support stack files in YAML or JSON.
+CloudStack CLI does support stack files in YAML or JSON.
 
-An example stackfile could look like this (my_stackfile.yml):
+*An example stackfile could look like this (my_stackfile.yml):*
 
 ```yaml
 ---
@@ -113,7 +129,7 @@ An example stackfile could look like this (my_stackfile.yml):
         - "storage_network"
 ```
 
-Create the stack of servers from above:
+*Create the stack of servers from the definition above:
 
 ```bash
 $ cloudstack-cli stack create my_stackfile.yml
@@ -121,7 +137,7 @@ $ cloudstack-cli stack create my_stackfile.yml
 
 **Hint:** You can also parse a stackfile from a URI.
 
-The following command destroys a stack using a definition gathered from a stackfile lying on a Github repository:
+*The following command destroys a stack using a definition gathered from a stackfile lying on a Github repository:*
 
 ```bash
 $ cloudstack-cli stack destroy https://raw.githubusercontent.com/niwo/cloudstack-cli/master/test/stack_example.json
@@ -134,7 +150,7 @@ Completed: 2/3 (15.4s)
 
 ### Example: Sort computing offerings
 
-Sort all computing offerings by CPU and Memory grouped my Domain:
+*Sort all computing offerings by CPU and Memory grouped by domain:*
 
 ```bash
 $ cloudstack-cli offering sort
@@ -142,8 +158,8 @@ $ cloudstack-cli offering sort
 
 ### Example: Stop all backup routers of a given project
 
-Stop all virtual routers of project named Demo (you could filter by zone too):
-(This command is helpful if you have to deploy new versions of Cloudstack when using redundant routers)
+*Stop all virtual routers of project named Demo (you could filter by zone too):*
+(This command is helpful if you have to deploy new versions of CloudStack when using redundant routers)
 
 ```bash
 $ cloudstack-cli router list --project Demo --status running --redundant-state BACKUP --command STOP
