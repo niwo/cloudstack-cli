@@ -2,17 +2,17 @@ module CloudstackCli
   module OptionResolver
 
     def vm_options_to_params
-      resolve_zone(options)
-      resolve_project(options)
-      resolve_compute_offering(options)
-      resolve_template(options)
-      resolve_disk_offering(options)
-      resolve_iso(options)
+      resolve_zone
+      resolve_project
+      resolve_compute_offering
+      resolve_template
+      resolve_disk_offering
+      resolve_iso
       unless options[:template_id]
         say "Error: Template or ISO is required.", :red
         exit 1
       end
-      resolve_networks(options)
+      resolve_networks
     end
 
     def resolve_zone
