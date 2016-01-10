@@ -17,13 +17,24 @@ $ gem install cloudstack-cli
 
 ### Create a cloudstack-cli environment
 
+cloudstack-cli expects to find a configuration file with the API URL and your CloudStack credentials in your home directory named .cloudstack-cli.yml. If the file is located elsewhere you can specify the location using the --config option.
+
 *Create your initial environment, which defines your connection options:*
 
 ```bash
-$ cloudstack-cli environment add production
+$ cloudstack-cli setup
 ```
 
-cloudstack-cli expects to find a configuration file with the API URL and your CloudStack credentials in your home directory named .cloudstack-cli.yml. If the file is located elsewhere you can specify the location using the --config option.
+"cloudstack-cli setup" (or "cloudstack-cli environment add") requires the following options:
+  - The full URL of your CloudStack API, i.e. "https://cloud.local/client/api"
+  - Your API Key (generate it under Accounts > Users if not already available)
+  - Your Secret Key (see above)
+
+*Add an additional environment:*
+
+```bash
+$ cloudstack-cli env add production
+```
 
 cloudstack-cli supports multiple environments using the --environment option.
 
