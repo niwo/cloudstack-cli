@@ -7,7 +7,7 @@ class IpAddress < CloudstackCli::Base
     end
   end
 
-  desc "ip_address assign NETWORK", "assign a public IP address"
+  desc "assign NETWORK", "assign a public IP address"
   option :project
   def assign(network)
     resolve_project
