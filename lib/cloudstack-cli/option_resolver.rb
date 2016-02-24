@@ -108,7 +108,6 @@ module CloudstackCli
           exit 1
         end
         unless options[:disk_offering_id]
-          puts options
           say "Error: a disk offering is required when using iso.", :red
           exit 1
         end

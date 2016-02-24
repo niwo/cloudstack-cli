@@ -133,7 +133,7 @@ class VirtualMachine < CloudstackCli::Base
       unless virtual_machine = client.list_virtual_machines(options.merge(name: name, listall: true)).first
         say "Virtual machine #{name} not found.", :red
       else
-        ask = "Destroy #{name} (#{virtual machine['state']})? [y/N]:"
+        ask = "Destroy #{name} (#{virtual_machine['state']})? [y/N]:"
         if options[:force] || yes?(ask, :yellow)
           say "destroying #{name} "
           client.destroy_virtual_machine(
