@@ -8,6 +8,7 @@ module CloudstackCli
       resolve_template
       resolve_disk_offering
       resolve_iso
+      options[:size] = options[:disk_size] if options[:disk_size]
       unless options[:template_id]
         say "Error: Template or ISO is required.", :red
         exit 1
@@ -106,7 +107,8 @@ module CloudstackCli
           say "Error: Iso '#{options[:iso]}' is invalid.", :red
           exit 1
         end
-        unless options[:diskoffering_id]
+        unless options[:disk_offering_id]
+          puts options
           say "Error: a disk offering is required when using iso.", :red
           exit 1
         end
