@@ -135,6 +135,7 @@ CloudStack CLI does support stack files in YAML or JSON.
       disk_offering: "Perf Storage"
       disk_size: "5"
       offering: "2cpu_4gb"
+      ip_address: 10.100.1.25
       networks:
         - "server_network"
         - "storage_network"
