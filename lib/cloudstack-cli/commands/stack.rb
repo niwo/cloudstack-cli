@@ -31,11 +31,12 @@ class Stack < CloudstackCli::Base
             size: instance["disk_size"],
             group: instance["group"] || stack["group"],
             keypair: instance["keypair"] || stack["keypair"],
+            ip_address: instance["ip_address"],
             sync: true
           }
           jobs << {
             id: client.deploy_virtual_machine(
-              vm_options_to_params(options),
+              vm_options_to_params,
               {sync: true}
             )['jobid'],
             name: "Create VM #{name}"
