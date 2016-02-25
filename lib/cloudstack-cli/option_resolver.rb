@@ -100,10 +100,16 @@ module CloudstackCli
 
     def resolve_iso
       if options[:iso]
-        unless iso = client.list_isos(
-            name: options[:iso],
-            project_id: options[:project_id]
+        iso = false
+        %w(self featured community).each do |iso_filter|
+          iso = client.list_isos(
+              name: options[:iso],
+              project_id: options[:project_id],
+              isofilter: iso_filter
           ).first
+          break if iso
+        end
+        unless iso
           say "Error: Iso '#{options[:iso]}' is invalid.", :red
           exit 1
         end

@@ -85,6 +85,7 @@ class VirtualMachine < CloudstackCli::Base
   option :keypair, desc: "the name of the ssh keypair to use"
   option :group, desc: "group name"
   option :account, desc: "account name"
+  option :ip_address, desc: "the ip address for default vm's network"
   def create(*names)
     vm_options_to_params
 
@@ -99,7 +100,7 @@ class VirtualMachine < CloudstackCli::Base
         }
       else
         job = {
-          id: client.deploy_virtual_machine(options, {sync: true})['jobid'],
+          id: client.deploy_virtual_machine(options.merge(name: name), {sync: true})['jobid'],
           name: "Create virtual machine #{name}"
         }
       end
@@ -234,7 +235,7 @@ class VirtualMachine < CloudstackCli::Base
         say "\nCommand #{options[:command]} not supported.", :red
         exit 1
       end
-      exit unless yes?("\n#{command.capitalize} the virtual_machine(s) above? [y/N]:", :magenta)
+      exit unless yes?("\n#{command.capitalize} the virtual machine(s) above? [y/N]:", :magenta)
 
       jobs = virtual_machines.map do |vm|
         {

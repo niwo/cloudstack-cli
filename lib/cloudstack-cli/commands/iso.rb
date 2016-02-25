@@ -5,7 +5,7 @@ class Iso < CloudstackCli::Base
   option :zone
   option :account
   option :type,
-    enum: %w(featured self self-executable executable community all)
+    enum: %w(featured self selfexecutable sharedexecutable executable community all)
   def list
     resolve_project
     resolve_zone
