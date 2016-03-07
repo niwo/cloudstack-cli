@@ -122,12 +122,12 @@ class Volume < CloudstackCli::Base
     say "Attach volume #{name} to VM #{options[:virtual_machine]} "
     client.attach_volume(
       id: volume['id'],
-      virtualmachine_id: options[:virtual_machine_id]
+      virtualmachineid: options[:virtual_machine_id]
     )
     say " OK.", :green
   end
 
-  desc "detach NAME", "attach volume to VM"
+  desc "detach NAME", "detach volume from VM"
   option :project, desc: 'project of volume'
   def detach(name)
     resolve_project
@@ -151,7 +151,7 @@ class Volume < CloudstackCli::Base
     say " OK.", :green
   end
 
-  desc "delete NAME", "attach volume to VM"
+  desc "delete NAME", "delete volume to VM"
   option :project, desc: 'project of volume'
   def delete(name)
     resolve_project

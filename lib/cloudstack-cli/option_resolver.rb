@@ -7,7 +7,7 @@ module CloudstackCli
       resolve_compute_offering
       resolve_template
       resolve_disk_offering
-      resolve_iso
+      resolve_iso_for_vm_deployment
       options[:size] = options[:disk_size] if options[:disk_size]
       unless options[:template_id]
         say "Error: Template or ISO is required.", :red
@@ -109,17 +109,24 @@ module CloudstackCli
           ).first
           break if iso
         end
-        unless iso
+        if iso
+          options[:iso_id] = iso["id"]
+        else
           say "Error: Iso '#{options[:iso]}' is invalid.", :red
           exit 1
         end
-        unless options[:disk_offering_id]
-          say "Error: a disk offering is required when using iso.", :red
-          exit 1
-        end
-        options[:template_id] = iso['id']
-        options['hypervisor'] = (options[:hypervisor] || 'vmware')
       end
+      options
+    end
+
+    def resolve_iso_for_vm_deployment
+      unless options[:disk_offering_id]
+        say "Error: a disk offering is required when using iso.", :red
+        exit 1
+      end
+      resolve_iso
+      options[:template_id] = options[:iso_id]
+      options['hypervisor'] = (options[:hypervisor] || 'vmware')
       options
     end
 

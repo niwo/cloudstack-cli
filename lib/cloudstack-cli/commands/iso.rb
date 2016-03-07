@@ -1,10 +1,10 @@
 class Iso < CloudstackCli::Base
 
-  desc 'list', "list iso's"
-  option :project
-  option :zone
-  option :account
-  option :type,
+  desc 'list', "list ISO's"
+  option :project, desc: 'project name'
+  option :zone, desc: 'zone name'
+  option :account, desc: 'account name'
+  option :type, desc: 'type of ISO',
     enum: %w(featured self selfexecutable sharedexecutable executable community all)
   def list
     resolve_project
@@ -14,7 +14,7 @@ class Iso < CloudstackCli::Base
     options.delete :type
     isos = client.list_isos(options)
     if isos.size < 1
-      puts "No iso's found."
+      puts "No ISO's found."
     else
       table = [%w(Name Zone Bootable Public Featured)]
       isos.each do |iso|
@@ -27,13 +27,36 @@ class Iso < CloudstackCli::Base
         ]
       end
       print_table(table)
-      say "Total number of isos: #{isos.size}"
+      say "Total number of ISO's: #{isos.size}"
     end
   end
 
-  desc 'detach VM_ID', "detaches any ISO file (if any) currently attached to a virtual machine"
-  def detach(vm_id)
-    client.detach_iso({virtualmachine_id: vm_id}, {sync: true})
+  desc 'attach', "attaches an ISO to a virtual machine"
+  option :iso, desc: 'ISO file name'
+  option :project, desc: 'project name'
+  option :virtual_machine, desc: 'virtual machine name'
+  option :virtual_machine_id, desc: 'virtual machine id (if no virtual machine name profided)'
+  def attach
+    resolve_iso
+    resolve_project
+    unless options[:virtual_machine_id]
+     resolve_virtual_machine
+    end
+    options[:id] = options[:iso_id]
+    client.attach_iso(options.merge(sync: false))
+    say " OK", :green
+  end
+
+  desc 'detach', "detaches any ISO file (if any) currently attached to a virtual machine"
+  option :project, desc: 'project name'
+  option :virtual_machine, desc: 'virtual machine name'
+  option :virtual_machine_id, desc: 'virtual machine id (if no virtual machine name profided)'
+  def detach
+    resolve_project
+    unless options[:virtual_machine_id]
+      resolve_virtual_machine
+    end
+    client.detach_iso(options.merge(sync: true))
     say " OK", :green
   end
 
