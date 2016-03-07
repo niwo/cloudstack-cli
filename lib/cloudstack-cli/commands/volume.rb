@@ -82,15 +82,25 @@ class Volume < CloudstackCli::Base
     end
 
     say "Creating volume #{name} "
-    client.create_volume(options)
+    job = client.create_volume(options).merge(sync: true)
     say " OK.", :green
-    sleep 2
-    invoke "volume:show", [name], options
+
+    # attach the new volume if a vm is profided and not a sapshot
+    if options[:virtual_machine] && options[:snapshot] == nil
+      sleep 2
+      say "Attach volume #{name} to VM #{options[:virtual_machine]} "
+      client.attach_volume(
+        id: job['volume']['id'],
+        virtualmachineid: options[:virtual_machine_id],
+        sync: true
+      )
+      say " OK.", :green
+    end
   end
 
   desc "attach NAME", "attach volume to VM"
   option :project, desc: 'project of volume'
-  option :virtual_machine, desc: 'project of volume'
+  option :virtual_machine, desc: 'virtual machine of volume'
   def attach(name)
     resolve_project
     resolve_virtual_machine
