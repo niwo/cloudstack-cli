@@ -8,7 +8,7 @@ class Account < CloudstackCli::Base
 
   desc "show NAME", "show detailed infos about an account"
   def show(name)
-    unless account = client.list_accounts(name: name).first
+    unless account = client.list_accounts(name: name, listall: true).first
       say "No account named \"#{name}\" found.", :red
     else
       account.delete 'user'

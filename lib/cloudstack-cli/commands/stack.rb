@@ -32,7 +32,6 @@ class Stack < CloudstackCli::Base
             group: instance["group"] || stack["group"],
             keypair: instance["keypair"] || stack["keypair"],
             ip_address: instance["ip_address"],
-            sync: true
           }
           jobs << {
             id: client.deploy_virtual_machine(

@@ -36,16 +36,6 @@ module CloudstackCli
       true
     end
 
-    # fix for subcommand help issues
-    # see https://github.com/erikhuda/thor/issues/261
-    # def self.banner(command, namespace = nil, subcommand = false)
-    #   "#{basename} #{subcommand_prefix} #{command.usage}"
-    # end
-    #
-    # def self.subcommand_prefix
-    #   self.name.gsub(%r{.*::}, '').gsub(%r{^[A-Z]}) { |match| match[0].downcase }.gsub(%r{[A-Z]}) { |match| "-#{match[0].downcase}" }
-    # end
-
     no_commands do
       def client
         @config ||= load_configuration
@@ -82,7 +72,7 @@ module CloudstackCli
 
         unless config.key?(:url) && config.key?(:api_key) && config.key?(:secret_key)
           say "The environment #{env || '\'-\''} contains no valid data.", :red
-          say "Please check with 'cs environment list' and set a valid default environment."
+          say "Please check with 'cloudstack-cli environment list' and set a valid default environment."
           exit 1
         end
         config
