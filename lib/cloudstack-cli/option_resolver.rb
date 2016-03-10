@@ -7,7 +7,7 @@ module CloudstackCli
       resolve_compute_offering
       resolve_template
       resolve_disk_offering
-      resolve_iso_for_vm_deployment
+      resolve_iso_for_vm_deployment if options[:iso]
       options[:size] = options[:disk_size] if options[:disk_size]
       unless options[:template_id]
         say "Error: Template or ISO is required.", :red

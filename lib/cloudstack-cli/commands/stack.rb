@@ -18,7 +18,7 @@ class Stack < CloudstackCli::Base
             status: 1
           }
         else
-          options = {
+          options.merge!({
             name: name,
             displayname: instance["decription"],
             zone: instance["zone"] || stack["zone"],
@@ -32,7 +32,8 @@ class Stack < CloudstackCli::Base
             group: instance["group"] || stack["group"],
             keypair: instance["keypair"] || stack["keypair"],
             ip_address: instance["ip_address"],
-          }
+          })
+          
           jobs << {
             id: client.deploy_virtual_machine(
               vm_options_to_params,

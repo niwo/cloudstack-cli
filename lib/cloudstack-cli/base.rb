@@ -85,7 +85,7 @@ module CloudstackCli
       def parse_file(file, extensions = %w(.json .yaml .yml))
         handler = case File.extname(file)
         when ".json"
-          Object.const_get "JSON"
+          Object.const_get "MultiJson"
         when ".yaml", ".yml"
           Object.const_get "YAML"
         else
