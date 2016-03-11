@@ -199,6 +199,67 @@ class VirtualMachine < CloudstackCli::Base
     puts
   end
 
+  desc "update NAME", "update a virtual machine"
+  option :project,
+    desc: "project of virtual machine"
+  option :force, type: :boolean,
+    desc: "update w/o asking for confirmation"
+  option :details, type: :hash,
+    desc: "details in key/value pairs."
+  option :display_name,
+    desc: "user generated name"
+  option :display_vm,
+    desc: "an optional field, whether to the display the vm to the end user or not"
+  option :group,
+    desc: "group of the virtual machine"
+  option :ha_enable, enum: %w(true false),
+    desc: "true if high-availability is enabled for the virtual machine, false otherwise"
+  option :instance_name,
+    desc: "instance name of the user vm"
+  option :is_dynamically_scalable,
+    desc: "true if VM contains XS/VMWare tools inorder to support dynamic scaling of VM cpu/memory"
+  option :name,
+    desc: "new host name of the vm"
+  option :ostype_id,
+    desc: "the ID of the OS type that best represents this VM"
+  option :user_data,
+    desc: "an optional binary data that can be sent to the virtual machine upon a successful deployment."
+  def update(name)
+    resolve_project
+
+    unless vm = client.list_virtual_machines(
+      name: name, project_id: options[:project_id], listall: true
+      ).first
+      say "Virtual machine #{name} not found.", :red
+      exit 1
+    end
+
+    unless vm["state"].downcase == "stopped"
+      say "Virtual machine #{name} (#{vm["state"]}) must be in a stopped state.", :red
+      exit 1
+    end
+
+    unless options[:force] || yes?("Update virtual_machine #{name}? [y/N]:", :magenta)
+      exit
+    end
+
+    if options[:user_data]
+      # base64 encode user_data
+      options[:user_data] = [options[:user_data]].pack("m")
+    end
+
+    vm = client.update_virtual_machine(options.merge(id: vm['id']))
+
+    say "Virtual machine \"#{name}\" has been updated:", :green
+
+    table = vm.select do |k, _|
+      options.find {|k2, _| k2.gsub('_', '') == k }
+    end.map do |key, value|
+      [ set_color("#{key}:", :yellow), set_color("#{value}", :red) ]
+    end
+    print_table table
+  end
+
   no_commands do
 
     def print_virtual_machines(virtual_machines)
