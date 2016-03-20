@@ -18,14 +18,19 @@ class VirtualMachine < CloudstackCli::Base
     desc: "number of concurrent command to execute"
   option :format, default: "table",
     enum: %w(table json yaml)
+  option :filter, type: :hash,
+    desc: "filter objects based on arrtibutes: (attr1:regex attr2:regex ...)"
   def list
     resolve_account
     resolve_project
     resolve_zone
     resolve_host
-    command = options[:command].downcase if options[:command]
-    options.delete(:command)
+    if options[:command]
+      command = options[:command].downcase
+      options.delete(:command)
+    end
     virtual_machines = client.list_virtual_machines(options)
+    virtual_machines = filter_objects(virtual_machines, options[:filter]) if options[:filter]
     if virtual_machines.size < 1
       puts "No virtual_machines found."
     else
@@ -267,7 +272,7 @@ class VirtualMachine < CloudstackCli::Base
       when :yaml
         puts({'virtual_machines' => virtual_machines}.to_yaml)
       when :json
-        say MultiJson.dump({ virtual_machines: virtual_machines }, pretty: true)
+        say JSON.pretty_generate({ virtual_machines: virtual_machines })
       else
         with_i_name = virtual_machines.first['instancename']
         with_h_name = virtual_machines.first['hostname']

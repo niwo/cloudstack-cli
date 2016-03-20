@@ -68,7 +68,7 @@ module CloudstackCli
 
       data = client.send_request(params)
       if options[:format] == 'json'
-        puts options[:pretty_print] ? MultiJson.dump(data, pretty: true) : data.to_json
+        puts options[:pretty_print] ? JSON.pretty_generate(data) : data.to_json
       else
         puts data.to_yaml
       end

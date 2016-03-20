@@ -1,5 +1,6 @@
 require "thor"
 require "cloudstack-cli/thor_patch"
+require "json"
 require "yaml"
 require "open-uri"
 
@@ -79,13 +80,24 @@ module CloudstackCli
       end
 
       def filter_by(objects, key, value)
-        objects.select {|r| r[key.to_s].downcase == value.downcase}
+        objects.select do |object|
+          object[key.to_s] =~ /#{value}/i
+        end
+      end
+
+      def filter_objects(objects, filter)
+        return objects if objects.size == 0
+        filter.each do |key, value|
+          objects = filter_by(objects, key, value)
+          return objects if objects.size == 0
+        end
+        objects
       end
 
       def parse_file(file, extensions = %w(.json .yaml .yml))
         handler = case File.extname(file)
         when ".json"
-          Object.const_get "MultiJson"
+          Object.const_get "JSON"
         when ".yaml", ".yml"
           Object.const_get "YAML"
         else
