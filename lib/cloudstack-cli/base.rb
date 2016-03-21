@@ -80,13 +80,23 @@ module CloudstackCli
       end
 
       def filter_by(objects, key, value)
+        if objects.size < 2
+          return objects
+        elsif !(objects.first.has_key? key)
+          keys = objects.first.keys.join(", ")
+          say "WARNING: Filter invalid, no key \"#{key}\" found.", :yellow
+          say("DEBUG: Supported keys are, #{keys}.", :magenta) if options[:debug]
+          return objects
+        end
         objects.select do |object|
           object[key.to_s] =~ /#{value}/i
         end
+      rescue RegexpError => e
+        say "ERROR: Invalid regular expression in filter - #{e.message}", :red
+        exit 1
       end
 
-      def filter_objects(objects, filter)
-        return objects if objects.size == 0
+      def filter_objects(objects, filter = options[:filter])
         filter.each do |key, value|
           objects = filter_by(objects, key, value)
           return objects if objects.size == 0

@@ -7,10 +7,10 @@ class VirtualMachine < CloudstackCli::Base
   option :project, desc: "name of the project"
   option :zone, desc: "the name of the availability zone"
   option :state, desc: "state of the virtual machine"
-  option :listall, desc: "list all virtual machines", default: true
-  option :storage_id, desc: "the storage ID where vm's volumes belong to"
   option :host, desc: "the name of the hypervisor host the VM belong to"
-  option :keyword, desc: "filter by keyword"
+  option :filter, type: :hash,
+    desc: "filter objects based on arrtibutes: (attr1:regex attr2:regex ...)"
+  option :listall, desc: "list all virtual machines", default: true
   option :command,
     desc: "command to execute for the given virtual machines",
     enum: %w(START STOP REBOOT)
@@ -18,19 +18,18 @@ class VirtualMachine < CloudstackCli::Base
     desc: "number of concurrent command to execute"
   option :format, default: "table",
     enum: %w(table json yaml)
-  option :filter, type: :hash,
-    desc: "filter objects based on arrtibutes: (attr1:regex attr2:regex ...)"
   def list
     resolve_account
     resolve_project
     resolve_zone
     resolve_host
+    resolve_iso
     if options[:command]
       command = options[:command].downcase
       options.delete(:command)
     end
     virtual_machines = client.list_virtual_machines(options)
-    virtual_machines = filter_objects(virtual_machines, options[:filter]) if options[:filter]
+    virtual_machines = filter_objects(virtual_machines) if options[:filter]
     if virtual_machines.size < 1
       puts "No virtual_machines found."
     else
