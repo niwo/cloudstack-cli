@@ -82,10 +82,9 @@ module CloudstackCli
       def filter_by(objects, key, value)
         if objects.size < 2
           return objects
-        elsif !(objects.first.has_key? key)
-          keys = objects.first.keys.join(", ")
+        elsif !(keys = objects.map{|i| i.keys}.flatten.uniq).include?(key)
           say "WARNING: Filter invalid, no key \"#{key}\" found.", :yellow
-          say("DEBUG: Supported keys are, #{keys}.", :magenta) if options[:debug]
+          say("DEBUG: Supported keys are, #{keys.join(', ')}.", :magenta) if options[:debug]
           return objects
         end
         objects.select do |object|
