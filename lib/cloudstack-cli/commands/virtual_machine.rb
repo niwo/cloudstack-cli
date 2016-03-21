@@ -19,6 +19,7 @@ class VirtualMachine < CloudstackCli::Base
   option :format, default: "table",
     enum: %w(table json yaml)
   def list
+    add_filters_to_options("listVirtualMachines") if options[:filter]
     resolve_account
     resolve_project
     resolve_zone
@@ -269,9 +270,9 @@ class VirtualMachine < CloudstackCli::Base
     def print_virtual_machines(virtual_machines)
       case options[:format].to_sym
       when :yaml
-        puts({'virtual_machines' => virtual_machines}.to_yaml)
+        puts({virtual_machines: virtual_machines}.to_yaml)
       when :json
-        say JSON.pretty_generate({ virtual_machines: virtual_machines })
+        puts JSON.pretty_generate(virtual_machines: virtual_machines)
       else
         with_i_name = virtual_machines.first['instancename']
         with_h_name = virtual_machines.first['hostname']

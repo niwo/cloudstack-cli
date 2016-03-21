@@ -1,17 +1,26 @@
 class Domain < CloudstackCli::Base
 
   desc 'list', 'list domains'
+  option :format, default: "table",
+    enum: %w(table json yaml)
   def list
     domains = client.list_domains
     if domains.size < 1
       puts "No domains found."
     else
-      table = [%w(Name Path)]
-      domains.each do |domain|
-        table << [domain['name'], domain['path']]
+      case options[:format].to_sym
+      when :yaml
+        puts({domains: domains}.to_yaml)
+      when :json
+        puts JSON.pretty_generate(domains: domains)
+      else
+        table = [%w(Name Path)]
+        domains.each do |domain|
+          table << [domain['name'], domain['path']]
+        end
+        print_table table
+        say "Total number of domains: #{domains.size}"
       end
-      print_table table
-      say "Total number of domains: #{domains.size}"
     end
   end
 

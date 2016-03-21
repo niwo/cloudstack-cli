@@ -6,28 +6,41 @@ class Iso < CloudstackCli::Base
   option :account, desc: 'account name'
   option :type, desc: 'type of ISO',
     enum: %w(featured self selfexecutable sharedexecutable executable community all)
+  option :format, default: "table",
+    enum: %w(table json yaml)
+  option :filter, type: :hash,
+    desc: "filter objects based on arrtibutes: (attr1:regex attr2:regex ...)"
   def list
+    add_filters_to_options("listIsos") if options[:filter]
     resolve_project
     resolve_zone
     resolve_account
     options[:isofilter] = options[:type]
     options.delete :type
     isos = client.list_isos(options)
+    isos = filter_objects(isos) if options[:filter]
     if isos.size < 1
       puts "No ISO's found."
     else
-      table = [%w(Name Zone Bootable Public Featured)]
-      isos.each do |iso|
-        table <<  [
-          iso['name'],
-          iso['zonename'],
-          iso['bootable'],
-          iso['ispublic'],
-          iso['isfeatured']
-        ]
+      case options[:format].to_sym
+      when :yaml
+        puts({isos: isos}.to_yaml)
+      when :json
+        puts JSON.pretty_generate(isos: isos)
+      else
+        table = [%w(Name Zone Bootable Public Featured)]
+        isos.each do |iso|
+          table <<  [
+            iso['name'],
+            iso['zonename'],
+            iso['bootable'],
+            iso['ispublic'],
+            iso['isfeatured']
+          ]
+        end
+        print_table(table)
+        say "Total number of ISO's: #{isos.size}"
       end
-      print_table(table)
-      say "Total number of ISO's: #{isos.size}"
     end
   end
 

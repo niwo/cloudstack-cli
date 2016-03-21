@@ -7,30 +7,43 @@ class Volume < CloudstackCli::Base
   option :keyword, desc: 'list by keyword'
   option :name, desc: 'name of the disk volume'
   option :type, desc: 'type of disk volume (ROOT or DATADISK)'
+  option :filter, type: :hash,
+    desc: "filter objects based on arrtibutes: (attr1:regex attr2:regex ...)"
+  option :format, default: "table",
+    enum: %w(table json yaml)
   def list
     resolve_project
     resolve_account
     resolve_zone
+    add_filters_to_options("listVolumes") if options[:filter]
     volumes = client.list_volumes(options)
+    volumes = filter_objects(volumes) if options[:filter]
     if volumes.size < 1
       say "No volumes found."
     else
-      table = [%w(Name Type Size VM Storage Offeringname Zone Status)]
-      table.first << 'Project' if options[:project]
-      volumes.each do |volume|
-        table << [
-          volume['name'], volume['type'],
-          (volume['size'] / 1024**3).to_s + 'GB',
-          volume['vmname'],
-          volume['storage'],
-          volume['diskofferingname'],
-          volume['zonename'],
-          volume['state']
-        ]
-        table.last << volume['project'] if options[:project]
+      case options[:format].to_sym
+      when :yaml
+        puts({volumes: volumes}.to_yaml)
+      when :json
+        puts JSON.pretty_generate(volumes: volumes)
+      else
+        table = [%w(Name Type Size VM Storage Offeringname Zone Status)]
+        table.first << 'Project' if options[:project]
+        volumes.each do |volume|
+          table << [
+            volume['name'], volume['type'],
+            (volume['size'] / 1024**3).to_s + 'GB',
+            volume['vmname'],
+            volume['storage'],
+            volume['diskofferingname'],
+            volume['zonename'],
+            volume['state']
+          ]
+          table.last << volume['project'] if options[:project]
+        end
+        print_table(table)
+        say "Total number of volumes: #{volumes.size}"
       end
-      print_table(table)
-      say "Total number of volumes: #{volumes.size}"
     end
   end
 

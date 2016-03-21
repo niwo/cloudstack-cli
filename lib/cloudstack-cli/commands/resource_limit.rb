@@ -18,6 +18,8 @@ class ResourceLimit < CloudstackCli::Base
   option :account
   option :project
   option :type, desc: "specify type, see types for a list of types"
+  option :format, default: "table",
+    enum: %w(table json yaml)
   def list
     resolve_account
     resolve_project
@@ -34,8 +36,16 @@ class ResourceLimit < CloudstackCli::Base
         resource_to_s(limit, 'max')
       ]
     end
-    table = table.insert(0, header)
-    print_table table
+
+    case options[:format].to_sym
+    when :yaml
+      puts({resource_limits: limits}.to_yaml)
+    when :json
+      puts JSON.pretty_generate(resource_limits: limits)
+    else
+      table = table.insert(0, header)
+      print_table table
+    end
   end
 
   desc "refresh", "refresh resource counts"

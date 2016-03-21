@@ -167,9 +167,9 @@ class Router < CloudstackCli::Base
         options[:format] ||= "table"
         case options[:format].to_sym
         when :yaml
-          puts({'routers' => routers}.to_yaml)
+          puts({routers: routers}.to_yaml)
         when :json
-          say JSON.pretty_generate({ routers: routers })
+          puts JSON.pretty_generate(routers: routers)
         else
           table = [%w(
             Name Zone Account/Project IP Linklocal-IP Status Version

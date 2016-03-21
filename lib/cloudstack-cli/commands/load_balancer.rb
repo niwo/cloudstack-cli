@@ -2,24 +2,33 @@ class LoadBalancer < CloudstackCli::Base
 
   desc "list", "list load balancer rules"
   option :project
+  option :format, default: "table",
+    enum: %w(table json yaml)
   def list
     resolve_project
     rules = client.list_load_balancer_rules(options)
     if rules.size < 1
       puts "No load balancer rules found."
     else
-      table = [%w(Name Public-IP Public-Port Private-Port Algorithm)]
-      rules.each do |rule|
-        table << [
-          rule['name'],
-          rule['publicip'],
-          rule['publicport'],
-          rule['privateport'],
-          rule['algorithm']
-        ]
+      case options[:format].to_sym
+      when :yaml
+        puts({rules: rules}.to_yaml)
+      when :json
+        puts JSON.pretty_generate(rules: rules)
+      else
+        table = [%w(Name Public-IP Public-Port Private-Port Algorithm)]
+        rules.each do |rule|
+          table << [
+            rule['name'],
+            rule['publicip'],
+            rule['publicport'],
+            rule['privateport'],
+            rule['algorithm']
+          ]
+        end
+        print_table table
+        say "Total number of rules: #{rules.count}"
       end
-      print_table table
-      say "Total number of rules: #{rules.count}"
     end
   end
 

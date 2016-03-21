@@ -80,7 +80,7 @@ module CloudstackCli
       end
 
       def filter_by(objects, key, value)
-        if objects.size < 2
+        if objects.size == 0
           return objects
         elsif !(keys = objects.map{|i| i.keys}.flatten.uniq).include?(key)
           say "WARNING: Filter invalid, no key \"#{key}\" found.", :yellow
@@ -88,7 +88,7 @@ module CloudstackCli
           return objects
         end
         objects.select do |object|
-          object[key.to_s] =~ /#{value}/i
+          object[key.to_s].to_s =~ /#{value}/i
         end
       rescue RegexpError => e
         say "ERROR: Invalid regular expression in filter - #{e.message}", :red
@@ -101,6 +101,15 @@ module CloudstackCli
           return objects if objects.size == 0
         end
         objects
+      end
+
+      def add_filters_to_options(command)
+        options[:filter].each do |filter_key, filter_value|
+          if client.api.params(command).find {|param| param["name"] == filter_key.downcase }
+            options[filter_key.downcase] = filter_value.gsub(/[^\w\s\.-]/, '')
+            options[:filter].delete(filter_key)
+          end
+        end
       end
 
       def parse_file(file, extensions = %w(.json .yaml .yml))

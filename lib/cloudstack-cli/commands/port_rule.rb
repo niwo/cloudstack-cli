@@ -44,25 +44,34 @@ class PortRule < CloudstackCli::Base
 
   desc "list", "list portforwarding rules"
   option :project
+  option :format, default: "table",
+    enum: %w(table json yaml)
   def list
     resolve_project
     rules = client.list_port_forwarding_rules(options)
     if rules.size < 1
       puts "No rules found."
     else
-      table = [["IP", "Server", "Public-Port", "Private-Port", "Protocol", "State"]]
-      rules.each do |rule|
-        table << [
-          rule['ipaddress'],
-          rule['virtualmachinename'],
-          print_ports(rule, 'public'),
-          print_ports(rule, 'private'),
-          rule['protocol'],
-          rule['state']
-        ]
+      case options[:format].to_sym
+      when :yaml
+        puts({rules: rules}.to_yaml)
+      when :json
+        puts JSON.pretty_generate(rules: rules)
+      else
+        table = [["IP", "Server", "Public-Port", "Private-Port", "Protocol", "State"]]
+        rules.each do |rule|
+          table << [
+            rule['ipaddress'],
+            rule['virtualmachinename'],
+            print_ports(rule, 'public'),
+            print_ports(rule, 'private'),
+            rule['protocol'],
+            rule['state']
+          ]
+        end
+        print_table table
+        say "Total number of rules: #{rules.count}"
       end
-      print_table table
-      say "Total number of rules: #{rules.count}"
     end
   end
 
