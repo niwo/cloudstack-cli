@@ -4,37 +4,47 @@ class Network < CloudstackCli::Base
   option :project, desc: 'the project name of the network'
   option :account, desc: 'the owner of the network'
   option :zone, desc: 'the name of the zone the network belongs to'
-  option :type, desc: 'the type of the network'
   option :showid, type: :boolean, desc: 'show the network id'
   option :showvlan, type: :boolean, desc: 'show the VLAN'
+  option :filter, type: :hash,
+    desc: "filter objects based on arrtibutes: (attr1:regex attr2:regex ...)"
+  option :format, default: "table",
+    enum: %w(table json yaml)
   def list
     resolve_zone if options[:zone]
     resolve_project
+    add_filters_to_options("listNetworks") if options[:filter]
     networks = client.list_networks(options)
-
+    networks = filter_objects(networks) if options[:filter]
     if networks.size < 1
       puts "No networks found."
     else
-      networks = filter_by(networks, 'type', options[:type]) if options[:type]
-      table = [%w(Name Displaytext Account/Project Zone Domain State Type Offering)]
-      table[0] << "ID" if options[:showid]
-      table[0] << "VLAN" if options[:showvlan]
-      networks.each do |network|
-        table << [
-          network["name"],
-          network["displaytext"],
-          network["account"] || network["project"],
-          network["zonename"],
-          network["domain"],
-          network["state"],
-          network["type"],
-          network["networkofferingname"]
-        ]
-        table[-1] << network["id"] if options[:showid]
-        table[-1] << network["vlan"] if options[:showvlan]
+      case options[:format].to_sym
+      when :yaml
+        puts({networks: networks}.to_yaml)
+      when :json
+        puts JSON.pretty_generate(networks: networks)
+      else
+        table = [%w(Name Displaytext Account/Project Zone Domain State Type Offering)]
+        table[0] << "ID" if options[:showid]
+        table[0] << "VLAN" if options[:showvlan]
+        networks.each do |network|
+          table << [
+            network["name"],
+            network["displaytext"],
+            network["account"] || network["project"],
+            network["zonename"],
+            network["domain"],
+            network["state"],
+            network["type"],
+            network["networkofferingname"]
+          ]
+          table[-1] << network["id"] if options[:showid]
+          table[-1] << network["vlan"] if options[:showvlan]
+        end
+        print_table table
+        say "Total number of networks: #{networks.count}"
       end
-      print_table table
-      say "Total number of networks: #{networks.count}"
     end
   end
 

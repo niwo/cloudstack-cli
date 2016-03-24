@@ -1,5 +1,6 @@
 require "thor"
 require "cloudstack-cli/thor_patch"
+require "json"
 require "yaml"
 require "open-uri"
 
@@ -79,13 +80,42 @@ module CloudstackCli
       end
 
       def filter_by(objects, key, value)
-        objects.select {|r| r[key.to_s].downcase == value.downcase}
+        if objects.size == 0
+          return objects
+        elsif !(keys = objects.map{|i| i.keys}.flatten.uniq).include?(key)
+          say "WARNING: Filter invalid, no key \"#{key}\" found.", :yellow
+          say("DEBUG: Supported keys are, #{keys.join(', ')}.", :magenta) if options[:debug]
+          return objects
+        end
+        objects.select do |object|
+          object[key.to_s].to_s =~ /#{value}/i
+        end
+      rescue RegexpError => e
+        say "ERROR: Invalid regular expression in filter - #{e.message}", :red
+        exit 1
+      end
+
+      def filter_objects(objects, filter = options[:filter])
+        filter.each do |key, value|
+          objects = filter_by(objects, key, value)
+          return objects if objects.size == 0
+        end
+        objects
+      end
+
+      def add_filters_to_options(command)
+        options[:filter].each do |filter_key, filter_value|
+          if client.api.params(command).find {|param| param["name"] == filter_key.downcase }
+            options[filter_key.downcase] = filter_value.gsub(/[^\w\s\.-]/, '')
+            options[:filter].delete(filter_key)
+          end
+        end
       end
 
       def parse_file(file, extensions = %w(.json .yaml .yml))
         handler = case File.extname(file)
         when ".json"
-          Object.const_get "MultiJson"
+          Object.const_get "JSON"
         when ".yaml", ".yml"
           Object.const_get "YAML"
         else

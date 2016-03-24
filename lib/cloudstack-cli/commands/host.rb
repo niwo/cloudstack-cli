@@ -3,20 +3,29 @@ class Host < CloudstackCli::Base
   desc 'list', 'list hosts'
   option :zone, desc: "lists hosts by zone"
   option :type, desc: "the host type"
+  option :format, default: "table",
+    enum: %w(table json yaml)
   def list
     resolve_zone if options[:zone]
     hosts = client.list_hosts(options)
     if hosts.size < 1
       say "No hosts found."
     else
-      table = [["Zone", "Type", "Cluster", "Name"]]
-      hosts.each do |host|
-        table << [
-        	host['zonename'], host['type'], host['clustername'], host['name']
-        ]
+      case options[:format].to_sym
+      when :yaml
+        puts({hosts: hosts}.to_yaml)
+      when :json
+        puts JSON.pretty_generate(hosts: hosts)
+      else
+        table = [["Zone", "Type", "Cluster", "Name"]]
+        hosts.each do |host|
+          table << [
+          	host['zonename'], host['type'], host['clustername'], host['name']
+          ]
+        end
+        print_table table
+        say "Total number of hosts: #{hosts.size}"
       end
-      print_table table
-      say "Total number of hosts: #{hosts.size}"
     end
   end
 

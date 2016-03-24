@@ -13,7 +13,7 @@ class Capacity < CloudstackCli::Base
   }
 
   desc "list", "list system capacity"
-  option :zone, desc: "lists clusters by zone"
+  option :zone, desc: "list capacity by zone"
   option :type, desc: "specify type, see types for a list of types"
   def list
     resolve_zone if options[:zone]

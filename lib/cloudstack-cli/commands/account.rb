@@ -21,22 +21,31 @@ class Account < CloudstackCli::Base
   end
 
   desc 'list', 'list accounts'
+  option :format, default: "table",
+    enum: %w(table json yaml)
   def list
     accounts = client.list_accounts(listall: true)
     if accounts.size < 1
       puts "No accounts found."
     else
-      table = [%w(Name Type Domain State)]
-      accounts.each do |account|
-        table << [
-          account['name'],
-          TYPES[account['accounttype']],
-          account['domain'],
-          account['state']
-        ]
+      case options[:format].to_sym
+      when :yaml
+        puts({accounts: accounts}.to_yaml)
+      when :json
+        puts JSON.pretty_generate(accounts: accounts)
+      else
+        table = [%w(Name Type Domain State)]
+        accounts.each do |account|
+          table << [
+            account['name'],
+            TYPES[account['accounttype']],
+            account['domain'],
+            account['state']
+          ]
+        end
+        print_table table
+        say "Total number of accounts: #{accounts.size}"
       end
-      print_table table
-      say "Total number of accounts: #{accounts.size}"
     end
   end
 

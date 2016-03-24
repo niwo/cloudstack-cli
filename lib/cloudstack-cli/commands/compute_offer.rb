@@ -2,13 +2,26 @@ class ComputeOffer < CloudstackCli::Base
 
   desc 'list', 'list compute offerings'
   option :domain, desc: "the domain associated with the compute offering"
+  option :format, default: "table",
+    enum: %w(table json yaml)
+  option :filter, type: :hash,
+    desc: "filter objects based on arrtibutes: (attr1:regex attr2:regex ...)"
   def list
     resolve_domain
+    add_filters_to_options("listServiceOfferings") if options[:filter]
     offerings = client.list_service_offerings(options)
+    offerings = filter_objects(offerings) if options[:filter]
     if offerings.size < 1
       puts "No offerings found."
     else
-      print_compute_offerings(offerings)
+      case options[:format].to_sym
+      when :yaml
+        puts({compute_offers: offerings}.to_yaml)
+      when :json
+        puts JSON.pretty_generate(compute_offers: offerings)
+      else
+        print_compute_offerings(offerings)
+      end
     end
   end
 

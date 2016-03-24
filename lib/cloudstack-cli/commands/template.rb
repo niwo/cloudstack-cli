@@ -6,6 +6,8 @@ class Template < CloudstackCli::Base
   option :type,
     enum: %w(featured self self-executable executable community all),
     default: "featured"
+  option :format, default: "table",
+    enum: %w(table json yaml)
   def list(type='featured')
     resolve_project
     resolve_zone
@@ -14,19 +16,26 @@ class Template < CloudstackCli::Base
     if templates.size < 1
       puts "No templates found."
     else
-      table = [%w(Name Created Zone Featured Public Format)]
-      templates.each do |template|
-        table << [
-          template['name'],
-          Time.parse(template['created']).strftime("%F"),
-          template['zonename'],
-          template['isfeatured'],
-          template['ispublic'],
-          template['format']
-        ]
+      case options[:format].to_sym
+      when :yaml
+        puts({templates: templates}.to_yaml)
+      when :json
+        puts JSON.pretty_generate(templates: templates)
+      else
+        table = [%w(Name Created Zone Featured Public Format)]
+        templates.each do |template|
+          table << [
+            template['name'],
+            Time.parse(template['created']).strftime("%F"),
+            template['zonename'],
+            template['isfeatured'],
+            template['ispublic'],
+            template['format']
+          ]
+        end
+        print_table(table)
+        say "Total number of templates: #{templates.size}"
       end
-      print_table(table)
-      say "Total number of templates: #{templates.size}"
     end
   end
 

@@ -29,6 +29,8 @@ class IpAddress < CloudstackCli::Base
   option :project
   option :account
   option :listall
+  option :format, default: "table",
+    enum: %w(table json yaml)
   def list
     resolve_account
     resolve_project
@@ -36,12 +38,19 @@ class IpAddress < CloudstackCli::Base
     if addresses.size < 1
       say "No ip addresses found."
     else
-      table = [%w(ID Address Account Zone)]
-      addresses.each do |address|
-        table << [address["id"], address["ipaddress"], address["account"], address["zonename"]]
+      case options[:format].to_sym
+      when :yaml
+        puts({ip_addresses: addresses}.to_yaml)
+      when :json
+        puts JSON.pretty_generate(ip_addresses: addresses)
+      else
+        table = [%w(ID Address Account Zone)]
+        addresses.each do |address|
+          table << [address["id"], address["ipaddress"], address["account"], address["zonename"]]
+        end
+        print_table table
+        say "Total number of addresses: #{addresses.size}"
       end
-      print_table table
-      say "Total number of addresses: #{addresses.size}"
     end
   end
 

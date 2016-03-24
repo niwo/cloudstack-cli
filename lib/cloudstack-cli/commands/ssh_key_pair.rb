@@ -2,8 +2,15 @@ class SshKeyPair < CloudstackCli::Base
 
   desc "list", 'list ssh key pairs'
   option :listall, default: true
+<<<<<<< HEAD
   option :account, desc: "name of the account"
   option :project, desc: "name of the project"
+=======
+  option :account
+  option :project
+  option :format, default: "table",
+    enum: %w(table json yaml)
+>>>>>>> d4f7232f3bb8882c3085630284dcfd273825144b
   def list
     resolve_account
     resolve_project
@@ -11,11 +18,18 @@ class SshKeyPair < CloudstackCli::Base
     if pairs.size < 1
       say "No ssh key pairs found."
     else
-      table = [["Name", "Fingerprint"]]
-      pairs.each do |pair|
-        table << [pair['name'], pair['fingerprint']]
+      case options[:format].to_sym
+      when :yaml
+        puts({ssh_key_pairs: pairs}.to_yaml)
+      when :json
+        puts JSON.pretty_generate(ssh_key_pairs: pairs)
+      else
+        table = [["Name", "Fingerprint"]]
+        pairs.each do |pair|
+          table << [pair['name'], pair['fingerprint']]
+        end
+        print_table table
       end
-      print_table table
     end
   end
 
