@@ -2,15 +2,10 @@ class SshKeyPair < CloudstackCli::Base
 
   desc "list", 'list ssh key pairs'
   option :listall, default: true
-<<<<<<< HEAD
   option :account, desc: "name of the account"
   option :project, desc: "name of the project"
-=======
-  option :account
-  option :project
   option :format, default: "table",
     enum: %w(table json yaml)
->>>>>>> d4f7232f3bb8882c3085630284dcfd273825144b
   def list
     resolve_account
     resolve_project
@@ -50,7 +45,7 @@ class SshKeyPair < CloudstackCli::Base
   desc 'register NAME', 'register ssh key pair'
   option :account, desc: "name of the account"
   option :project, desc: "name of the project"
-  option :public_key, required: true, desc: "path to public_key file"
+  option :public_key, aliases: %w(-k), required: true, desc: "path to public_key file"
   def register(name)
     resolve_account
     resolve_project
@@ -66,6 +61,7 @@ class SshKeyPair < CloudstackCli::Base
     say "Name : #{pair['name']}"
     say "Fingerprint : #{pair['fingerprint']}"
     say "Privatekey : #{pair['privatekey']}"
+    puts
   rescue => e
     say "Failed to register key: #{e.message}", :red
     exit 1
@@ -89,9 +85,9 @@ class SshKeyPair < CloudstackCli::Base
     end
   end
 
-  desc 'reset_vm_keys', 'Resets the SSH Key for virtual machine. The virtual machine must be in a "Stopped" state.'
-  option :keypair, desc: "name of keypair", required: true
-  option :virtual_machine, desc: "name of virtual machine", required: true
+  desc 'reset_vm_keys', 'resets the SSH Key for virtual machine (the virtual machine must be in a "Stopped" state)'
+  option :keypair, aliases: %w(-k), desc: "name of keypair", required: true
+  option :virtual_machine, aliases: %w(-m), desc: "name of virtual machine", required: true
   option :account, desc: "name of the account"
   option :project, desc: "name of the project"
   def reset_vm_keys
