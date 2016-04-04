@@ -1,5 +1,0 @@
-#!/usr/bin/env ruby
-
-require 'cloudstack-cli'
-
-CloudstackCli::Cli.start(ARGV)

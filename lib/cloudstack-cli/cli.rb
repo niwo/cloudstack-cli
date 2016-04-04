@@ -35,7 +35,7 @@ module CloudstackCli
     def completion
       shell_script = File.join(
         File.dirname(__FILE__), '..', '..',
-        'completions', "cs.#{options[:shell]}"
+        'completions', "cloudstack-cli.#{options[:shell]}"
       )
       unless File.file? shell_script
         say "Specified cloudstack-cli shell auto-completion rules for #{options[:shell]} not found.", :red
