@@ -13,7 +13,11 @@ module CloudstackCli
         say "Error: Template or ISO is required.", :red
         exit 1
       end
-      resolve_networks
+      if options[:ip_network_list]
+        resolve_ip_network_list
+      else
+        resolve_networks
+      end
     end
 
     def resolve_zone
@@ -86,8 +90,6 @@ module CloudstackCli
       end
       networks.compact!
       if networks.empty?
-        #unless default_network = client.list_networks(project_id: options[:project_id]).find {
-        #  |n| n['isdefault'] == true }
         unless default_network = client.list_networks(project_id: options[:project_id]).first
           say "Error: No default network found.", :red
           exit 1
@@ -95,6 +97,31 @@ module CloudstackCli
         networks << available_networks.first['id'] rescue nil
       end
       options[:network_ids] = networks.join(',')
+      options
+    end
+
+    def resolve_ip_network_list
+      network_list = []
+      available_networks = network = client.list_networks(
+        zone_id: options[:zone_id],
+        project_id: options[:project_id]
+      )
+      if options[:ip_network_list]
+        options[:ip_network_list].each do |item|
+          unless network = available_networks.find { |n| n['name'] == item["name"] }
+            say "Error: Network '#{name}' not found.", :red
+            exit 1
+          end
+          item.delete("name")
+          network_list << {networkid: network["id"]}.merge(item) # rescue nil
+        end
+      end
+      network_list.compact!
+      if network_list.empty?
+        say "Error: IP network list can't be empty.", :red
+        exit 1
+      end
+      options[:ip_to_network_list] = network_list
       options
     end
 
