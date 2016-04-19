@@ -22,18 +22,19 @@ class Stack < CloudstackCli::Base
             name: name,
             displayname: instance["decription"],
             zone: instance["zone"] || stack["zone"],
+            project: stack["project"],
             template: instance["template"],
             iso: instance["iso"] ,
             offering: instance["offering"],
             networks: load_string_or_array(instance["networks"]),
-            project: stack["project"],
+            ip_network_list: instance["ip_network_list"],
             disk_offering: instance["disk_offering"],
             size: instance["disk_size"],
             group: instance["group"] || stack["group"],
             keypair: instance["keypair"] || stack["keypair"],
-            ip_address: instance["ip_address"],
+            ip_address: instance["ip_address"]
           })
-          
+
           jobs << {
             id: client.deploy_virtual_machine(
               vm_options_to_params,
@@ -123,6 +124,7 @@ class Stack < CloudstackCli::Base
     def string_to_array(string)
       string ? string.gsub(', ', ',').split(',') : nil
     end
-  end
+
+  end # no_commands
 
 end
