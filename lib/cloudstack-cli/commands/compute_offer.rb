@@ -33,6 +33,7 @@ class ComputeOffer < CloudstackCli::Base
   option :domain
   option :ha, type: :boolean
   option :tags
+  option :hosttags
   def create(name)
     resolve_domain
     options[:name] = name
@@ -73,12 +74,14 @@ class ComputeOffer < CloudstackCli::Base
 
   no_commands do
     def print_compute_offerings(offerings, totals = true)
-      table = [%w(Name Displaytext Domain ID)]
+      table = [%w(Name Displaytext Domain Tags HostTags ID)]
       offerings.each do |offering|
         table << [
           offering["name"],
           offering["displaytext"],
           offering["domain"],
+          offering["tags"],
+          offering["hosttags"],
           offering["id"]
         ]
       end
