@@ -91,9 +91,20 @@ class VirtualMachine < CloudstackCli::Base
   option :group, desc: "group name"
   option :account, desc: "account name"
   option :ip_address, desc: "the ip address for default vm's network"
+  option :ip_network_list, desc: "ip_network_list (net1:ip net2:ip...)", type: :array
+  option :user_data,
+    desc: "optional binary data that can be sent to the virtual machine upon a successful deployment."
   def create(*names)
-    vm_options_to_params
+    if names.size == 0
+      say "Please provide at least one virtual machine name.", :yellow
+      exit 1
+    end
 
+    if options[:ip_network_list]
+      options[:ip_network_list] = array_to_network_list(options[:ip_network_list])
+    end
+
+    vm_options_to_params
     say "Start deploying virtual machine#{ "s" if names.size > 1 }...", :green
     jobs = names.map do |name|
       if virtual_machine = client.list_virtual_machines(name: name, project_id: options[:project_id]).first
@@ -131,15 +142,21 @@ class VirtualMachine < CloudstackCli::Base
 
   desc "destroy NAME [NAME2 ..]", "destroy virtual machine(s)"
   option :project
-  option :force, desc: "destroy without asking", type: :boolean, aliases: '-f'
+  option :force, desc: "destroy without confirmation", type: :boolean, aliases: '-f'
   option :expunge, desc: "expunge virtual machine immediately", type: :boolean, default: false, aliases: '-E'
   def destroy(*names)
+    if names.size == 0
+      say "Please provide at least one virtual machine name.", :yellow
+      exit 1
+    end
+
     resolve_project
     names.each do |name|
       unless virtual_machine = client.list_virtual_machines(options.merge(name: name, listall: true)).first
         say "Virtual machine #{name} not found.", :red
       else
-        ask = "Destroy #{name} (#{virtual_machine['state']})? [y/N]:"
+        action = options[:expunge] ? "Expunge" : "Destroy"
+        ask = "#{action} #{name} (#{virtual_machine['state']})? [y/N]:"
         if options[:force] || yes?(ask, :yellow)
           say "destroying #{name} "
           client.destroy_virtual_machine(
@@ -228,7 +245,7 @@ class VirtualMachine < CloudstackCli::Base
   option :ha_enable, enum: %w(true false),
     desc: "true if high-availability is enabled for the virtual machine, false otherwise"
   option :user_data,
-    desc: "an optional binary data that can be sent to the virtual machine upon a successful deployment."
+    desc: "optional binary data that can be sent to the virtual machine upon a successful deployment."
   def update(name)
     resolve_project
 
@@ -313,6 +330,14 @@ class VirtualMachine < CloudstackCli::Base
       end
 
       run_background_jobs(jobs, "#{command}_virtual_machine")
+    end
+
+    def array_to_network_list(arr)
+      arr.each.map do |item|
+        name = item.split(':')[0]
+        ip = item.split(':')[1]
+        {"name" => name, "ip" => ip}
+      end
     end
 
   end # no_commands

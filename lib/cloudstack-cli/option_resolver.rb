@@ -109,11 +109,11 @@ module CloudstackCli
       if options[:ip_network_list]
         options[:ip_network_list].each do |item|
           unless network = available_networks.find { |n| n['name'] == item["name"] }
-            say "Error: Network '#{name}' not found.", :red
+            say "Error: Network '#{item["name"]}' not found.", :red
             exit 1
           end
           item.delete("name")
-          network_list << {networkid: network["id"]}.merge(item) # rescue nil
+          network_list << {networkid: network["id"]}.merge(item)
         end
       end
       network_list.compact!
@@ -122,6 +122,7 @@ module CloudstackCli
         exit 1
       end
       options[:ip_to_network_list] = network_list
+      [:network_ids, :ip_address].each { |k| options.delete(k) }
       options
     end
 

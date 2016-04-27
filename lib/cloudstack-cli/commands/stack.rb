@@ -1,6 +1,9 @@
 class Stack < CloudstackCli::Base
 
   desc "create STACKFILE", "create a stack of VMs"
+  option :skip_forwarding_rules, default: false,
+    type: :boolean, aliases: '-s',
+    desc: "Skip creation of port forwarding rules."
   def create(stackfile)
     stack = parse_file(stackfile)
     project_id = find_project_by_name(stack["project"])
@@ -34,7 +37,6 @@ class Stack < CloudstackCli::Base
             keypair: instance["keypair"] || stack["keypair"],
             ip_address: instance["ip_address"]
           })
-
           jobs << {
             id: client.deploy_virtual_machine(
               vm_options_to_params,
@@ -47,22 +49,25 @@ class Stack < CloudstackCli::Base
     end
     watch_jobs(jobs)
 
-    say "Check for port forwarding rules...", :green
-    jobs = []
-    stack["servers"].each do |instance|
-      string_to_array(instance["name"]).each do |name|
-        if port_rules = string_to_array(instance["port_rules"])
-          server = client.list_virtual_machines(name: name, project_id: project_id).first
-          create_port_rules(server, port_rules, false).each_with_index do |job_id, index|
-            jobs << {
-              id: job_id,
-              name: "Create port forwarding rules (#{port_rules[index]}) for VM #{name}"
-            }
+    unless options[:skip_forwarding_rules]
+      say "Check for port forwarding rules...", :green
+      jobs = []
+      stack["servers"].each do |instance|
+        string_to_array(instance["name"]).each do |name|
+          if port_rules = string_to_array(instance["port_rules"])
+            server = client.list_virtual_machines(name: name, project_id: project_id).first
+            create_port_rules(server, port_rules, false).each_with_index do |job_id, index|
+              jobs << {
+                id: job_id,
+                name: "Create port forwarding rules (#{port_rules[index]}) for VM #{name}"
+              }
+            end
           end
         end
       end
+      watch_jobs(jobs)
     end
-    watch_jobs(jobs)
+
     say "Finished.", :green
   end
 
@@ -118,7 +123,8 @@ class Stack < CloudstackCli::Base
     end
 
     def load_string_or_array(item)
-     item.is_a?(Array) ? item : [item]
+      return nil if item == nil
+      item.is_a?(Array) ? item : [item]
     end
 
     def string_to_array(string)
