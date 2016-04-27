@@ -121,24 +121,23 @@ CloudStack CLI does support stack files in YAML or JSON.
   group: "my_web_stack"
   keypair: "mykeypair"
   servers:
-    -
-      name: "web-d1, web-d2"
-      description: "Web nodes"
+    - name: "web-d1, web-d2"
+      description: "web node"
       template: "CentOS-7-x64"
       offering: "1cpu_1gb"
       networks: "server_network"
       port_rules: ":80, :443"
-    -
-      name: "db-01"
+    - name: "db-01"
       description: "PostgreSQL Master"
       iso: "CentOS-7-x64"
       disk_offering: "Perf Storage"
       disk_size: "5"
       offering: "2cpu_4gb"
-      ip_address: 10.100.1.25
-      networks:
-        - "server_network"
-        - "storage_network"
+      ip_network_list:
+        - name: FrontendNetwork
+          ip: 10.101.64.42
+        - name: BackendNetwork
+          ip: 10.102.1.11
 ```
 
 *Create the stack of servers from the definition above:
