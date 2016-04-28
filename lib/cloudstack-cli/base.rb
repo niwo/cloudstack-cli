@@ -72,7 +72,7 @@ module CloudstackCli
         end
 
         unless config.key?(:url) && config.key?(:api_key) && config.key?(:secret_key)
-          say "The environment #{env || '\'-\''} contains no valid data.", :red
+          say "The environment #{env || '\'-\''} does not contain all required keys.", :red
           say "Please check with 'cloudstack-cli environment list' and set a valid default environment."
           exit 1
         end
