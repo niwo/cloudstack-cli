@@ -195,15 +195,22 @@ module CloudstackCli
       options
     end
 
-    def resolve_virtual_machine
+    def resolve_virtual_machine(return_vm = false)
       if options[:virtual_machine]
-        args = { name: options[:virtual_machine], listall: true }
-        args[:project_id] = options[:project_id]
-        unless vm = client.list_virtual_machines(args).first
+        unless vm = client.list_virtual_machines(
+          name: options[:virtual_machine],
+          listall: true,
+          project_id: options[:project_id]
+        ).find {|vm| vm["name"] == options[:virtual_machine] }
           say "Error: VM '#{options[:virtual_machine]}' not found.", :red
           exit 1
         end
-        options[:virtual_machine_id] = vm['id']
+
+        if return_vm
+          return vm
+        else
+          options[:virtual_machine_id] = vm["id"]
+        end
       end
       options
     end

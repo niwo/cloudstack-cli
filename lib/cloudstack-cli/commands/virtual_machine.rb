@@ -63,15 +63,12 @@ class VirtualMachine < CloudstackCli::Base
   option :project
   def show(name)
     resolve_project
-    options[:name] = name
-    unless virtual_machine = client.list_virtual_machines({list_all: true}.merge options).first
-      puts "No virtual machine found."
-    else
-      table = virtual_machine.map do |key, value|
-        [ set_color("#{key}:", :yellow), "#{value}" ]
-      end
-      print_table table
+    options[:virtual_machine] = name
+    virtual_machine = resolve_virtual_machine(true)
+    table = virtual_machine.map do |key, value|
+      [ set_color("#{key}:", :yellow), "#{value}" ]
     end
+    print_table table
   end
 
   desc "create NAME [NAME2 ...]", "create virtual machine(s)"
@@ -149,14 +146,13 @@ class VirtualMachine < CloudstackCli::Base
       say "Please provide at least one virtual machine name.", :yellow
       exit 1
     end
-
     resolve_project
     names.each do |name|
-      unless virtual_machine = client.list_virtual_machines(options.merge(name: name, listall: true)).first
+      unless virtual_machine = find_vm_by_name(name)
         say "Virtual machine #{name} not found.", :red
       else
         action = options[:expunge] ? "Expunge" : "Destroy"
-        ask = "#{action} #{name} (#{virtual_machine['state']})? [y/N]:"
+        ask = "#{action} #{virtual_machine['name']} (#{virtual_machine['state']})? [y/N]:"
         if options[:force] || yes?(ask, :yellow)
           say "destroying #{name} "
           client.destroy_virtual_machine(
@@ -179,13 +175,12 @@ class VirtualMachine < CloudstackCli::Base
   option :force
   def stop(name)
     resolve_project
-    options[:name] = name
-    options[:listall] = true
-    exit unless options[:force] || yes?("Stop virtual machine #{name}? [y/N]:", :magenta)
-    unless virtual_machine = client.list_virtual_machines(options).first
+    unless virtual_machine = find_vm_by_name(name)
       say "Virtual machine #{name} not found.", :red
       exit 1
     end
+    exit unless options[:force] ||
+      yes?("Stop virtual machine #{virtual_machine['name']}? [y/N]:", :magenta)
     client.stop_virtual_machine(id: virtual_machine['id'])
     puts
   end
@@ -194,13 +189,11 @@ class VirtualMachine < CloudstackCli::Base
   option :project
   def start(name)
     resolve_project
-    options[:name] = name
-    options[:listall] = true
-    unless virtual_machine = client.list_virtual_machines(options).first
+    unless virtual_machine = find_vm_by_name(name)
       say "Virtual machine #{name} not found.", :red
       exit 1
     end
-    say("Starting virtual machine #{name}", :magenta)
+    say("Starting virtual machine #{virtual_machine['name']}", :magenta)
     client.start_virtual_machine(id: virtual_machine['id'])
     puts
   end
@@ -210,13 +203,11 @@ class VirtualMachine < CloudstackCli::Base
   option :force
   def reboot(name)
     resolve_project
-    options[:name] = name
-    options[:listall] = true
-    unless virtual_machine = client.list_virtual_machines(options).first
+    unless virtual_machine = find_vm_by_name(name)
       say "Virtual machine #{name} not found.", :red
       exit 1
     end
-    exit unless options[:force] || yes?("Reboot virtual_machine #{name}? [y/N]:", :magenta)
+    exit unless options[:force] || yes?("Reboot virtual_machine #{virtual_machine["name"]}? [y/N]:", :magenta)
     client.reboot_virtual_machine(id: virtual_machine['id'])
     puts
   end
@@ -248,30 +239,22 @@ class VirtualMachine < CloudstackCli::Base
     desc: "optional binary data that can be sent to the virtual machine upon a successful deployment."
   def update(name)
     resolve_project
-
-    unless vm = client.list_virtual_machines(
-      name: name, project_id: options[:project_id], listall: true
-      ).first
+    unless vm = find_vm_by_name(name)
       say "Virtual machine #{name} not found.", :red
       exit 1
     end
-
     unless vm["state"].downcase == "stopped"
       say "Virtual machine #{name} (#{vm["state"]}) must be in a stopped state.", :red
       exit 1
     end
-
     unless options[:force] || yes?("Update virtual_machine #{name}? [y/N]:", :magenta)
       exit
     end
-
     if options[:user_data]
       # base64 encode user_data
       options[:user_data] = [options[:user_data]].pack("m")
     end
-
     vm = client.update_virtual_machine(options.merge(id: vm['id']))
-
     say "Virtual machine \"#{name}\" has been updated:", :green
 
     table = vm.select do |k, _|
@@ -283,6 +266,14 @@ class VirtualMachine < CloudstackCli::Base
   end
 
   no_commands do
+
+    def find_vm_by_name(name)
+      client.list_virtual_machines(
+        name: options[:virtual_machine],
+        listall: true,
+        project_id: options[:project_id]
+      ).find {|vm| vm["name"] == name }
+    end
 
     def print_virtual_machines(virtual_machines)
       case options[:format].to_sym

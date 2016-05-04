@@ -232,7 +232,7 @@ module CloudstackCli
       print_options(server_offerings)
       service_offering = ask_number("Offering Nr.: ")
 
-      templates = client.list_templates(project_id: project_id, zone_id: zones[zone]["id"], template_filter: "all")
+      templates = client.list_templates(project_id: project_id, zone_id: zones[zone]["id"], template_filter: "executable")
       say "Select a template:", :yellow
       print_options(templates)
       template = ask_number("Template Nr.: ")

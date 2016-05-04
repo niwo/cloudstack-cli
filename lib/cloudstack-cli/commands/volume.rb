@@ -113,7 +113,7 @@ class Volume < CloudstackCli::Base
 
   desc "attach NAME", "attach volume to VM"
   option :project, desc: 'project of volume'
-  option :virtual_machine, desc: 'virtual machine of volume'
+  option :virtual_machine, desc: 'virtual machine of volume', required: true
   def attach(name)
     resolve_project
     resolve_virtual_machine
@@ -142,6 +142,7 @@ class Volume < CloudstackCli::Base
 
   desc "detach NAME", "detach volume from VM"
   option :project, desc: 'project of volume'
+  option :force
   def detach(name)
     resolve_project
 
@@ -158,7 +159,8 @@ class Volume < CloudstackCli::Base
       say "Error: Volume #{name} currently not attached to any VM.", :red
       exit 1
     end
-
+    exit unless options[:force] ||
+      yes?("Detach volume #{name} from virtual_machine #{volume["vmname"]}? [y/N]:", :magenta)
     say "Detach volume #{name} from VM #{volume["vmname"]} "
     client.detach_volume id: volume['id']
     say " OK.", :green
