@@ -134,5 +134,6 @@ module CloudstackCli
         end
       end
     end
-  end
-end
+    
+  end # class
+end # module

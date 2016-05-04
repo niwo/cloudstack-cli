@@ -162,15 +162,16 @@ Completed: 2/3 (15.4s)
 ### Example: Sort computing offerings
 
 *Sort all computing offerings by CPU and Memory grouped by domain:*
+(root admin privileges needed)
 
 ```bash
-$ cloudstack-cli offering sort
+$ cloudstack-cli compute_offer sort
 ```
 
 ### Example: Stop all backup routers of a given project
 
 *Stop all virtual routers of project named Demo (you could filter by zone too):*
-(This command is helpful if you have to deploy new versions of CloudStack when using redundant routers)
+(this command is helpful if you have to deploy new major release of CloudStack when using redundant routers)
 
 ```bash
 $ cloudstack-cli router list --project Demo --status running --redundant-state BACKUP --command STOP
