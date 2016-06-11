@@ -166,37 +166,63 @@ module CloudstackCli
     end
 
     def create_port_rules(server, port_rules, async = true)
-      frontendip = nil
+      frontendip_id = nil
       jobs = []
       client.verbose = async
       project_id = server['projectid'] || nil
       port_rules.each do |pf_rule|
-        ip = pf_rule.split(":")[0]
-        if ip != ''
-          ip_addr = client.get_public_ip_address(ip, project_id)
-          unless ip_addr
-            say "Error: IP #{ip} not found.", :red
+        pf_rule = pf_rule_to_object(pf_rule)
+        if pf_rule[:ipaddress]
+          pub_ip = client.list_public_ip_addresses(
+            network_id: get_server_default_nic(server)["networkid"],
+            project_id: project_id,
+            ipaddress: pf_rule[:ipaddress]
+          )
+          ip_addr = pub_ip.find { |addr| addr['ipaddress'] == pf_rule[:ipaddress]} if pub_ip
+          if ip_addr
+            frontendip = ip_addr['id']
+          else
+            say "Error: IP #{pf_rule[:ipaddress]} not found.", :red
             next
           end
-        else
-          ip_addr = frontendip ||= client.associate_ip_address(
-            network_id: server["nic"].first["networkid"]
-          )["ipaddress"]
         end
-        port = pf_rule.split(":")[1]
-        args = {
-          ipaddressid: ip_addr["id"],
-          publicport: port,
-          privateport: port,
-          protocol: 'TCP',
-          virtualmachineid: server["id"]
-        }
-        if async
-          say "Create port forwarding rule #{ip_addr['ipaddress']}:#{port} for server #{server["name"]}.", :yellow
-          client.create_port_forwarding_rule(args)
-          return
+
+        # check if there is already an existing rule
+        rules = client.list_port_forwarding_rules(
+          networkid: get_server_default_nic(server)["networkid"],
+          ipaddressid: frontendip_id,
+          projectid: project_id
+        )
+        existing_pf_rules = rules.find do |rule|
+          # remember matching address for additional rules
+          frontendip_id = rule['ipaddressid'] if rule['virtualmachineid'] == server['id']
+
+          rule['virtualmachineid'] == server['id'] &&
+          rule['publicport'] == pf_rule[:publicport] &&
+          rule['privateport'] == pf_rule[:privateport] &&
+          rule['protocol'] == pf_rule[:protocol]
+        end
+
+        if existing_pf_rules
+          say "Port forwarding rule on port #{pf_rule[:privateport]} for VM #{server["name"]} already exists.", :yellow
         else
-          jobs << client.create_port_forwarding_rule(args, {sync: true})['jobid']
+          unless frontendip_id
+            frontendip_id = client.associate_ip_address(
+              network_id: get_server_default_nic(server)["networkid"],
+              project_id: project_id
+            )['ipaddress']['id']
+          end
+          args = pf_rule.merge({
+            ipaddressid: frontendip_id,
+            virtualmachineid: server["id"]
+          })
+          if async
+            say "Create port forwarding rule #{pf_rule[:ipaddress]}:#{port} for VM #{server["name"]}.", :yellow
+            client.create_port_forwarding_rule(args)
+            return
+          else
+            jobs << client.create_port_forwarding_rule(args, {sync: true})['jobid']
+          end
         end
       end
       jobs
@@ -267,56 +293,20 @@ module CloudstackCli
       end
     end
 
-    ##
-    # Finds the public ip for a server
-
-    def get_server_public_ip(server, cached_rules=nil)
-      return nil unless server
-
-      # find the public ip
-      nic = get_server_default_nic(server) || {}
-      if nic['type'] == 'Virtual'
-        ssh_rule = get_ssh_port_forwarding_rule(server, cached_rules)
-        ssh_rule ? ssh_rule['ipaddress'] : nil
-      else
-        nic['ipaddress']
-      end
-    end
-
-    ##
-    # Gets the SSH port forwarding rule for the specified server.
-
-    def get_ssh_port_forwarding_rule(server, cached_rules=nil)
-      rules = cached_rules || client.list_port_forwarding_rules(project_id: server["projectid"]) || []
-      rules.find_all { |r|
-        r['virtualmachineid'] == server['id'] &&
-            r['privateport'] == '22'&&
-            r['publicport'] == '22'
-      }.first
-    end
-
-    ##
-    # Returns the fully qualified domain name for a server.
-
-    def get_server_fqdn(server)
-      return nil unless server
-
-      nic = get_server_default_nic(server) || {}
-      networks = client.list_networks(project_id: server['projectid']) || {}
-
-      id = nic['networkid']
-      network = networks.select { |net|
-        net['id'] == id
-      }.first
-      return nil unless network
-
-      "#{server['name']}.#{network['networkdomain']}"
-    end
-
     def get_server_default_nic(server)
       server['nic'].each do |nic|
         return nic if nic['isdefault']
       end
+    end
+
+    def pf_rule_to_object(pf_rule)
+      pf_rule = pf_rule.split(":")
+      {
+        ipaddress: (pf_rule[0] == '' ? nil : pf_rule[0]),
+        privateport: pf_rule[1],
+        publicport: (pf_rule[2] || pf_rule[1]),
+        protocol: (pf_rule[3] || 'tcp').downcase
+      }
     end
 
   end

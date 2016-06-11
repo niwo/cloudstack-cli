@@ -102,15 +102,13 @@ class VirtualMachine < CloudstackCli::Base
     end
 
     vm_options_to_params
-    say "Start deploying virtual machine#{ "s" if names.size > 1 }...", :green
+    say "Start deploying virtual machine#{"s" if names.size > 1}...", :green
     jobs = names.map do |name|
-      if virtual_machine = client.list_virtual_machines(name: name, project_id: options[:project_id]).first
+      if virtual_machine = client.list_virtual_machines(
+        name: name, project_id: options[:project_id]
+        ).first
         say "virtual machine #{name} (#{virtual_machine["state"]}) already exists.", :yellow
-        job = {
-          id: 0,
-          name: "Create virtual machine #{name}",
-          status: 1
-        }
+        job = {id: 0, name: "Create virtual machine #{name}", status: 1}
       else
         job = {
           id: client.deploy_virtual_machine(options.merge(name: name), {sync: true})['jobid'],
