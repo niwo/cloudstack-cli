@@ -13,7 +13,7 @@ class Stack < CloudstackCli::Base
     jobs = []
     stack["servers"].each do |instance|
       string_to_array(instance["name"]).each do |name|
-        if options[:limit].include?(name)
+        if !options[:limit] || options[:limit].include?(name)
           server = client.list_virtual_machines(name: name, project_id: project_id).first
           if server
             say "VM #{name} (#{server["state"]}) already exists.", :yellow
@@ -57,7 +57,7 @@ class Stack < CloudstackCli::Base
       jobs = []
       stack["servers"].each do |instance|
         string_to_array(instance["name"]).each do |name|
-          if options[:limit].include?(name) && port_rules = string_to_array(instance["port_rules"])
+          if !options[:limit] || options[:limit].include?(name) && port_rules = string_to_array(instance["port_rules"])
             server = client.list_virtual_machines(name: name, project_id: project_id).first
             create_port_rules(server, port_rules, false).each_with_index do |job_id, index|
               job_name = "Create port forwarding rules (#{port_rules[index]}) for VM #{name}"

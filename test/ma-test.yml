@@ -1,0 +1,10 @@
+---
+  name: test-from-templ
+  description: Testinstall from Template
+  version: 1.0
+  zone: ZUERICH_IX
+  servers:
+    - name: test-01
+      template: web-d2-2015-07-16
+      offering: 1cpu_1gb
+      networks: wolfgrni
