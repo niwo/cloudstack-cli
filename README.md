@@ -140,7 +140,7 @@ CloudStack CLI does support stack files in YAML or JSON.
           ip: 10.102.1.11
 ```
 
-*Create the stack of servers from the definition above:
+*Create the stack of servers from the definition above:*
 
 ```bash
 $ cloudstack-cli stack create my_stackfile.yml
