@@ -15,7 +15,8 @@ module CloudstackCli
       -1 => "waiting",
       0  => "running",
       1  => "completed",
-      2  => "error"
+      2  => "error",
+      3  => "aborted"
     }
 
     def watch_jobs(jobs)
@@ -120,7 +121,7 @@ module CloudstackCli
       end
       t_elapsed = opts[:t_start] ? (Time.now - opts[:t_start]).round(1) : 0
       completed = jobs.select{|j| j[:status] == 1}.size
-      say "Completed: #{completed}/#{jobs.size} (#{t_elapsed}s)", :magenta
+      say "Completed: #{completed} of #{jobs.size} (#{t_elapsed}s)", :magenta
       sleep opts[:sleeptime] || 0.1
       spinner.push spinner.shift
       spinner

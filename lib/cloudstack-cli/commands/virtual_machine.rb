@@ -108,7 +108,7 @@ class VirtualMachine < CloudstackCli::Base
         name: name, project_id: options[:project_id]
         ).first
         say "virtual machine #{name} (#{virtual_machine["state"]}) already exists.", :yellow
-        job = {id: 0, name: "Create virtual machine #{name}", status: 1}
+        job = {id: 0, name: "Create virtual machine #{name}", status: 3}
       else
         job = {
           id: client.deploy_virtual_machine(options.merge(name: name), {sync: true})['jobid'],
@@ -120,19 +120,27 @@ class VirtualMachine < CloudstackCli::Base
     watch_jobs(jobs)
     if options[:port_rules].size > 0
       say "Create port forwarding rules...", :green
-      jobs = []
+      pjobs = []
       names.each do |name|
         virtual_machine = client.list_virtual_machine(name: name, project_id: options[:project_id]).first
         create_port_rules(virtual_machine, options[:port_rules], false).each_with_index do |job_id, index|
-          jobs << {
+          pjobs << {
             id: job_id,
             name: "Create port forwarding ##{index + 1} rules for virtual machine #{virtual_machine['name']}"
           }
         end
       end
-      watch_jobs(jobs)
+      watch_jobs(pjobs)
     end
     say "Finished.", :green
+    if (jobs.count {|job| job[:status] == 1 } > 0) && yes?("Display password(s) for VM(s)? [y/N]:", :yellow)
+      table = []
+      jobs.each do |job|
+        data = client.query_async_job_result(jobid: job[:id])["jobresult"]["virtualmachine"] rescue nil
+        table << [data["name"], data["password"]] if data
+      end
+      print_table table
+    end
   end
 
   desc "destroy NAME [NAME2 ..]", "destroy virtual machine(s)"
