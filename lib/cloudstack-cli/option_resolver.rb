@@ -240,5 +240,16 @@ module CloudstackCli
       options
     end
 
+    def resolve_cluster
+      if options[:cluster]
+        unless cluster = client.list_clusters(name: options[:cluster]).first
+          say "Error: Cluster '#{options[:cluster]}' not found.", :red
+          exit 1
+        end
+        options[:cluster_id] = cluster['id']
+      end
+      options
+    end
+
   end
 end

@@ -162,7 +162,7 @@ Completed: 2/3 (15.4s)
 ### Example: Sort computing offerings
 
 *Sort all computing offerings by CPU and Memory grouped by domain:*
-(root admin privileges needed)
+(root admin privileges required)
 
 ```bash
 $ cloudstack-cli compute_offer sort

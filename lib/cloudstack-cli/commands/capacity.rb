@@ -14,23 +14,28 @@ class Capacity < CloudstackCli::Base
 
   desc "list", "list system capacity"
   option :zone, desc: "list capacity by zone"
+  option :cluster, desc: "list capacity by cluster"
   option :type, desc: "specify type, see types for a list of types"
   def list
-    resolve_zone if options[:zone]
+    resolve_zone
+    resolve_cluster
     capacities = client.list_capacity(options)
     table = []
     header = ["Zone", "Type", "Capacity Used", "Capacity Total", "Used"]
+    header[0] = "Cluster" if options[:cluster_id]
     capacities.each do |c|
-      table << [
-        c['zonename'],
-         CAPACITY_TYPES[c['type']][:name],
-         capacity_to_s(c, 'capacityused'),
-         capacity_to_s(c, 'capacitytotal'),
-         "#{c['percentused']}%"
-      ]
+      if CAPACITY_TYPES.include? c['type']
+        table << [
+          c['clustername'] || c['zonename'],
+          CAPACITY_TYPES[c['type']][:name],
+          capacity_to_s(c, 'capacityused'),
+          capacity_to_s(c, 'capacitytotal'),
+          "#{c['percentused']}%"
+        ]
+      end
     end
-    table = table.sort {|a, b|  [a[0], a[1]] <=> [b[0], b[1]]}.insert(0, header)
-    print_table table
+    table = table.sort {|a, b| [a[0], a[1]] <=> [b[0], b[1]]}
+    print_table table.insert(0, header)
   end
 
   desc "types", "show capacity types"
