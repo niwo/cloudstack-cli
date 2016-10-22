@@ -104,9 +104,7 @@ class VirtualMachine < CloudstackCli::Base
     vm_options_to_params
     say "Start deploying virtual machine#{"s" if names.size > 1}...", :green
     jobs = names.map do |name|
-      if virtual_machine = client.list_virtual_machines(
-        name: name, project_id: options[:project_id]
-        ).first
+      if virtual_machine = find_vm_by_name(name)
         say "virtual machine #{name} (#{virtual_machine["state"]}) already exists.", :yellow
         job = {id: 0, name: "Create virtual machine #{name}", status: 3}
       else
@@ -118,26 +116,27 @@ class VirtualMachine < CloudstackCli::Base
       job
     end
     watch_jobs(jobs)
-    if options[:port_rules].size > 0
+    successful_jobs = jobs.count {|job| job[:status] == 1 }
+    if options[:port_rules].size > 0 && successful_jobs > 0
       say "Create port forwarding rules...", :green
       pjobs = []
       names.each do |name|
-        virtual_machine = client.list_virtual_machine(name: name, project_id: options[:project_id]).first
-        create_port_rules(virtual_machine, options[:port_rules], false).each_with_index do |job_id, index|
+        vm = client.list_virtual_machines(name: name, project_id: options[:project_id]).first
+        create_port_rules(vm, options[:port_rules], false).each_with_index do |job_id, index|
           pjobs << {
             id: job_id,
-            name: "Create port forwarding ##{index + 1} rules for virtual machine #{virtual_machine['name']}"
+            name: "Create port forwarding ##{index + 1} rules for VM #{vm['name']}"
           }
         end
       end
       watch_jobs(pjobs)
     end
     say "Finished.", :green
-    if (jobs.count {|job| job[:status] == 1 } > 0) && yes?("Display password(s) for VM(s)? [y/N]:", :yellow)
+    if successful_jobs > 0 && yes?("Display password(s) for VM(s)? [y/N]:", :yellow)
       table = []
       jobs.each do |job|
         data = client.query_async_job_result(jobid: job[:id])["jobresult"]["virtualmachine"] rescue nil
-        table << [data["name"], data["password"]] if data
+        table << ["#{data["name"]}:", data["password"]] if data
       end
       print_table table
     end
