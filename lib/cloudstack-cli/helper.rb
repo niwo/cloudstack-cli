@@ -24,7 +24,7 @@ module CloudstackCli
       call = 0
       opts = {t_start: Time.now}
       jobs = update_job_status(jobs)
-      while jobs.select{|job| job[:status].to_i < 1 }.size > 0 do
+      while jobs.count{|job| job[:status].to_i < 1 } > 0 do
         if call.modulo(40) == 0
           t = Thread.new { jobs = update_job_status(jobs) }
           while t.alive?
@@ -50,7 +50,12 @@ module CloudstackCli
       jobs.each do |job|
         job[:status] = 0 unless job[:status]
         if job[:status] == 0
-          job[:status] = client.query_async_job_result(job_id: job[:id])['jobstatus']
+          result = client.query_async_job_result(job_id: job[:id])
+          job[:status] = result["jobstatus"]
+          # add result information for terminated jobs
+          if job[:status].between?(1, 2)
+            job[:result] = result["jobresult"]
+          end
         end
       end
       jobs
@@ -62,7 +67,7 @@ module CloudstackCli
         call = 0
         opts = {t_start: Time.now}
 
-        while jobs.select{|job| job[:status] < 1 }.size > 0 do
+        while jobs.count{|job| job[:status] < 1 } > 0 do
           if call.modulo(40) == 0
             t = Thread.new { jobs = update_jobs(jobs, command) }
             while t.alive?
@@ -90,19 +95,23 @@ module CloudstackCli
       # update running job status
       threads = jobs.select{|job| job[:status] == 0 }.map do |job|
         Thread.new do
-          job[:status] = client.query_async_job_result(job_id: job[:job_id])['jobstatus']
+          result = client.query_async_job_result(job_id: job[:job_id])
+          job[:status] = result['jobstatus']
+          if job[:status].between?(1, 2)
+            job[:result] = result["jobresult"]
+          end
         end
       end
       threads.each(&:join)
 
       # launch new jobs if required and possible
-      launch_capacity = options[:concurrency] - jobs.select{|job| job[:status] == 0 }.count
+      launch_capacity = (options[:concurrency] ||= 10) - jobs.count{|job| job[:status] == 0 }
       threads = []
       jobs.select{|job| job[:status] == -1 }.each do |job|
         if launch_capacity > 0
           threads << Thread.new do
             job[:job_id] = client.send(
-              command, { id: job[:object_id] }, { sync: true }
+              command, job[:args], { sync: true }
             )['jobid']
             job[:status] = 0
           end
@@ -120,7 +129,7 @@ module CloudstackCli
         puts job[:status] == 0 ? spinner.first : ""
       end
       t_elapsed = opts[:t_start] ? (Time.now - opts[:t_start]).round(1) : 0
-      completed = jobs.select{|j| j[:status] == 1}.size
+      completed = jobs.count{|j| j[:status] == 1 }
       say "Completed: #{completed} of #{jobs.size} (#{t_elapsed}s)", :magenta
       sleep opts[:sleeptime] || 0.1
       spinner.push spinner.shift

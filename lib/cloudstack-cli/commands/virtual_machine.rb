@@ -15,7 +15,7 @@ class VirtualMachine < CloudstackCli::Base
     desc: "command to execute for the given virtual machines",
     enum: %w(START STOP REBOOT)
   option :concurrency, type: :numeric, default: 10, aliases: '-C',
-    desc: "number of concurrent command to execute"
+    desc: "number of concurrent commands to execute"
   option :format, default: "table",
     enum: %w(table json yaml)
   def list
@@ -78,7 +78,7 @@ class VirtualMachine < CloudstackCli::Base
   option :zone, aliases: '-z', required: true, desc: "availability zone name"
   option :networks, aliases: '-n', type: :array, desc: "network names"
   option :project, aliases: '-p', desc: "project name"
-  option :port_rules, aliases: '-pr', type: :array,
+  option :port_rules, type: :array,
     default: [],
     desc: "Port Forwarding Rules [public_ip]:port ..."
   option :disk_offering, desc: "disk offering (data disk for template, root disk for iso)"
@@ -91,6 +91,8 @@ class VirtualMachine < CloudstackCli::Base
   option :ip_network_list, desc: "ip_network_list (net1:ip net2:ip...)", type: :array
   option :user_data,
     desc: "optional binary data that can be sent to the virtual machine upon a successful deployment."
+  option :concurrency, type: :numeric, default: 10, aliases: '-C',
+    desc: "number of concurrent commands to execute"
   def create(*names)
     if names.size == 0
       say "Please provide at least one virtual machine name.", :yellow
@@ -106,39 +108,45 @@ class VirtualMachine < CloudstackCli::Base
     jobs = names.map do |name|
       if virtual_machine = find_vm_by_name(name)
         say "virtual machine #{name} (#{virtual_machine["state"]}) already exists.", :yellow
-        job = {id: 0, name: "Create virtual machine #{name}", status: 3}
+        job = {name: "Create virtual machine #{name}", status: 3}
       else
         job = {
-          id: client.deploy_virtual_machine(options.merge(name: name), {sync: true})['jobid'],
-          name: "Create virtual machine #{name}"
+          args: options.merge(name: name),
+          name: "Create VM #{name}",
+          status: -1
         }
       end
       job
     end
-    watch_jobs(jobs)
+
+    if jobs.count{|job| job[:status] < 1 } > 0
+      run_background_jobs(jobs, "deploy_virtual_machine")
+    end
+
     successful_jobs = jobs.count {|job| job[:status] == 1 }
     if options[:port_rules].size > 0 && successful_jobs > 0
       say "Create port forwarding rules...", :green
       pjobs = []
-      names.each do |name|
-        vm = client.list_virtual_machines(name: name, project_id: options[:project_id]).first
+      jobs.select{|job| job[:status] == 1}.each do |job|
+        vm = job[:result]["virtualmachine"]
         create_port_rules(vm, options[:port_rules], false).each_with_index do |job_id, index|
           pjobs << {
             id: job_id,
-            name: "Create port forwarding ##{index + 1} rules for VM #{vm['name']}"
+            name: "Create port forwarding rule #{options[:port_rules][index]} for VM #{vm['name']}"
           }
         end
       end
       watch_jobs(pjobs)
     end
     say "Finished.", :green
+
     if successful_jobs > 0 && yes?("Display password(s) for VM(s)? [y/N]:", :yellow)
-      table = []
-      jobs.each do |job|
-        data = client.query_async_job_result(jobid: job[:id])["jobresult"]["virtualmachine"] rescue nil
-        table << ["#{data["name"]}:", data["password"]] if data
+      pw_table = jobs.select {|job| job[:status] == 1 && job[:result] }.map do |job|
+        if result = job[:result]["virtualmachine"]
+          ["#{result["name"]}:", result["password"] || "n/a"]
+        end
       end
-      print_table table
+      print_table(pw_table) if pw_table.size > 0
     end
   end
 
@@ -319,7 +327,7 @@ class VirtualMachine < CloudstackCli::Base
       jobs = virtual_machines.map do |vm|
         {
           job_id: nil,
-          object_id: vm["id"],
+          args: { id: vm["id"] },
           name: "#{command.capitalize} virtual machine #{vm['name']}",
           status: -1
         }

@@ -18,6 +18,7 @@ module CloudstackCli
       else
         resolve_networks
       end
+      options
     end
 
     def resolve_zone

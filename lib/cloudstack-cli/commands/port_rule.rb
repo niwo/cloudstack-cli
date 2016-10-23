@@ -10,10 +10,13 @@ class PortRule < CloudstackCli::Base
   option :keyword, desc: "list by keyword"
   def create(server_name)
     resolve_project
-    unless server = client.list_virtual_machines(name: server_name, project_id: options[:project_id]).first
+    unless server = client.list_virtual_machines(
+      name: server_name, project_id: options[:project_id], listall: true
+      ).find {|vm| vm["name"] == server_name }
       error "Server #{server_name} not found."
       exit 1
     end
+    ip_addr = nil
     options[:rules].each do |pf_rule|
       ip = pf_rule.split(":")[0]
       unless ip == ''
@@ -23,16 +26,13 @@ class PortRule < CloudstackCli::Base
         end
       else
         say "Assign a new IP address ", :yellow
-        say(" OK", :green) if ip_addr = client.associate_ip_address(
-          networkid: client.list_networks(
-            project_id: options[:project_id]
-          ).find {|n| n['name'] == options[:network]}['id'],
-          project_id: options[:project_id]
-        )
+        net_id = client.list_networks(project_id: options[:project_id]).find {|n| n['name'] == options[:network]}['id']
+        say(" OK", :green) if ip_addr = client.associate_ip_address(networkid: net_id)["ipaddress"]
       end
       port = pf_rule.split(":")[1]
       say "Create port forwarding rule #{ip_addr["ipaddress"]}:#{port} for server #{server_name} ", :yellow
-      say(" OK.", :green) if client.create_port_forwarding_rule(
+
+      say(" OK", :green) if client.create_port_forwarding_rule(
         ipaddress_id: ip_addr["id"],
         public_port: port,
         private_port: port,

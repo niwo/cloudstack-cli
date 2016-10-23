@@ -1,0 +1,14 @@
+---
+  name: "web_stack_b"
+  description: "Web Application Stack"
+  version: "1.0"
+  zone: "ZUERICH_EQ"
+  project: "Playground"
+  group: "my_web_stack"
+  servers:
+    - name: "webx-01, webx-02"
+      description: "Web nodes"
+      template: "CentOS-7-x86_64"
+      offering: "1cpu_1gb"
+      networks: "M_PLAY"
+      port_rules: ":80, :443"

@@ -13,7 +13,7 @@ class Router < CloudstackCli::Base
     desc: "command to execute for each router",
     enum: %w(START STOP REBOOT STOP_START)
   option :concurrency, type: :numeric, default: 10, aliases: '-C',
-    desc: "number of concurrent command to execute"
+    desc: "number of concurrent commands to execute"
   option :format, default: "table",
     enum: %w(table json yaml)
   option :showid, type: :boolean, desc: "display the router ID"
@@ -43,7 +43,7 @@ class Router < CloudstackCli::Base
     desc: "command to execute for each router",
     enum: %w(START STOP REBOOT)
   option :concurrency, type: :numeric, default: 10, aliases: '-C',
-    desc: "number of concurrent command to execute"
+    desc: "number of concurrent commands to execute"
   option :format, default: "table",
     enum: %w(table json yaml)
   def list_from_file(file)
@@ -219,7 +219,7 @@ class Router < CloudstackCli::Base
         jobs = routers.map do |router|
           {
             job_id: nil,
-            object_id: router["id"],
+            args: { id: router["id"] },
             name: "#{cmd.capitalize} router #{router['name']}",
             status: -1
           }
