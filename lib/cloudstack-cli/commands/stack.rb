@@ -14,13 +14,14 @@ class Stack < CloudstackCli::Base
     stack["servers"].each do |instance|
       string_to_array(instance["name"]).each do |name|
         if !options[:limit] || options[:limit].include?(name)
-          server = client.list_virtual_machines(name: name, project_id: project_id).first
-          if server
+          if server = client.list_virtual_machines(
+            name: name, project_id: project_id, listall: true
+          ).find {|vm| vm["name"] == name }
             say "VM #{name} (#{server["state"]}) already exists.", :yellow
             jobs << {
               id: 0,
               name: "Create VM #{name}",
-              status: 1
+              status: 3
             }
           else
             options.merge!({
@@ -52,23 +53,37 @@ class Stack < CloudstackCli::Base
     end
     watch_jobs(jobs)
 
-    unless options[:skip_forwarding_rules]
+    # count jobs with status 1 => Completed
+    successful_jobs = jobs.count {|job| job[:status] == 1 }
+    pw_table = []
+    if successful_jobs > 0 &&
+      jobs.each do |job|
+        data = client.query_async_job_result(jobid: job[:id])["jobresult"]["virtualmachine"] rescue nil
+        pw_table << ["#{data["name"]}:", data["password"]] if data
+      end
+    end
+
+    unless successful_jobs == 0 || options[:skip_forwarding_rules]
       say "Check for port forwarding rules...", :green
-      jobs = []
+      pjobs = []
       stack["servers"].each do |instance|
         string_to_array(instance["name"]).each do |name|
           if (!options[:limit] || options[:limit].include?(name)) && port_rules = string_to_array(instance["port_rules"])
             server = client.list_virtual_machines(name: name, project_id: project_id).first
             create_port_rules(server, port_rules, false).each_with_index do |job_id, index|
               job_name = "Create port forwarding rules (#{port_rules[index]}) for VM #{name}"
-              jobs << {id: job_id, name: job_name}
+              pjobs << {id: job_id, name: job_name}
             end
           end
         end
       end
-      watch_jobs(jobs)
+      watch_jobs(pjobs)
     end
     say "Finished.", :green
+
+    if pw_table.size > 0 && yes?("Display password(s) for VM(s)? [y/N]:", :yellow)
+      print_table pw_table
+    end
   end
 
   desc "destroy STACKFILE", "destroy a stack of VMs"
@@ -101,7 +116,8 @@ class Stack < CloudstackCli::Base
       exit
     end
 
-    if options[:force] || yes?("Destroy the following VM #{servers.join(', ')}? [y/N]:", :yellow)
+    if options[:force] ||
+      yes?("Destroy #{'and expunge ' if options[:expunge]}the following VM(s)? #{servers.join(', ')} [y/N]:", :yellow)
       jobs = []
       servers.each do |name|
         if server = client.list_virtual_machines(name: name, project_id: project_id).first
