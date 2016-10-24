@@ -1,0 +1,20 @@
+---
+  name: "web_stack_a"
+  description: "Web Application Stack"
+  version: "1.0"
+  zone: "Sandbox-simulator"
+  group: "my_web_stack"
+  servers:
+    - name: "web-01, web-02"
+      description: "Web nodes"
+      template: "CentOS 5.3(64-bit) no GUI (Simulator)"
+      offering: "Small Instance"
+      networks: "test-network"
+      port_rules: ":80, :443"
+    - name: "db-01"
+      description: "PostgreSQL Master"
+      template: "CentOS 5.3(64-bit) no GUI (Simulator)"
+      offering: "Medium Instance"
+      ip_network_list:
+        - name: "test-network"
+          ip: 10.1.1.11

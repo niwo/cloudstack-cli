@@ -8,6 +8,8 @@ class Stack < CloudstackCli::Base
     desc: "Skip creation of port forwarding rules."
   option :concurrency, type: :numeric, default: 10, aliases: '-C',
     desc: "number of concurrent commands to execute"
+  option :assumeyes, type: :boolean, default: false, aliases: '-y',
+    desc: "answer yes for all questions"
   def create(stackfile)
     stack = parse_file(stackfile)
     project_id = find_project_by_name(stack["project"])
@@ -83,13 +85,16 @@ class Stack < CloudstackCli::Base
     end
     say "Finished.", :green
 
-    if successful_jobs > 0 && yes?("Display password(s) for VM(s)? [y/N]:", :yellow)
-      pw_table = jobs.select {|job| job[:status] == 1 && job[:result] }.map do |job|
-        if result = job[:result]["virtualmachine"]
-          ["#{result["name"]}:", result["password"] || "n/a"]
+    if successful_jobs > 0
+      if options[:assumeyes] || yes?("Display password(s) for VM(s)? [y/N]:", :yellow)
+        pw_table = [%w(VM Password)]
+        jobs.select {|job| job[:status] == 1 && job[:result] }.each do |job|
+          if result = job[:result]["virtualmachine"]
+            pw_table << ["#{result["name"]}:", result["password"] || "n/a"]
+          end
         end
+        print_table(pw_table) if pw_table.size > 0
       end
-      print_table(pw_table) if pw_table.size > 0
     end
   end
 
