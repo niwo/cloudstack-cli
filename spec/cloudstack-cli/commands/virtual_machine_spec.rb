@@ -3,49 +3,99 @@ require "cloudstack-cli"
 
 describe VirtualMachine do
 
-  it "should be able to run vm list" do
-    out = capture_io{ CloudstackCli::Cli.start [
+  it "should support all CRUD actions" do
+    vmname = "testvm1"
+
+    # CREATE
+    out, err = capture_io{ CloudstackCli::Cli.start [
+      "vm",
+      "create",
+      vmname,
+      "--zone=#{ZONE}",
+      "--template=#{TEMPLATE}",
+      "--offering=#{OFFERING_S}",
+      "--networks=test-network",
+      "--port-rules=:80",
+      "--assumeyes",
+      CONFIG,
+    ]}
+    err.must_equal ""
+
+    # READ - LIST
+    out, err = capture_io{ CloudstackCli::Cli.start [
       "vm",
       "list",
       CONFIG
-    ]}.join ""
-    out.lines.last.must_match(
-      /.*(No virtual machines found.|Total number of virtual machines: \d)/
+    ]}
+    err.must_equal ""
+    out.must_match(
+      /.*(#{vmname}).*/
     )
-  end
 
-  it "should successfully create a vm" do
-    out, err = capture_io do
-      startvm = CloudstackCli::Cli.start [
-        "vm",
-        "create",
-        "testvm1",
-        "--zone=Sandbox-simulator",
-        "--template=CentOS 5.3(64-bit) no GUI (Simulator)",
-        "--offering=Small Instance",
-        "--networks=test-network",
-        "--port-rules=:80",
-        "--assumeyes",
-        CONFIG,
-      ]
-    end
-    puts out
+    # READ - SHOW
+    out, err = capture_io{ CloudstackCli::Cli.start [
+      "vm",
+      "show",
+      vmname,
+      CONFIG
+    ]}
     err.must_equal ""
-  end
+    out.must_match(
+      /.*(#{vmname}).*/
+    )
 
-  it "should destroy a vm" do
-    out, err = capture_io do
-      startvm = CloudstackCli::Cli.start [
-        "vm",
-        "destroy",
-        "testvm1",
-        "--expunge",
-        "--force",
-        CONFIG,
-      ]
-    end
-    puts out
+    # UPDATE - STOP
+    out, err = capture_io{ CloudstackCli::Cli.start [
+      "vm",
+      "stop",
+      vmname,
+      "--force",
+      CONFIG,
+    ]}
     err.must_equal ""
+
+    # UPDATE - UPDATE ;-)
+    new_vmname = "testvm11"
+    out, err = capture_io{ CloudstackCli::Cli.start [
+      "vm",
+      "update",
+      vmname,
+      "--name=#{new_vmname}",
+      "--force",
+      CONFIG,
+    ]}
+    err.must_equal ""
+
+    # UPDATE - START
+    out, err = capture_io{ CloudstackCli::Cli.start [
+      "vm",
+      "start",
+      new_vmname,
+      CONFIG,
+    ]}
+    err.must_equal ""
+
+    # UPDATE - REBOOT
+    out, err = capture_io{ CloudstackCli::Cli.start [
+      "vm",
+      "reboot",
+      new_vmname,
+      "--force",
+      CONFIG,
+    ]}
+    err.must_equal ""
+
+    # DELETE
+    out, err = capture_io{ CloudstackCli::Cli.start [
+      "vm",
+      "destroy",
+      new_vmname,
+      "--expunge",
+      "--force",
+      CONFIG,
+    ]}
+    err.must_equal ""
+    
   end
 
 end
