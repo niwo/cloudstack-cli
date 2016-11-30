@@ -28,7 +28,7 @@ class IpAddress < CloudstackCli::Base
   desc "list", "list public IP address"
   option :project
   option :account
-  option :listall
+  option :listall, type: :boolean, default: true
   option :format, default: "table",
     enum: %w(table json yaml)
   def list

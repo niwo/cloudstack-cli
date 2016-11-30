@@ -20,7 +20,7 @@ class Account < CloudstackCli::Base
     end
   end
 
-  desc 'list', 'list accounts'
+  desc "list", "list accounts"
   option :format, default: "table",
     enum: %w(table json yaml)
   def list

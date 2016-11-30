@@ -1,7 +1,7 @@
 class SshKeyPair < CloudstackCli::Base
 
   desc "list", 'list ssh key pairs'
-  option :listall, default: true
+  option :listall, type: :boolean, default: true
   option :account, desc: "name of the account"
   option :project, desc: "name of the project"
   option :format, default: "table",

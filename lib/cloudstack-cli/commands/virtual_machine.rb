@@ -10,7 +10,7 @@ class VirtualMachine < CloudstackCli::Base
   option :host, desc: "the name of the hypervisor host the VM belong to"
   option :filter, type: :hash,
     desc: "filter objects based on arrtibutes: (attr1:regex attr2:regex ...)"
-  option :listall, desc: "list all virtual machines", default: true
+  option :listall, desc: "list all virtual machines", type: :boolean, default: true
   option :command,
     desc: "command to execute for the given virtual machines",
     enum: %w(START STOP REBOOT)

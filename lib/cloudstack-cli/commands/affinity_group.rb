@@ -4,7 +4,7 @@ class AffinityGroup < CloudstackCli::Base
   option :account
   option :name
   option :type
-  option :listall
+  option :listall, type: :boolean, default: true
   option :keyword
   option :format, default: "table",
     enum: %w(table json yaml)

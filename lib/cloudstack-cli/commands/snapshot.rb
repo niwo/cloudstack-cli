@@ -4,7 +4,7 @@ class Snapshot < CloudstackCli::Base
   option :account, desc: "the account associated with the snapshot"
   option :project, desc: "the project associated with the snapshot"
   option :domain, desc: "the domain name of the snapshot's account"
-  option :listall, default: true, desc: "list all resources the caller has rights on"
+  option :listall, type: :boolean, default: true, desc: "list all resources the caller has rights on"
   option :state, desc: "filter snapshots by state"
   option :format, default: "table",
     enum: %w(table json yaml)

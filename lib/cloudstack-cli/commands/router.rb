@@ -7,7 +7,6 @@ class Router < CloudstackCli::Base
   option :state, desc: "the status of the router"
   option :redundant_state, desc: "the state of redundant virtual router",
     enum: %w(master backup fault unknown)
-  option :listall, type: :boolean, desc: "list all routers", default: true
   option :reverse, type: :boolean, default: false, desc: "reverse listing of routers"
   option :command,
     desc: "command to execute for each router",
@@ -26,13 +25,14 @@ class Router < CloudstackCli::Base
 
     routers = client.list_routers(options)
     # show all routers unless project or account is set
-    if options[:listall] && !options[:project] && !options[:account]
+    if !options[:project] && !options[:account]
       client.list_projects(listall: true).each do |project|
         routers = routers + client.list_routers(
           options.merge(projectid: project['id'])
         )
       end
     end
+    options[:listall] = true
     print_routers(routers, options)
     execute_router_commands(options[:command].downcase, routers) if options[:command]
   end

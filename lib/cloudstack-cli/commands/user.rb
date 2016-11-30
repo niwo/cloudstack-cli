@@ -1,7 +1,7 @@
 class User < CloudstackCli::Base
 
   desc 'list', 'list users'
-  option :listall
+  option :listall, type: :boolean, default: true
   option :account
   option :format, default: "table",
     enum: %w(table json yaml)
