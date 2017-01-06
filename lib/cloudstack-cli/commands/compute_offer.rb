@@ -60,7 +60,7 @@ class ComputeOffer < CloudstackCli::Base
     sortkey = -1
     offerings.group_by{|o| o["domain"]}.each_value do |offers|
       offers.sort {
-        |oa, ob| [oa["cpunumber"], oa["memory"]] <=> [ob["cpunumber"], ob["memory"]]
+        |oa, ob| [oa["cpunumber"], oa["memory"], oa["name"]] <=> [ob["cpunumber"], ob["memory"], ob["name"]]
       }.each do |offer|
         puts "#{sortkey.abs} #{offer['domain']} - #{offer["displaytext"]}"
         client.update_service_offering(
