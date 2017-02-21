@@ -17,11 +17,14 @@ class User < CloudstackCli::Base
       when :json
         puts JSON.pretty_generate(users: users)
       else
-        table = [["Account", "Type", "Name", "Email", "State", "Domain"]]
+        table = [%w(Account Type Name Username Email State Domain)]
         users.each do |user|
           table << [
-            user['account'], Account::TYPES[user['accounttype']], "#{user['firstname']} #{user['lastname']}",
-            user['email'], user['state'], user['domain']
+            user['account'],
+            Account::TYPES[user['accounttype']],
+            "#{user['firstname']} #{user['lastname']}",
+            user['username'], user['email'],
+            user['state'], user['domain']
           ]
         end
         print_table table
