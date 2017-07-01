@@ -1,4 +1,5 @@
 require "cloudstack_client"
+require "cloudstack_client/configuration"
 
 require "cloudstack-cli/version"
 require "cloudstack-cli/helper"

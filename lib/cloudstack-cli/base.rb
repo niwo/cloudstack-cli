@@ -49,34 +49,12 @@ module CloudstackCli
         @client
       end
 
-      def load_configuration(config_file = options[:config_file], env = options[:env])
-        unless File.exists?(config_file)
-          say "Configuration file #{config_file} not found.", :red
-          say "Please run \'cs environment add\' to create one."
-          exit 1
-        end
-
-        begin
-          config = YAML::load(IO.read(config_file))
-        rescue
-          say "Can't load configuration from file #{config_file}.", :red
-          exit 1
-        end
-
-        env ||= config[:default]
-        if env
-          unless config = config[env]
-            say "Can't find environment #{env}.", :red
-            exit 1
-          end
-        end
-
-        unless config.key?(:url) && config.key?(:api_key) && config.key?(:secret_key)
-          say "The environment #{env || '\'-\''} does not contain all required keys.", :red
-          say "Please check with 'cloudstack-cli environment list' and set a valid default environment."
-          exit 1
-        end
-        config
+      def load_configuration
+        CloudstackClient::Configuration.load(options)
+      rescue CloudstackClient::ConfigurationError => e
+        say "Error: ", :red
+        say e.message
+        exit 1
       end
 
       def filter_by(objects, key, value)
@@ -91,7 +69,8 @@ module CloudstackCli
           object[key.to_s].to_s =~ /#{value}/i
         end
       rescue RegexpError => e
-        say "ERROR: Invalid regular expression in filter - #{e.message}", :red
+        say "ERROR: ", :red
+        say "Invalid regular expression in filter - #{e.message}"
         exit 1
       end
 
@@ -119,21 +98,23 @@ module CloudstackCli
         when ".yaml", ".yml"
           Object.const_get "YAML"
         else
-          say "File extension #{File.extname(file)} not supported. Supported extensions are #{extensions.join(', ')}", :red
+          say "ERROR: ", :red
+          say "File extension #{File.extname(file)} not supported. Supported extensions are #{extensions.join(', ')}"
           exit
         end
         begin
           return handler.load open(file){|f| f.read}
         rescue SystemCallError
-          say "Can't find the file #{file}.", :red
+          say "ERROR: ", :red
+          say "Can't find the file '#{file}'."
           exit 1
         rescue => e
-          say "Error parsing #{File.extname(file)} file:", :red
-          say e.message
+          say "ERROR: ", :red
+          say "Can't parse file '#{file}': #{e.message}"
           exit 1
         end
       end
     end
-    
+
   end # class
 end # module

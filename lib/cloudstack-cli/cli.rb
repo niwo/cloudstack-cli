@@ -5,9 +5,9 @@ module CloudstackCli
     package_name "cloudstack-cli"
 
     class_option :config_file,
-      default: File.join(Dir.home, '.cloudstack-cli.yml'),
+      default: CloudstackClient::Configuration.locate_config_file,
       aliases: '-c',
-      desc: 'Location of your cloudstack-cli configuration file'
+      desc: 'Location of your cloudstack configuration file'
 
     class_option :env,
       aliases: '-e',
