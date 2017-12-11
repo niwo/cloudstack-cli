@@ -18,6 +18,7 @@ class VirtualMachine < CloudstackCli::Base
     desc: "number of concurrent commands to execute"
   option :format, default: "table",
     enum: %w(table json yaml)
+  option :force, desc: "execute command without confirmation", type: :boolean, aliases: '-f'
   def list
     add_filters_to_options("listVirtualMachines") if options[:filter]
     resolve_account
@@ -35,7 +36,7 @@ class VirtualMachine < CloudstackCli::Base
       puts "No virtual machines found."
     else
       print_virtual_machines(virtual_machines)
-      execute_virtual_machines_commands(command, virtual_machines) if command
+      execute_virtual_machines_commands(command, virtual_machines, options) if command
     end
   end
 
@@ -46,6 +47,7 @@ class VirtualMachine < CloudstackCli::Base
   option :concurrency, type: :numeric, default: 10, aliases: '-C',
   desc: "number of concurrent command to execute"
   option :format, default: :table, enum: %w(table json yaml)
+  option :force, desc: "execute command without confirmation", type: :boolean, aliases: '-f'
   def list_from_file(file)
     virtual_machines = parse_file(file)["virtual_machines"]
     if virtual_machines.size < 1
@@ -54,7 +56,8 @@ class VirtualMachine < CloudstackCli::Base
       print_virtual_machines(virtual_machines)
       execute_virtual_machines_commands(
         options[:command].downcase,
-        virtual_machines
+        virtual_machines,
+        options
       ) if options[:command]
     end
   end
@@ -322,12 +325,13 @@ class VirtualMachine < CloudstackCli::Base
       end
     end
 
-    def execute_virtual_machines_commands(command, virtual_machines)
+    def execute_virtual_machines_commands(command, virtual_machines, options = {})
       unless %w(start stop reboot).include?(command)
         say "\nCommand #{options[:command]} not supported.", :red
         exit 1
       end
-      exit unless yes?("\n#{command.capitalize} the virtual machine(s) above? [y/N]:", :magenta)
+      exit unless options[:force] ||
+        yes?("\n#{command.capitalize} the virtual machine(s) above? [y/N]:", :magenta)
 
       jobs = virtual_machines.map do |vm|
         {
