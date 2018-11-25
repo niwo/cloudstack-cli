@@ -1,5 +1,5 @@
 :default: development
 development:
-  :url: http://127.0.0.1:8080/client/api
-  :api_key: 3B1lE0C33ceSOUg0jaIo8STNZ55I-mdvza0LXpZA8mrvtpBpgzJgE9YSsURBcQ6qKX090w5vv_AgGRZeYS9AiQ
-  :secret_key: mneyw6fg__Gt-ENg0E_9BfxcuiMJPSThe701Kuz7f5_EsJ0POoN4z9eoslECP5V9oDzB6XOlsCw1FuBqPjMmLg
+  :url: http://localhost:8080/client/api
+  :api_key: oCyplGVQ0i64XLm6LATWSrcX_oMnH3BuTl9P2QR0VoD6obi1fcVTa5niOvRSlVnVwEjNwOpfNwXtUgueCEKrfg
+  :secret_key: OA-kVaw4QxYceWebDuBpwiQz2c9r0tpny6E4MwAUb8-IFIFXiIGdPKxTneuoP-vE-l9MUMoSLE1UwO0yAzaM8Q
