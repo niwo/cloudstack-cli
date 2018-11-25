@@ -16,16 +16,14 @@ describe VirtualMachine do
       "--offering=#{OFFERING_S}",
       "--networks=test-network",
       "--port-rules=:80",
-      "--assumeyes",
-      CONFIG,
+      "--assumeyes"
     ]}
     err.must_equal ""
 
     # READ - LIST
     out, err = capture_io{ CloudstackCli::Cli.start [
       "vm",
-      "list",
-      CONFIG
+      "list"
     ]}
     err.must_equal ""
     out.must_match(
@@ -36,8 +34,7 @@ describe VirtualMachine do
     out, err = capture_io{ CloudstackCli::Cli.start [
       "vm",
       "show",
-      vmname,
-      CONFIG
+      vmname
     ]}
     err.must_equal ""
     out.must_match(
@@ -49,8 +46,7 @@ describe VirtualMachine do
       "vm",
       "stop",
       vmname,
-      "--force",
-      CONFIG,
+      "--force"
     ]}
     err.must_equal ""
 
@@ -61,8 +57,7 @@ describe VirtualMachine do
       "update",
       vmname,
       "--name=#{new_vmname}",
-      "--force",
-      CONFIG,
+      "--force"
     ]}
     err.must_equal ""
 
@@ -70,8 +65,7 @@ describe VirtualMachine do
     out, err = capture_io{ CloudstackCli::Cli.start [
       "vm",
       "start",
-      new_vmname,
-      CONFIG,
+      new_vmname
     ]}
     err.must_equal ""
 
@@ -80,8 +74,7 @@ describe VirtualMachine do
       "vm",
       "reboot",
       new_vmname,
-      "--force",
-      CONFIG,
+      "--force"
     ]}
     err.must_equal ""
 
@@ -91,8 +84,7 @@ describe VirtualMachine do
       "destroy",
       new_vmname,
       "--expunge",
-      "--force",
-      CONFIG,
+      "--force"
     ]}
     err.must_equal ""
     
