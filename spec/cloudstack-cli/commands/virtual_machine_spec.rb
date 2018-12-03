@@ -19,8 +19,7 @@ describe VirtualMachine do
         "--offering=#{OFFERING_S}",
         "--networks=test-network",
         "--port-rules=:80",
-        "--assumeyes",
-        CONFIG,
+        "--assumeyes"
       ]
     end
     err.must_equal ""
