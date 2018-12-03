@@ -26,7 +26,7 @@ class Template < CloudstackCli::Base
         templates.each do |template|
           table << [
             template['name'],
-            Time.parse(template['created']).strftime("%F"),
+            (Time.parse(template['created']).strftime("%F") rescue "-"),
             template['zonename'],
             template['isfeatured'],
             template['ispublic'],

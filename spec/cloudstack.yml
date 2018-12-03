@@ -1,5 +1,0 @@
-:default: test
-test:
-  :url: http://127.0.0.1:8080/client/api
-  :api_key: _BEmrXaVKbW-LWSGfMjOojsWZW41HXMYK8kiygOLA1jy952NK6gNm8c-vW0u7OBadmGjsEjDld9KxO4JbVKpxA
-  :secret_key: 8qI-fCeF-Awf-aU3NQ6mPJOgC2iv4woeuazfL4OvHNxAt10s-y0sd7s8W99V2f3gRWT3po_jSExd3gmhGBZzlA
