@@ -190,6 +190,13 @@ $ cloudstack-cli router list --project Demo --status running --redundant-state B
 -  This tool was inspired by the Knife extension for Cloudstack: [knife-cloudstack](https://github.com/CloudStack-extras/knife-cloudstack)
 
 
+## Test
+
+1. Requires the [cloudstack-simulator](https://hub.docker.com/r/cloudstack/simulator/) docker images running on your local machine
+2. You need to add the admin secrets to your local cloudstack environment an make it default
+3. Currently you need to create a isolated network named "test-network" manually on the simulator
+4. Run `bundle exec rake test`
+
 ## Contributing
 
 1. Fork it
