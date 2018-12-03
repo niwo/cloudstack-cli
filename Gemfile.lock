@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    cloudstack-cli (1.6.4)
+    cloudstack-cli (1.6.5)
       cloudstack_client (~> 1.5.5)
       thor (~> 0.20.0)
 
