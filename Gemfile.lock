@@ -1,17 +1,17 @@
 PATH
   remote: .
   specs:
-    cloudstack-cli (1.6.3)
-      cloudstack_client (~> 1.5.3)
+    cloudstack-cli (1.6.4)
+      cloudstack_client (~> 1.5.5)
       thor (~> 0.20.0)
 
 GEM
   remote: https://rubygems.org/
   specs:
-    cloudstack_client (1.5.4)
+    cloudstack_client (1.5.5)
     minitest (5.11.3)
     rake (12.3.1)
-    thor (0.20.0)
+    thor (0.20.3)
 
 PLATFORMS
   ruby
@@ -22,4 +22,4 @@ DEPENDENCIES
   rake (~> 12.3)
 
 BUNDLED WITH
-   1.16.1
+   1.17.1

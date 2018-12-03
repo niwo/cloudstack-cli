@@ -102,7 +102,7 @@ $ cloudstack-cli vm help list
 *Bootstraps a server using a template and creating port-forwarding rules for port 22 and 80:*
 
 ```bash
-$ cloudstack-cli server create server-01 --template CentOS-6.4-x64-v1.4 --zone DC1 --offering 1cpu_1gb --port-rules :22 :80
+$ cloudstack-cli server create web-01 --template CentOS-7.5-x64 --zone DC1 --offering 2cpu_2gb --port-rules :22 :80
 ```
 
 ### Example: Run any custom API command

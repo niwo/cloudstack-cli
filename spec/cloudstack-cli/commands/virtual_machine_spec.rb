@@ -3,22 +3,26 @@ require "cloudstack-cli"
 
 describe VirtualMachine do
 
+  #TODO: test-network must be created beforehand
+
   it "should support all CRUD actions" do
     vmname = "testvm1"
 
     # CREATE
-    out, err = capture_io{ CloudstackCli::Cli.start [
-      "vm",
-      "create",
-      vmname,
-      "--zone=#{ZONE}",
-      "--template=#{TEMPLATE}",
-      "--offering=#{OFFERING_S}",
-      "--networks=test-network",
-      "--port-rules=:80",
-      "--assumeyes",
-      CONFIG,
-    ]}
+    out, err = capture_io do
+      CloudstackCli::Cli.start [
+        "vm",
+        "create",
+        vmname,
+        "--zone=#{ZONE}",
+        "--template=#{TEMPLATE}",
+        "--offering=#{OFFERING_S}",
+        "--networks=test-network",
+        "--port-rules=:80",
+        "--assumeyes",
+        CONFIG,
+      ]
+    end
     err.must_equal ""
 
     # READ - LIST
@@ -95,7 +99,7 @@ describe VirtualMachine do
       CONFIG,
     ]}
     err.must_equal ""
-    
+
   end
 
 end
