@@ -21,9 +21,9 @@ Gem::Specification.new do |gem|
   gem.require_paths = %w(lib)
   gem.rdoc_options  = %w[--line-numbers --inline-source]
 
-  gem.add_development_dependency('rake', '~> 12.3')
+  gem.add_development_dependency('rake', '~> 13.0')
   gem.add_development_dependency('minitest', '~> 5.11')
 
   gem.add_dependency('cloudstack_client', '~> 1.5.6')
-  gem.add_dependency('thor', '~> 0.20.0')
+  gem.add_dependency('thor', '~> 1.1.0')
 end
