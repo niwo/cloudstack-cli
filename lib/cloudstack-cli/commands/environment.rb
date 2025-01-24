@@ -45,7 +45,7 @@ class Environment < CloudstackCli::Base
       config[:default] = env if options[:default]
     end
 
-    if File.exists? options[:config_file]
+    if File.exist? options[:config_file]
       old_config = parse_config_file
       if !env || old_config.has_key?(env)
         say "This environment already exists!", :red
@@ -117,7 +117,7 @@ class Environment < CloudstackCli::Base
   no_commands do
 
     def parse_config_file
-      if File.exists? options[:config_file]
+      if File.exist? options[:config_file]
         begin
           return YAML::load(IO.read(options[:config_file]))
         rescue
