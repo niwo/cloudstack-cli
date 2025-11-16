@@ -8,9 +8,9 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
-    cloudstack_client (1.5.10)
-    minitest (5.25.4)
-    rake (13.2.1)
+    cloudstack_client (1.5.11)
+    minitest (5.26.1)
+    rake (13.3.1)
     thor (1.1.0)
 
 PLATFORMS
