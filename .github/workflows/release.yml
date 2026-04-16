@@ -113,7 +113,13 @@ jobs:
 
       - name: Publish gem to RubyGems
         if: steps.rubygems.outputs.exists != 'true'
-        uses: rubygems/release-gem@v1
-        with:
-          token: ${{ secrets.RUBYGEMS_API_KEY }}
-          setup-trusted-publisher: false
+        env:
+          GEM_HOST_API_KEY: ${{ secrets.RUBYGEMS_API_KEY }}
+          RELEASE_VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          if [ -z "$GEM_HOST_API_KEY" ]; then
+            echo 'Missing RUBYGEMS_API_KEY secret.'
+            exit 1
+          fi
+
+          gem push "cloudstack-cli-$RELEASE_VERSION.gem"
