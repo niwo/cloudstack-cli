@@ -112,6 +112,8 @@ jobs:
           fi
 
       - name: Publish gem to RubyGems
+        if: steps.rubygems.outputs.exists != 'true'
         uses: rubygems/release-gem@v1
         with:
-          api-key: ${{ secrets.RUBYGEMS_AUTH_TOKEN }}
+          token: ${{ secrets.RUBYGEMS_API_KEY }}
+          setup-trusted-publisher: false
