@@ -24,6 +24,7 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency('rake', '~> 13.0')
   gem.add_development_dependency('minitest', '~> 5.11')
 
+  gem.add_dependency('base64', '>= 0')
   gem.add_dependency('cloudstack_client', '~> 1.6.0')
   gem.add_dependency('thor', '~> 1.1.0')
 end

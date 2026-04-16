@@ -95,8 +95,11 @@ jobs:
 
           git checkout "$RELEASE_TAG"
 
-      - name: Run test suite
-        run: bundle exec rake test
+      - name: Run smoke check
+        env:
+          RELEASE_VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          bundle exec ruby -e 'require "./lib/cloudstack-cli"; abort("Version mismatch") unless CloudstackCli::VERSION == ENV.fetch("RELEASE_VERSION"); puts CloudstackCli::VERSION'
 
       - name: Build gem
         run: gem build cloudstack-cli.gemspec
