@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Existing git tag to release, for example v1.6.12'
+        description: 'Release tag to publish, for example v1.6.12'
         required: true
         type: string
 
@@ -38,7 +38,11 @@ jobs:
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             RELEASE_TAG='${{ github.event.inputs.tag }}'
             git fetch --force --tags origin
-            git checkout "$RELEASE_TAG"
+
+            if git rev-parse "refs/tags/$RELEASE_TAG" >/dev/null 2>&1; then
+              git checkout "$RELEASE_TAG"
+            fi
+
             VERSION="$(ruby -e 'require "./lib/cloudstack-cli/version"; print CloudstackCli::VERSION')"
           elif [ "$GITHUB_REF_TYPE" = "tag" ]; then
             RELEASE_TAG="$GITHUB_REF_NAME"
@@ -68,15 +72,15 @@ jobs:
             exit 1
           fi
 
-      - name: Create release tag from main
-        if: github.ref_type == 'branch'
+      - name: Create release tag from branch
+        if: github.ref_type == 'branch' || github.event_name == 'workflow_dispatch'
         run: |
           RELEASE_TAG='${{ steps.release.outputs.release_tag }}'
 
           git fetch --force --tags origin
 
-          if git rev-parse "$RELEASE_TAG" >/dev/null 2>&1; then
-            TAG_SHA="$(git rev-list -n 1 "$RELEASE_TAG")"
+          if git rev-parse "refs/tags/$RELEASE_TAG" >/dev/null 2>&1; then
+            TAG_SHA="$(git rev-list -n 1 "refs/tags/$RELEASE_TAG")"
 
             if [ "$TAG_SHA" != "$GITHUB_SHA" ]; then
               echo "Tag $RELEASE_TAG already exists on $TAG_SHA, expected $GITHUB_SHA."
