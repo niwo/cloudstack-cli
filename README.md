@@ -211,7 +211,7 @@ The `Update bundle` workflow runs monthly and can also be started manually from 
 
 The `Release gem` workflow publishes to RubyGems when a tag like `v1.6.12` is pushed. It also runs when `lib/cloudstack-cli/version.rb` changes on `main`, creates the matching tag automatically, verifies the gem loads and builds, and publishes that version. You can also trigger it manually from the Actions tab with a release tag like `v1.6.12`; if the tag does not exist yet, the workflow creates it from the selected branch before publishing, and if it already exists the workflow reuses that tag.
 
-Add the `RUBYGEMS_API_KEY` repository secret before using the release workflow.
+The release workflow uses RubyGems trusted publishing via GitHub OIDC, so no RubyGems API key secret is required. The gem must already be configured with this repository as a trusted publisher on RubyGems.org.
 
 Typical release flow:
 
