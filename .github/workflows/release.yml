@@ -1,0 +1,121 @@
+name: Release gem
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+    paths:
+      - 'lib/cloudstack-cli/version.rb'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing git tag to release, for example v1.6.12'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.event.inputs.tag || github.ref_name || github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve release metadata
+        id: release
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            RELEASE_TAG='${{ github.event.inputs.tag }}'
+            git fetch --force --tags origin
+            git checkout "$RELEASE_TAG"
+            VERSION="$(ruby -e 'require "./lib/cloudstack-cli/version"; print CloudstackCli::VERSION')"
+          elif [ "$GITHUB_REF_TYPE" = "tag" ]; then
+            RELEASE_TAG="$GITHUB_REF_NAME"
+            VERSION="$(ruby -e 'require "./lib/cloudstack-cli/version"; print CloudstackCli::VERSION')"
+          else
+            VERSION="$(ruby -e 'require "./lib/cloudstack-cli/version"; print CloudstackCli::VERSION')"
+            RELEASE_TAG="v$VERSION"
+          fi
+
+          echo "release_tag=$RELEASE_TAG" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+
+      - name: Verify tag matches gem version
+        run: |
+          VERSION='${{ steps.release.outputs.version }}'
+          TAG_VERSION='${{ steps.release.outputs.release_tag }}'
+          TAG_VERSION="${TAG_VERSION#v}"
+
+          if [ "$TAG_VERSION" != "$VERSION" ]; then
+            echo "Tag version ($TAG_VERSION) does not match gem version ($VERSION)."
+            exit 1
+          fi
+
+      - name: Create release tag from main
+        if: github.ref_type == 'branch'
+        run: |
+          RELEASE_TAG='${{ steps.release.outputs.release_tag }}'
+
+          git fetch --force --tags origin
+
+          if git rev-parse "$RELEASE_TAG" >/dev/null 2>&1; then
+            TAG_SHA="$(git rev-list -n 1 "$RELEASE_TAG")"
+
+            if [ "$TAG_SHA" != "$GITHUB_SHA" ]; then
+              echo "Tag $RELEASE_TAG already exists on $TAG_SHA, expected $GITHUB_SHA."
+              exit 1
+            fi
+          else
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git tag -a "$RELEASE_TAG" -m "Release $RELEASE_TAG"
+            git push origin "$RELEASE_TAG"
+          fi
+
+          git checkout "$RELEASE_TAG"
+
+      - name: Run test suite
+        run: bundle exec rake test
+
+      - name: Build gem
+        run: gem build cloudstack-cli.gemspec
+
+      - name: Check whether version already exists on RubyGems
+        id: rubygems
+        env:
+          RELEASE_VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          if ruby -rjson -ropen-uri -e 'versions = JSON.parse(URI.open("https://rubygems.org/api/v1/versions/cloudstack-cli.json", &:read)); exit(versions.any? { |item| item["number"] == ENV.fetch("RELEASE_VERSION") } ? 0 : 1)'; then
+            echo "Version $RELEASE_VERSION already exists on RubyGems."
+            echo 'exists=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'exists=false' >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Publish to RubyGems
+        if: steps.rubygems.outputs.exists != 'true'
+        env:
+          GEM_HOST_API_KEY: ${{ secrets.RUBYGEMS_API_KEY }}
+        run: |
+          if [ -z "$GEM_HOST_API_KEY" ]; then
+            echo 'Missing RUBYGEMS_API_KEY secret.'
+            exit 1
+          fi
+
+          gem push "cloudstack-cli-${{ steps.release.outputs.version }}.gem"

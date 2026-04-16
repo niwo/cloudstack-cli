@@ -197,6 +197,29 @@ $ cloudstack-cli router list --project Demo --status running --redundant-state B
 3. Currently you need to create a isolated network named "test-network" manually on the simulator
 4. Run `bundle exec rake test`
 
+## Automation
+
+GitHub Actions are configured for dependency maintenance and RubyGems releases.
+
+### Bundle updates
+
+The `Update bundle` workflow runs monthly and can also be started manually from the Actions tab. It runs `bundle update`, verifies the test suite, and opens a pull request with the updated lockfile.
+
+### Releases
+
+The `Release gem` workflow publishes to RubyGems when a tag like `v1.6.12` is pushed. It also runs when `lib/cloudstack-cli/version.rb` changes on `main`, creates the matching tag automatically, and publishes that version. You can still trigger it manually for an existing tag from the Actions tab.
+
+Add the `RUBYGEMS_API_KEY` repository secret before using the release workflow.
+
+Typical release flow:
+
+1. Update `lib/cloudstack-cli/version.rb`.
+2. Commit and push the version change.
+3. Push to `main`.
+4. GitHub Actions creates the matching tag, verifies the tag matches the gem version, and pushes the release to RubyGems.
+
+If you prefer, you can still create and push the matching tag yourself, for example `git tag v1.6.12 && git push origin v1.6.12`.
+
 ## Contributing
 
 1. Fork it
