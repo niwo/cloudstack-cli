@@ -111,14 +111,7 @@ jobs:
             echo 'exists=false' >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Publish to RubyGems
-        if: steps.rubygems.outputs.exists != 'true'
-        env:
-          GEM_HOST_API_KEY: ${{ secrets.RUBYGEMS_API_KEY }}
-        run: |
-          if [ -z "$GEM_HOST_API_KEY" ]; then
-            echo 'Missing RUBYGEMS_API_KEY secret.'
-            exit 1
-          fi
-
-          gem push "cloudstack-cli-${{ steps.release.outputs.version }}.gem"
+      - name: Publish gem to RubyGems
+        uses: rubygems/release-gem@v1
+        with:
+          api-key: ${{ secrets.RUBYGEMS_AUTH_TOKEN }}
