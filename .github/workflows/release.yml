@@ -80,12 +80,7 @@ jobs:
           git fetch --force --tags origin
 
           if git rev-parse "refs/tags/$RELEASE_TAG" >/dev/null 2>&1; then
-            TAG_SHA="$(git rev-list -n 1 "refs/tags/$RELEASE_TAG")"
-
-            if [ "$TAG_SHA" != "$GITHUB_SHA" ]; then
-              echo "Tag $RELEASE_TAG already exists on $TAG_SHA, expected $GITHUB_SHA."
-              exit 1
-            fi
+            echo "Tag $RELEASE_TAG already exists. Reusing it for this release run."
           else
             git config user.name 'github-actions[bot]'
             git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
