@@ -114,11 +114,11 @@ jobs:
       - name: Publish gem to RubyGems
         if: steps.rubygems.outputs.exists != 'true'
         env:
-          GEM_HOST_API_KEY: ${{ secrets.RUBYGEMS_API_KEY }}
+          GEM_HOST_API_KEY: ${{ secrets.RUBYGEMS_AUTH_TOKEN }}
           RELEASE_VERSION: ${{ steps.release.outputs.version }}
         run: |
           if [ -z "$GEM_HOST_API_KEY" ]; then
-            echo 'Missing RUBYGEMS_API_KEY secret.'
+            echo 'Missing RUBYGEMS_AUTH_TOKEN secret.'
             exit 1
           fi
 
